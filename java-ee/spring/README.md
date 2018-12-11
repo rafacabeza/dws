@@ -4,7 +4,7 @@ Spring es un framework Java creado por Rod Johnson. Es un framework muy potente 
 
 Vamos a ver como usar Spring paso a paso en poyectos Java EE. Lo vamos a usar en combinación con Maven como gestor de dependencias y JPA como framework ORM, mapeo objeto-relacional.
 
-Todo lo explicado en este texto está reflejado en el proyecto https://bitbucket.org/rafacabeza/shopspring, úsalo para seguir el estudio del mismo
+Todo lo explicado en este texto está reflejado en el proyecto https://bitbucket.org/rafacabeza/shopspring, úsalo para seguir el estudio del mismo.
 
 ## Enlaces interesantes.
 
