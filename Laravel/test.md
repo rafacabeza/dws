@@ -1,4 +1,4 @@
-## Tests en Laravel
+# Tests en Laravel
 
 * Laravel viene preparado para usar phpunit desde el inicio
 * Podemos crear casos de test mediante artisan:
@@ -14,12 +14,12 @@
 
 * Para ejecutar los test, desde la consola y en el directorio del proyecto ejecutamos: `./vendor/bin/phpunit`
 
-### Ejemplos de tests
+## Ejemplos de tests
 
-#### Empezando
+### Empezando
 
 * Aquí vemos la estructura de la clase y la nomenclatura.
-* Ejemplo 1. 
+* Ejemplo 1.
   * visit\(\): visitar una URL.
   * see\(\): comprobar que se localiza un texto
   * dontSee\(\): viceversa
@@ -48,53 +48,49 @@ class ExampleTest extends TestCase
     }
 }
 ```
+### Bases de datos
 
-#### Enlaces y formularios
+* ¿Cómo probar el comportamiento de la aplicación para una tabla vacía y la misma tabla con una colección de registros?
 
-* Enlaces:
+* La solución pasa por:
 
-  * click\(\): pulsar interenlaces.
-  * seePageIs\(\): comprobar URI.
+  * Crear una base de datos para los test.
 
-* Formularios
+  * Crear las condiciones deseadas en cada test.
 
-  * type\($text, $elementName\) \| “Type” text into
-    a given field. 
-  * $this-&gt;select\($value, $elementName\) \| “Select” a radio button or drop-down
-  * field. $this-&gt;check\($elementName\) \| “Check” a checkbox field.     
-  * $this-&gt;uncheck\($elementName\)
-    \| “Uncheck” a checkbox field. 
-  * $this-&gt;attach\($pathToFile, $elementName\) \| “Attach” a file to the
-    form. 
-  * $this-&gt;press\($buttonTextOrElementName\) \| “Press” a button with the given text or name
+* Para logralo debemos hace varias cosas:
 
-#### Bases de datos
+#### Base de datos de pruebas
 
-##### Ver cambios en la base de datos
+* Crear bbdd nueva en Mysql. Por ejemplo le llamamos `laravel18test`
 
-* Problema. ¿He actualizado la base de datos realmente?
+* Añadir una constante referida a la misma en el fichero `.env`: `DB_DATABASE_TEST=laravel18test`.
 
-  * Está esta información??
-    ```php
-    ->assertDatabaseHas($table, array $data)
-    ```
-  * Ya no está esta otra??
+* En `config\\database.php` definir una conexión llamda `mysql_test` y que use dicha base de datos:
 
-    ```php
-    ->assertDatabaseMissing($table, array $data) // no esta´en la BBDD
-    ->assertSoftDeleted($table, array $data) //Comprobación de borrado "blando", no explicado.
-    ```
+```php
+'mysql_test' => [
+    'driver' => 'mysql',
+    'host' => env('DB_HOST', '127.0.0.1'),
+    'port' => env('DB_PORT', '3306'),
+    'database' => env('DB_DATABASE_TEST', 'forge'),
+    'username' => env('DB_USERNAME', 'forge'),
+    'password' => env('DB_PASSWORD', ''),
+    'unix_socket' => env('DB_SOCKET', ''),
+    'charset' => 'utf8mb4',
+    'collation' => 'utf8mb4_unicode_ci',
+    'prefix' => '',
+    'strict' => true,
+    'engine' => null,
+],
+```
 
-    ##### Base de datos de pruebas
-
-* Crear bbdd nueva en Mysql y dar permisos. Por ejemplo le llamamos `mysql_test`
-
-* En phpunit.xml agregar:
+* En phpunit.xml agregar un parámetro referido a la nueva conexión:
 
   ```xml
   <php>
   ...
-  <env name="DB_CONNECTION" value="mysql_tests"/> //nuevo
+  <env name="DB_CONNECTION" value="mysql_test"/> //nuevo
   </php>
   ```
 
@@ -113,4 +109,43 @@ class UsersModuleTest extends TestCase
 ```
 
 
+
+
+#### Ver cambios en la base de datos
+
+* Problema. ¿He actualizado la base de datos realmente?
+
+  * Está esta información??
+    ```php
+    ->assertDatabaseHas($table, array $data)
+    ```
+  * Ya no está esta otra??
+
+    ```php
+    ->assertDatabaseMissing($table, array $data) // no esta´en la BBDD
+    ->assertSoftDeleted($table, array $data) //Comprobación de borrado "blando", no explicado.
+    ```
+
+
+
+
+
+### Enlaces y formularios
+
+* Enlaces:
+
+  * click\(\): pulsar interenlaces.
+  * seePageIs\(\): comprobar URI.
+
+* Formularios
+
+  * type\($text, $elementName\) \| “Type” text into
+    a given field.
+  * $this-&gt;select\($value, $elementName\) \| “Select” a radio button or drop-down
+  * field. $this-&gt;check\($elementName\) \| “Check” a checkbox field.
+  * $this-&gt;uncheck\($elementName\)
+    \| “Uncheck” a checkbox field.
+  * $this-&gt;attach\($pathToFile, $elementName\) \| “Attach” a file to the
+    form.
+  * $this-&gt;press\($buttonTextOrElementName\) \| “Press” a button with the given text or name
 
