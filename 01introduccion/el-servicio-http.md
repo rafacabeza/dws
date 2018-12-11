@@ -1,4 +1,4 @@
-****# HTTP
+# HTTP
 
 Se recomienda leer las páginas 12-19 del [Tutorial Básico de Java EE](http://www.javahispano.org/storage/contenidos/JavaEE.pdf) publicado por JavaHispano
 
