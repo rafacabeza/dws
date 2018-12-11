@@ -93,8 +93,7 @@ Vamos a ver una colección de posibles test para verificar el funcionamiento de 
 
 * Lista vacía de usuarios
 
-```
-
+```php
   public function test_lista_de_usuarios_vacia()
   {
       $response = $this->get('/users');
@@ -102,14 +101,13 @@ Vamos a ver una colección de posibles test para verificar el funcionamiento de 
       $response->assertSee('Lista de usuarios');
       $response->assertSee('No hay usuarios');
   }
-
 ```
 
 * Lista de usuarios con datos:
 
   * Primera aproximación. Fallará porque partimos de una tabla vacía:
-```php
 
+```php
   public function test_lista_de_usuarios()
   {
       $response = $this->get('/users');
@@ -118,7 +116,6 @@ Vamos a ver una colección de posibles test para verificar el funcionamiento de 
       $response->assertSee('Pepe');
       $response->assertSee('pepe@gmail.com');
   }
-
 ```
 
   * Test correcto. Usar _factories_ para crear registros antes del test.
