@@ -2,7 +2,7 @@
 
 ## Modelos de ejecución de código en servidores y clientes web
 
-El desarrollo de aplicaciones web se apoya en la  arquitectura cliente-servidor. En esta arquitectura, existen dos actores, cliente y servidor
+El desarrollo de aplicaciones web se apoya en la  arquitectura cliente-servidor. En esta arquitectura, existen dos actores, cliente y servidor.
 
 - El cliente se conecta al servidor para solicitar algun servicio.
 - El servidor se encuentra en ejecución de forma ininterrumpida a la espera de que los diferentes clientes realicen una solicitud.
