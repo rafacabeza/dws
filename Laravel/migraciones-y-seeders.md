@@ -1,4 +1,4 @@
-## Migraciones
+# Migraciones
 
 * Laravel provee un sistema llamado "migraciones" que permite elaborar la estructura de la base de datos de un modo paulatino.
 * Las migraciones se asemejan a un control de versiones para la base de datos. Cada migración puede desplegarse o deshacerse según se precise.
@@ -52,14 +52,14 @@ class CreateStudiesTable extends Migration
 }
 ```
 
-### Ejecutar migraciones
+## Ejecutar migraciones
 
-* 
+*
 * Las migraciones se gestionan desde la consola mediante comandos de _artisan_.
 
   * El comando base es `php artisan migrate`. En los siguientes apartados vamos a ver las variantes.
   * `migrate:install` Crea una tabla en la base de
-    datos que sirve para llevar el control de las migraciones realizadas y su orden. 
+    datos que sirve para llevar el control de las migraciones realizadas y su orden.
   * `migrate:reset` Realiza una marcha atrás de todas las migraciones en el sistema, volviendo el schema de la
     base de datos al estado inicial.
   * `migrate:refresh` Vuelve atrás el sistema de migraciones y las vuelve a ejecutar todas.
@@ -67,9 +67,9 @@ class CreateStudiesTable extends Migration
   * \`php artisan migrate:rollback --step=2 Vuelve atrás las últimas migraciones, en este ccaso los últimos dos lotes.
   * `migrate:status` Te informa de las migraciones presentes en el sistema y si están ejecutadas o no.
 
-  ### Creación de migraciones
+  ## Creación de migraciones
 
-  * Se usa `artisan make:migration`: 
+  * Se usa `artisan make:migration`:
     ```
     // ej. comando base.
     php artisan make:migration create_users_table
@@ -80,7 +80,7 @@ class CreateStudiesTable extends Migration
     ```
 
 * El resultado es una clase hija de _Migration_, guardada en un fichero que comienza con la fecha de creación para que sea ordenado y ejecutado adecuadamente.
-  #### Estructura de una migracion
+  ### Estructura de una migracion
 * Las migraciones tienen dos métodos:
   * up\(\) sirve para modificar la base de datos. Típicamente crear una tabla.
   * down\(\) sirve para devolver la base de datos a su estado previo. Típicamente borrar una tabla.
@@ -119,7 +119,7 @@ class CreateStudiesTable extends Migration
 }
 ```
 
-#### Código de las migraciones
+### Código de las migraciones
 
 * Dentro de las funciones _up_ y _down_ usamos las funciones de la clase esquema para:
 
@@ -153,22 +153,22 @@ class CreateStudiesTable extends Migration
   //podríamos añadir ->onDelete(cascade) ...
   ```
 
-  * Los posibles modificadores son: 
+  * Los posibles modificadores son:
     ```
-    ->first() | Place the column “first” in the table (MySQL Only) 
-    ->after('column') | Place the column “after” another column (MySQL Only) 
-    ->nullable() | Allow NULL values to be inserted into the column 
-    ->default($value) | Specify a “default” value for the column 
-    ->unsigned() | Set integer columns to UNSIGNED 
+    ->first() | Place the column “first” in the table (MySQL Only)
+    ->after('column') | Place the column “after” another column (MySQL Only)
+    ->nullable() | Allow NULL values to be inserted into the column
+    ->default($value) | Specify a “default” value for the column
+    ->unsigned() | Set integer columns to UNSIGNED
     ->comment('my comment') | Add a comment to a column
     ```
 
 * Para otras operaciones consultar la documentación oficial.
 
-  #### Seeders \(o sembradores\)
+  ### Seeders \(o sembradores\)
 
   * Los _seeders_ son clases usadas para:
-  * Rellenar las tablas con datos de prueba 
+  * Rellenar las tablas con datos de prueba
   * Cargar las tablas con datos iniciales.
   * Creación con artisan:
 
@@ -176,7 +176,7 @@ class CreateStudiesTable extends Migration
 
   * Los seeders tienen un método _run\(\)_ donde se registra el contenido de los registros a insertar. Puede usarse sintáxis de _Query Builder_ o de _Eloquent_
 
-* Ejemplo: 
+* Ejemplo:
 
 ```php
 use Illuminate\Database\Seeder;
@@ -208,7 +208,7 @@ class StudiesSeeder extends Seeder
 public function run()
 {
     $this->call(StudySeeder::class);
-    $this->call(ModuleSeeder::class);    
+    $this->call(ModuleSeeder::class);
 }
 ```
 
@@ -220,7 +220,46 @@ public function run()
   * De forma individual
     `php artisan db:seed --class=ModuleSeeder`
 
-#### Model Factories
+### Model Factories
 
+* Crear un _factory_:
+
+```php
+php artisan make:factory PostFactory
+```
+
+* Codificar un factory:
+```php
+use Faker\Generator as Faker;
+
+$factory->define(App\User::class, function (Faker $faker) {
+    return [
+        'name' => $faker->name,
+        'email' => $faker->unique()->safeEmail,
+        'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret
+        'remember_token' => str_random(10),
+    ];
+});
+```
+
+* Usar el factory:
+
+  * Crear un objeto con `make()` o con `create()`, el primero crea una variable, el segundo además la guarda en base de datos:
+
+  ```php
+      $user = factory(App\User::class)->make();
+      $user = factory(App\User::class)->create();
+  ```
+  * Podemos crear más de un registro en la misma orden:
+  ```php
+  $users = factory(App\User::class, 3)->make(); //O create
+  ```
+
+  * Además podemos fijar o sobreescribir el valor de los campos:
+  ```php
+  $user = factory(App\User::class)->make([
+    'name' => 'Abigail',
+  ]);
+  ```
 
 

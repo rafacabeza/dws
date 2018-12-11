@@ -64,37 +64,16 @@ class ExampleTest extends TestCase
 
 * Crear bbdd nueva en Mysql. Por ejemplo le llamamos `laravel18test`
 
-* Añadir una constante referida a la misma en el fichero `.env`: `DB_DATABASE_TEST=laravel18test`.
-
-* En `config\\database.php` definir una conexión llamda `mysql_test` y que use dicha base de datos:
-
-```php
-'mysql_test' => [
-    'driver' => 'mysql',
-    'host' => env('DB_HOST', '127.0.0.1'),
-    'port' => env('DB_PORT', '3306'),
-    'database' => env('DB_DATABASE_TEST', 'forge'),
-    'username' => env('DB_USERNAME', 'forge'),
-    'password' => env('DB_PASSWORD', ''),
-    'unix_socket' => env('DB_SOCKET', ''),
-    'charset' => 'utf8mb4',
-    'collation' => 'utf8mb4_unicode_ci',
-    'prefix' => '',
-    'strict' => true,
-    'engine' => null,
-],
-```
 
 * En phpunit.xml agregar un parámetro referido a la nueva conexión:
 
   ```xml
   <php>
   ...
-  <env name="DB_CONNECTION" value="mysql_test"/> //nuevo
+  <env name="DB_DATABASE" value="laravel18test"/> //nuevo
   </php>
   ```
 
-  Esto se hace para alterar el valor DB\_DEFAULT indicado en config/database.php
 
 * En cada clase de Test debemos importar y usar el trait RefreshDatabase:
 
@@ -108,8 +87,89 @@ class UsersModuleTest extends TestCase
     // ...
 ```
 
+* OJO. Ahora en cada test partimos de una base de datos limpia. Con las migraciones recien hechas y sin registros sembrados.
 
+Vamos a ver una colección de posibles test para verificar el funcionamiento de un CRUD sobre la tabla usuarios.
 
+* Lista vacía de usuarios
+
+```
+
+  public function test_lista_de_usuarios_vacia()
+  {
+      $response = $this->get('/users');
+      $response->assertStatus(200);
+      $response->assertSee('Lista de usuarios');
+      $response->assertSee('No hay usuarios');
+  }
+
+```
+
+* Lista de usuarios con datos:
+
+  * Primera aproximación. Fallará porque partimos de una tabla vacía:
+```php
+
+  public function test_lista_de_usuarios()
+  {
+      $response = $this->get('/users');
+      $response->assertStatus(200);
+      $response->assertSee('Lista de usuarios');
+      $response->assertSee('Pepe');
+      $response->assertSee('pepe@gmail.com');
+  }
+
+```
+
+  * Test correcto. Usar _factories_ para crear registros antes del test.
+
+```php
+
+  public function test_lista_de_usuarios()
+  {
+      factory(User::class)->create([
+          'name' => 'Pepe',
+          'email' => 'pepe@gmail.com'
+      ]);
+
+      $response = $this->get('/users');
+      $response->assertStatus(200);
+      $response->assertDontSee('No hay usuarios');
+      $response->assertSee('Lista de usuarios');
+      $response->assertSee('Pepe');
+      $response->assertSee('pepe@gmail.com');
+  }
+
+```
+
+* Detalle de un registro:
+
+```php
+    public function test_metodo_show_user_1()
+  {
+      factory(User::class)->create([
+          'id' => 1,
+          'name' => 'Pepe',
+          'email' => 'pepe@gmail.com'
+      ]);
+
+      $response = $this->get('/users/1');
+      $response->assertStatus(200);
+      $response->assertSee('detalle del usuario 1');
+      $response->assertSee('Pepe');
+      $response->assertSee('pepe@gmail.com');
+  }
+
+```
+
+* Detalle de un registro con error 404:
+```php
+  public function test_metodo_show_user_inexistente()
+  {
+      $response = $this->get('/users/100000');
+      $response->assertStatus(404);
+  }
+```
 
 #### Ver cambios en la base de datos
 
