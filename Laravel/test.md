@@ -206,3 +206,36 @@ Vamos a ver una colección de posibles test para verificar el funcionamiento de 
     form.
   * $this-&gt;press\($buttonTextOrElementName\) \| “Press” a button with the given text or name
 
+  
+## Ejecución parcial de tests
+
+- Podemos ejecutar un sólo test usando la opción `--filter`:
+
+```
+phpunit --filter {TestMethodName} //sintáxis
+phpunit --filter test_metodo_show_user_inexistente  //ejemplo
+
+phpunit --filter {TestMethodName} {FilePath} //sintáxis
+phpunit --filter test_metodo_show_user_inexistente tests/Feature/UserTest.php //ejemplo
+```
+
+- O podemos agrupar los tests con la anotación `@group`:
+
+```php
+/**
+* @group users
+*/
+public function test_lista_de_usuarios_vacia()
+{
+    $response = $this->get('/users');
+    $response->assertStatus(200);
+    $response->assertSee('Lista de usuarios');
+    $response->assertSee('No hay usuarios');
+}
+```
+
+En este caso la ejecución debe llevar el parámetro group:
+    
+```
+phpunit --group=users
+```
