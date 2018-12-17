@@ -184,58 +184,36 @@ Vamos a ver una colección de posibles test para verificar el funcionamiento de 
     ```
 
 
+## Test en el navegador: Laravel Dusk
+- Enlaces de interés:
+ - https://laravel.com/docs/5.7/dusk
+ - https://www.uno-de-piera.com/laravel-dusk-browser-testing-laravel/
 
+- Dusk usa directamente un navegador. Por defecto usa el driver de Chrome.
 
+- Instalación:
+ ```
+ composer require --dev laravel/dusk
+ php artisan dusk:install
+ ```
 
-### Enlaces y formularios
-
-* Enlaces:
-
-  * click\(\): pulsar interenlaces.
-  * seePageIs\(\): comprobar URI.
-
-* Formularios
-
-  * type\($text, $elementName\) \| “Type” text into
-    a given field.
-  * $this-&gt;select\($value, $elementName\) \| “Select” a radio button or drop-down
-  * field. $this-&gt;check\($elementName\) \| “Check” a checkbox field.
-  * $this-&gt;uncheck\($elementName\)
-    \| “Uncheck” a checkbox field.
-  * $this-&gt;attach\($pathToFile, $elementName\) \| “Attach” a file to the
-    form.
-  * $this-&gt;press\($buttonTextOrElementName\) \| “Press” a button with the given text or name
-
-  
-## Ejecución parcial de tests
-
-- Podemos ejecutar un sólo test usando la opción `--filter`:
-
+- Ejecutar tests:
 ```
-phpunit --filter {TestMethodName} //sintáxis
-phpunit --filter test_metodo_show_user_inexistente  //ejemplo
-
-phpunit --filter {TestMethodName} {FilePath} //sintáxis
-phpunit --filter test_metodo_show_user_inexistente tests/Feature/UserTest.php //ejemplo
+php artisan dusk
+php artisan dusk:fails
+php artisan dusk:make LoginTest
 ```
 
-- O podemos agrupar los tests con la anotación `@group`:
+- Crear tests: `php artisan dusk:make LoginTest`
 
-```php
-/**
-* @group users
-*/
-public function test_lista_de_usuarios_vacia()
-{
-    $response = $this->get('/users');
-    $response->assertStatus(200);
-    $response->assertSee('Lista de usuarios');
-    $response->assertSee('No hay usuarios');
-}
-```
+- Preparar base de datos para Dusk:
+   - Crearmos base de datos `laravel18dusk`
+   - Creamos fichero de entorno para dusk: `.env.dusk`
+   ```
+   APP_URL="http://localhost:8001"
 
-En este caso la ejecución debe llevar el parámetro group:
-    
-```
-phpunit --group=users
-```
+   DB_CONNECTION="mysql"
+   DB_DATABASE='laravel18dusk'
+   ```
+
+   -Servimos con dicho entorno especial: `php artisan serve --env=dusk`
