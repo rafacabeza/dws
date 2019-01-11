@@ -201,7 +201,7 @@ Vamos a ver una colección de posibles test para verificar el funcionamiento de 
 ```
 php artisan dusk
 php artisan dusk:fails
-php artisan dusk:make LoginTest
+php artisan dusk --group=somegroup
 ```
 
 - Crear tests: `php artisan dusk:make LoginTest`
