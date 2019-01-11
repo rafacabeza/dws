@@ -1,0 +1,23 @@
+{
+  "name": "dws_gitbook",
+  "version": "1.0.0",
+  "description": "Este texto pretende ser la documentación base para el estudio y seguimiento del módulo Desarrollo Web en Entorno Servidor del ciclo de Desarrollo de Aplicaciones Web \\(IFC303\\).",
+  "main": "index.js",
+  "scripts": {
+    "start": "reveal-md --css style.css ./node/index.md" 
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rafacabeza/dws.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rafacabeza/dws/issues"
+  },
+  "homepage": "https://github.com/rafacabeza/dws#readme",
+  "dependencies": {
+    "gitbook-cli": "^2.3.2",
+    "reveal": "0.0.4"
+  }
+}
