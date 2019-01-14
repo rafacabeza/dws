@@ -1,7 +1,5 @@
 # Proyecto 1: Hola Usuario
 
-## Tiempo estimado: 60 minutos
-
 
 ## Descripción
 
@@ -36,16 +34,6 @@ cd holaUsuario
 touch app.js
 code .
 ```
-
-
-## Módulos de sistema
-
-- Están "built-in"
-  - Se cargan mediante un *require*
-  - No es necesario instalarlos
-- Podemos consultarlos en la web de node:
-  - https://nodejs.org/es/docs/
-    - Elegimos versión de la API
 
 
 ## Añadir texto a un fichero
@@ -174,20 +162,6 @@ fs.appendFile('saludo.txt', saludo, (err) => {
 ```
 
 
-## require
-
-- *require* es un módulo que está en el objeto global
-- Este código no es necesario:
- 
-  ```js
-  require('require');
-  ```
-
-- Funciona de forma síncrona
-  - Por eso se ponen al comienzo
-  - Podríamos colocarlos más tarde y hacer *lazy loading*
-
-
 ## Uso de módulos
 
 - Vamos a crear un módulo que sea el encargado de proporcionarnos el usuario
@@ -203,43 +177,6 @@ fs.appendFile('saludo.txt', saludo, (err) => {
   ```
 
 - Comprobamos la ejecución que muestra el texto del módulo requerido por consola.
-
-
-## Módulos en JavaScript
-
-- En JavaScript no hay módulos ni namespaces.
-- Todo va al objeto window y puede haber solapamiento de variables.
-- [Se implementan módulos de forma nativa con ES6](http://exploringjs.com/es6/ch_modules.html#sec_modules-in-javascript)
-
-
-- Fichero index.js
-
-```js
-var nombre = "juan";
-```
-
-- Fichero index.html
-
-```html
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <title>Document</title>
-</head>
-
-<body>
-  <script>
-    var nombre = "pepe";
-    console.log(nombre);
-  </script>
-  <script src="./index.js"></script>
-  <script>
-    console.log(nombre);
-  </script>
-</body>
-
-</html>
-```
 
 
 ## Uso de variables y funciones de otro módulo en node

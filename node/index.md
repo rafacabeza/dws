@@ -258,8 +258,331 @@ console.log(`El contenido del fichero es este: ${data}`)
 - Web:
   - https://caniuse.com
 
+**¿Empezamos el código?**
 
 
-# ¿Empezamos el código?
 
-- [Primer proyecto](./hola.md)
+# Módulos
+
+
+## ¿Qué son los módulos?
+
+- Los módulos en Node.js pueden considerarse librerías.
+- Es el elemento que nos permite dividir un proyecto en unidades de código más pequeñas.
+
+
+## Módulos incorporados en Node.jsx
+- Node incorpora un buen número de módulos para ser utilizados en nuestros proyectos:
+ - **fs** para el sistema de ficheros.
+ - **os** para el sistema operativo.
+ - **http** para montar un servidor web. ...
+
+
+## Usar modulos incorporados
+
+- Para incluir módulos debemos usar *require(nombremodulo)*:
+- Consultar en https://nodejs.org/es/docs/
+
+```javascript
+  const http = require('http'); //mejor const que let o var
+
+  http.createServer(function (req, res) {
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.end('Hola Mundo!!');
+  }).listen(8080);
+```
+
+
+### require
+
+- *require* es un módulo que está en el objeto global
+- Este código no es necesario:
+ 
+  ```js
+  require('require');
+  ```
+
+- Funciona de forma síncrona
+  - Por eso se ponen al comienzo
+  - Podríamos colocarlos más tarde y hacer *lazy loading*
+
+
+## Módulos de terceros
+- *npm install* nos permite incorporar módulos de terceros:
+- Después son usados con *require()* igualmente
+
+```bash
+npm install -h   //muestra ayuda
+    // alias de install: aliases: i, isntall, add
+npm install -S nombremodulo //guarda referencia en package.json y .lock
+    //-S es abreviatura de --save-prod
+npm install nombremodulo //sin opción: -S por defecto
+npm install -D nombremodulo //idem pero sólo como dependencia de desarrollo
+    //-D es abreviatura de --save-dev
+```
+
+
+
+# Módulos propios
+
+
+## Crear módulos propios:
+
+1. Crear un fichero javascript con definición de funciones, clases, constantes, ...
+  - Cualquier fichero con definición de funciones, variables, constantes, ...
+2. Uso de *exports*
+  - Las funciones o variables que puedan usarse desde el exterior se declaran con exports:
+  ```js
+  const saludo = "Hola";
+  exports.saludo;
+  ```
+ Veamos ejemplos:
+
+
+ ** Ejemplo 1 **
+
+- Crear módulo en mensaje.js
+
+```js
+module.exports = 'Hola Mundo!';
+
+//or
+
+exports = 'Hola Mundo!';
+```
+
+- Usar el módulo en app.js
+
+```js
+const msg = require('./mensaje.js');
+
+console.log(msg);
+```
+
+
+ ** Ejemplo 2 **
+
+- Crear módulo en mensaje.js
+
+```js
+exports.saludo = 'Hola Mundo!';
+
+//or
+
+module.exports.saludo = 'Hola Mundo!'
+```
+
+- Usar el módulo en app.js
+
+```js
+const msg = require('./mensaje.js');
+
+console.log(msg.saludo);;
+```
+
+
+** Ejemplo 3. Exportar función **
+
+- Fichero log.js
+
+```js
+module.exports.log = function (msg) { 
+    console.log(msg);
+};
+```
+Objeto exportado:
+```js
+{ log : function(msg){ console.log(msg); } }
+```
+
+Uso en app.js
+
+```js
+const msg = require('./Log.js');
+
+msg.log('Hello World');
+```
+
+
+** Ejemplo 4. Exportar objeto JSON **
+
+- Fichero data.js
+
+```js
+module.exports = {
+    firstName: 'James',
+    lastName: 'Bond'
+}
+```
+- Uso en app.js
+
+```js
+const person = require('./data.js');
+console.log(person.firstName + ' ' + person.lastName);
+```
+
+
+** Ejemplo 5. Un módulo como una clase **
+
+Módulo Person.js
+
+```js
+module.exports = function (firstName, lastName) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.fullName = function () { 
+        return this.firstName + ' ' + this.lastName;
+    }
+}
+```
+
+Ejemplo de uso en app.js
+
+```js
+const person = require('./Person.js');
+const person1 = new person('James', 'Bond');
+// o en una linea: 
+//const person1 = require('./Person.js')('James', 'Bond');
+console.log(person1.fullName());
+```
+
+
+** Ejemplo 6. Múltiples exports ** 
+
+```js
+module.exports = {
+    method: function() {},
+    otherMethod: function() {}
+}
+```
+O simplemente: 
+
+```js
+exports.method = function() {};
+exports.otherMethod = function() {};
+```
+Y lo usaríamos así:
+
+```js
+const MyMethods = require('./myModule.js');
+const method = MyMethods.method;
+const otherMethod = MyMethods.otherMethod;
+```
+
+
+** Ejemplo 7. Las funciones pueden estar definidas previamente ** 
+
+```js
+const function1 = function () {
+  //código
+}
+const function2 = function () {
+  //código
+}
+const function3 = function () {
+  //código
+}
+
+module.exports = {
+   function1,
+   function2,
+   function3
+}
+```
+
+
+** Ejemplo 8. Usando funciones flecha **
+
+```js
+const method = () => {
+   // your method logic
+}
+
+const otherMethod = () => {
+   // your method logic 
+}
+
+module.exports = {
+    method, 
+    otherMethod,
+    // anotherMethod
+};
+```
+
+
+## Caso Práctico
+
+- [Hola Usuario](./1-hola.md)
+<!-- - [Hola Usuario 2](./1-hola.md#/0/13) -->
+
+
+
+# Módulo Http
+
+
+## Node como servidor Http
+
+- Necesitamos usar el módulo Http:
+
+```js
+const http = require('http');
+```
+
+- Ejemplo: 
+
+```js
+var http = require('http');
+
+//crear servidor:
+http.createServer(function (req, res) {
+  res.write('Hola mundo!'); //escribir respuesta al cliente
+  res.end(); //cerrar respuesta
+}).listen(8080, () => console.log("Servidor en localhost:8080"));
+```
+
+
+## Headers
+
+- Podemos agruegar cabecerars HTTP
+
+- Ejemplo: 
+
+```js
+var http = require('http');
+http.createServer(function (req, res) {
+  res.writeHead(200, {'Content-Type': 'text/html'}); //cabecera
+  res.write('Hello World!');
+  res.end();
+}).listen(8080, () => console.log("Servidor en localhost:8080"));
+```
+
+
+## Request
+
+- Podemos tomar toda la información del request
+- Por ejemplo la URL:
+
+```js
+var http = require('http');
+http.createServer(function (req, res) {
+  res.writeHead(200, {'Content-Type': 'text/html'});
+  res.write(req.url);
+  res.end();
+}).listen(8080, () => console.log("Servidor en localhost:8080"));
+```
+
+
+** O los parámetros GET **
+
+```js
+const http = require('http');
+const url = require('url');
+
+http.createServer(function (req, res) {
+  res.writeHead(200, {'Content-Type': 'text/html'});
+  let query = url.parse(req.url, true).query;
+  let txt = 'HOla ' + query.name + " " + query.surname;
+  txt = `Hola ${query.name} ${query.surname}`;
+  res.end(txt);
+}).listen(8080, () => console.log("Servidor en localhost:8080"));
+```
