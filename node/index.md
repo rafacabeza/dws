@@ -581,8 +581,8 @@ const url = require('url');
 http.createServer(function (req, res) {
   res.writeHead(200, {'Content-Type': 'text/html'});
   let query = url.parse(req.url, true).query;
-  let txt = 'HOla ' + query.name + " " + query.surname;
-  txt = `Hola ${query.name} ${query.surname}`;
+  //let txt = 'Hola ' + query.name + " " + query.surname;
+  let txt = `Hola ${query.name} ${query.surname}`;
   res.end(txt);
 }).listen(8080, () => console.log("Servidor en localhost:8080"));
 ```
