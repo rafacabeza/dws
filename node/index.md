@@ -278,7 +278,7 @@ console.log(`El contenido del fichero es este: ${data}`)
  - **http** para montar un servidor web. ...
 
 
-## Usar modulos incorporados
+## Usar módulos incorporados
 
 - Para incluir módulos debemos usar *require(nombremodulo)*:
 - Consultar en https://nodejs.org/es/docs/
@@ -586,3 +586,120 @@ http.createServer(function (req, res) {
   res.end(txt);
 }).listen(8080, () => console.log("Servidor en localhost:8080"));
 ```
+
+
+
+# Configurar Visual Code
+- Vamos a moficiar la configuración de Visual Code
+- Vamos a instalar eslint como linter
+- Vamos a modificar algunas configuraciones de preferecias y atajos:
+
+
+## Atajos
+
+- Añadimos el siguiente JSON para la configuración de shortcuts:
+```js
+// Place your key bindings in this file to override the defaults
+[
+{
+    "key": "ctrl+shift+d",
+    "command": "editor.action.copyLinesDownAction",
+    "when": "editorTextFocus"
+},
+{
+    "key": "ctrl+shift+up",
+    "command": "editor.action.moveLinesUpAction",
+    "when": "editorTextFocus"
+},
+{
+    "key": "ctrl+shift+down",
+    "command": "editor.action.moveLinesDownAction",
+    "when": "editorTextFocus"
+}
+]
+```
+
+
+- Si usamos linux y gnome:
+  - El atajo de multicursor es `alt+click` pero esta combinación está usada por gnome
+  - Así lo cambiamos por super+click y podremos usar la citada combinación de teclas:
+
+```bash
+gsettings set org.gnome.desktop.wm.preferences mouse-button-modifier "<Super>"
+```
+
+
+## esLint
+
+- Vamos a usar esLint como linter para:
+  - Que nos ayude a generar un código homogéneo.
+  - Que nos ayude a detectar errores.
+
+- Instalación como dependencia de desarrollo del proyecto:
+
+```bash
+npm i -D eslint
+```
+
+
+## Configuración de eslint
+
+```bash
+$ node_modules/.bin/eslint --init # o npx eslint --init
+? How would you like to configure ESLint? 
+  Use a popular style guide
+? Which style guide do you want to follow? 
+  Standard
+? What format do you want your config file to be in? 
+  JSON
+? Would you like to install them now with npm? 
+  Yes
+```
+
+
+## Análisis configuración
+
+- *.eslintrc.json* tiene la configuración de nuestro linter
+- [Podríamos modificarla](https://eslint.org/docs/rules/), por ej:
+
+```json
+{
+    "extends": "standard",
+    "rules": {
+        "prefer-const": "error",
+        "no-var": "error"
+    }
+}
+```
+
+- Ayuda: Pulsa *CTRL + espacio* para autocompletado
+
+
+## Modificaciones Visual Code Editor
+
+- Instalamos la extensión Prettier de Esben Petersen
+- Su funcionamiento se basa en el fichero eslintrc
+- Queremos las modificaciones de eslint al guardar
+- Cambiamos las preferencias en Visual Code Editor para formatear nuestro JavaScript:
+
+```json
+  "prettier.eslintIntegration": true,
+  "eslint.autoFixOnSave": true,
+  "javascript.suggestionActions.enabled": false
+```
+
+
+- Observa que prettier tiene unas configuraciones por defecto:
+
+  ```json
+    // Whether to add a semicolon at the end of every line
+    "prettier.semi": true,
+
+    // If true, will use single instead of double quotes
+    "prettier.singleQuote": false,
+  ```
+
+- Debemos quedarnos con lo que se define en eslint, que es más parametrizable.
+- [Configuración sin Visual Code Editor](https://prettier.io/docs/en/eslint.html)
+
+

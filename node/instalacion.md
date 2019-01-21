@@ -1,5 +1,3 @@
-# Node.js
+# Instalación de Node.js
 
-- Introducción a Node.js
-- Creación de una API con Node.js
-
+- TODO: pendiente

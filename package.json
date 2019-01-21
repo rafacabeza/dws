@@ -4,7 +4,7 @@
   "description": "Este texto pretende ser la documentación base para el estudio y seguimiento del módulo Desarrollo Web en Entorno Servidor del ciclo de Desarrollo de Aplicaciones Web \\(IFC303\\).",
   "main": "index.js",
   "scripts": {
-    "start": "reveal-md --css style.css ./node/index.md"
+    "start": "reveal-md --css style.css ./node/inicio.md --port 2000"
   },
   "repository": {
     "type": "git",
