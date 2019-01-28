@@ -31,14 +31,6 @@
   - Numerosos ejemplos
 
 
-## Primeros pasos
-
-- No utilizaré ningún repo de GitHub.
-- Creamos un directorio para la app y...
-  - npm init
-  - Instalar y configurar eslint (standard)
-
-
 ## express
 
 - Instalar express mediante uno de los comandos siguientes:
@@ -389,7 +381,7 @@ hbs.registerHelper('toUpperCase', text => text.toUpperCase())
  {{>header}}
 </footer>
 ```
-
+<!-- 
 
 ## Deploy
 
@@ -397,7 +389,7 @@ hbs.registerHelper('toUpperCase', text => text.toUpperCase())
   - Dan solución a CMS's, código en php y mySQL
 - [JavaScript es el estándar de facto para soluciones serverless](https://hackernoon.com/the-serverless-series-what-is-serverless-d651fbacf3f4)
   - [Google Cloud Functions](https://cloud.google.com/functions/) por ejemplo solo funciona con JavaScript
-  - Nosotros haremos el deploy usando [Zeit](https://zeit.co/)
+  - Nosotros haremos el deploy usando [Zeit](https://zeit.co/) -->
 
 
 ## ¿Continuamos?
