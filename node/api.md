@@ -30,13 +30,13 @@
 - Elegir estilo Standard --> Javascript
 ```bash
 $ node_modules/.bin/eslint --init # o npx eslint --init
-? How would you like to configure ESLint? 
+? How would you like to configure ESLint?
   Use a popular style guide
-? Which style guide do you want to follow? 
+? Which style guide do you want to follow?
   Standard
-? What format do you want your config file to be in? 
+? What format do you want your config file to be in?
   JSON
-? Would you like to install them now with npm? 
+? Would you like to install them now with npm?
   Yes
 ```
 
@@ -66,7 +66,7 @@ $ node_modules/.bin/eslint --init # o npx eslint --init
 - Queremos que Prettier se base en esLint
 - Su funcionamiento se basa en el fichero eslintrc
 - Modificaciones de eslint al guardar
-- Visual Code da sugerencias por ejemplo para cambiar el tipo de módulos de Node.JS (CommonJs, síncrono) a ES6 Modules (asíncrono). 
+- Visual Code da sugerencias por ejemplo para cambiar el tipo de módulos de Node.JS (CommonJs, síncrono) a ES6 Modules (asíncrono).
   - [No nos interesan](https://nodejs.org/api/esm.html): lo desactivaremos
 
 
@@ -80,6 +80,18 @@ $ node_modules/.bin/eslint --init # o npx eslint --init
 ```json
   "prettier.eslintIntegration": true,
   "eslint.autoFixOnSave": true, //podríamos usar prettier-eslint
+  "javascript.suggestionActions.enabled": false
+```
+
+
+- Añadimos lo siguiente:
+
+```json
+  "editor.tabSize": 2,
+  "prettier.eslintIntegration": true,
+  "eslint.run": "onSave",
+  "eslint.autoFixOnSave": true, //podríamos usar prettier-eslint
+  "editor.formatOnSave": true,
   "javascript.suggestionActions.enabled": false
 ```
 
@@ -138,7 +150,7 @@ TODO: ¿Fork o scratch?
 ## Instalar paquetes y configurar npm start
 
 - Instalamos express
-  
+
   ```bash
   npm i -S express@4.16.3
   ```
@@ -174,7 +186,7 @@ app.get('/', (req, res) => {
 })
 
 app.get('/cervezas', (req, res) => {
-  res.json({ mensaje: '¡A beber cerveza!' })  
+  res.json({ mensaje: '¡A beber cerveza!' })
 })
 
 // iniciamos nuestro servidor
@@ -258,7 +270,7 @@ var router = express.Router()
 
 //establecemos nuestra primera ruta, mediante get.
 router.get('/', (req, res) => {
-  res.json({ mensaje: '¡Bienvenido a nuestra API!' })  
+  res.json({ mensaje: '¡Bienvenido a nuestra API!' })
 })
 
 // nuestra ruta irá en http://localhost:8080/api
@@ -408,7 +420,7 @@ app.get('/', (req, res) => {
   - [body-parser](https://www.npmjs.com/package/body-parser): extrae los datos del body y los convierte en json
 
 - **multipart/form-data**
-  - [Busboy](https://www.npmjs.com/package/busboy) o [Multer](https://github.com/expressjs/multer) 
+  - [Busboy](https://www.npmjs.com/package/busboy) o [Multer](https://github.com/expressjs/multer)
 
 
 ## Ejemplo con body-parser
@@ -428,7 +440,7 @@ app.get('/', (req, res) => {
   app.use(bodyParser.json())
 
   router.post('/', (req,res) => {
-    res.json({mensaje: req.body.nombre})  
+    res.json({mensaje: req.body.nombre})
   })
   ```
 
@@ -507,7 +519,7 @@ app.get('/', (req, res) => {
     - Recoge parámetros
     - Llama al modelo (obtener datos, guardar)
     - Devuelve json
-- El modelo puede ser complejo. 
+- El modelo puede ser complejo.
   - Por ej. creación de tokens o encriptación de passwords en el modelo de Usuario
   - Es un código que puede ser reutilizado entre controladores
 
