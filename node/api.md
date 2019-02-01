@@ -488,15 +488,16 @@ app.get('/', (req, res) => {
 
 ## Arquitectura MVC
 
-- Cada ruta se gestiona por un controlador
-  - El controlador es responsable de:
-    - Acceder a los datos para leer o guardar
-      - Delega en un modelo
-        - Utilizaremos un ODM
-        - Mongoose para MongoDB
-    - Enviar datos de vuelta
-      - Al ser JSON, lo haremos directamente desde el controller
-      - No necesitamos la capa Vista :-)
+- Todas las rutas de un recurso se gestionan por un controlador.
+ Cada ruta por un método del mismo
+- El controlador es responsable de:
+  - Acceder a los datos para leer o guardar
+    - Delega en un modelo
+      - Utilizaremos un ODM
+      - Mongoose para MongoDB
+  - Enviar datos de vuelta
+    - Al ser JSON, lo haremos directamente desde el controller
+    - No necesitamos la capa Vista :-)
 
 
 ## Fat model, thin controller
@@ -511,285 +512,10 @@ app.get('/', (req, res) => {
   - Es un código que puede ser reutilizado entre controladores
 
 
-## Acceso a base de datos
-
-- Para la persistencia de nuestros datos utilizaremos una base de datos
-- Elegimos una noSQL: MongoDB
-  - Es lo más habitual en arquitecturas MEAN
-  - Así operamos con objetos json tanto en node como en bbdd (bson)
-  - Y así tenemos otra consola de JavaScript :-)
-
-
-## Instalación de MongoDB
-
-- Utilizaremos **contenedores docker**:
-  - Eliminamos conflictos en la máquina base
-  - Podemos cambiar de versiones con facilidad
-  - Nuestro proyecto es más portable
-  
-- [Docker ya está instalado](./configuracion-inicial.md)
-
-- [Otra opción más tradicional sería usar repositorios o paquetes](https://www.mongodb.com/)
-
-
-## Fichero de instalación mediante docker
-
-- Definiremos un fichero *docker-compose.yml*
-- Para ver que imagen necesitamos podemos consultar en el [docker hub](https://hub.docker.com/)
-
-```yml
-version: '3'
-services:
-  mongodb:
-    hostname: mongodb
-    container_name: mongodb
-    image: mongo:4.0.1
-    volumes:
-      - ./mongodb-data:/data/db
-    ports:
-      - "27005:27017"
-```
-
-
-## Arrancar y parar MongoDB con docker-compose
-
-![](./img/docker-compose-comandos.png)
-
-
-## MongoDB: Consola
-
-- Se ejecuta con el comando mongo
-  - Como hemos instado MongoDB mediante docker, primero entraremos al contenedor:
-    ```bash
-    docker-compose exec mongodb bash
-    mongo
-    ```
-    - O mediante *attach shell* de la extensión Docker de Visual Editor
-  - Podemos ver:
-    - Los ejecutables de MongoDB en el contenedor
-    - El volumen mapeado...
-
-
-## MongoDB: Aplicaciones gráficas
-
-- [mongo-express](https://www.npmjs.com/package/mongo-express)
-  - Paquete de node
-  - Instalación docker
-
-- [Robo3T](https://robomongo.org/download)
-  - Antes llamado **Robomongo**
-  - El más extendido, será el que utilicemos
-
-
-## Robo3T: Instalar y configurar
-
-- Descargamos el paquete de [Robo3T](https://robomongo.org/download)(antes Robomongo)
-- Instalamos y ejecutamos
-
-
-## Robo3T: Conexiones a MongoDB
-
-- Robo3T guarda un listado de conexiones a MongoDB
-
-![Lista conexiones MongoDB](./img/robo3t-conexiones.png)
-
-
-## Robo3t: Configurar conexión a MongoDB
-
-- Creamos una nueva conexión a localhost y al puerto que hemos mapeado en Docker (27005)
-
-![Nueva conexión MongoDB](./img/robo3t-nueva-conexion.png)
-
-
-## Conceptos en noSQL
-
-![](img/SQL-MongoDB-correspondence.png)
-
-
-## Schema en noSQL
-
-![](img/no-sql-schema-vs-sql.jpg)
-
-
-## Inserción de datos
-
-- Utilizaremos el fichero *cervezas.json*, de la carpeta data
-
-- Importar nuestro cervezas.json a una base de datos
-
-```bash
-mongoimport --db web --collection cervezas --drop --file cervezas.json --jsonArray
-```
-
-- Otra opción es mediante Robomongo:
-
-```js
-  db.getCollection('cervezas').insertMany(array de objetos)
-```
-
-
-- Para hacer una búsqueda por varios campos de texto, tendremos que hacer un índice:
-
-```js
-  $ mongo # para entrar en la consola de mongo
-  use web; #seleccionamos la bbdd
-  db.cervezas.createIndex(
-    {
-      "nombre": "text",
-      "descripción": "text"
-    },
-    {
-      name: "CervezasIndex",
-      default_language: "spanish"
-    }
-  )
-```
-
-- Comprobamos que el índice esté bien creado
-
-  ```js
-  db.cervezas.getIndexes()
-  ```
-
-
-## Conexión a MongoDB desde node
-
-- Instalaremos [mongoose](https://mongoosejs.com/) como ODM (Object Document Mapper) en vez de trabajar con el [driver nativo de MongoDB](https://mongodb.github.io/node-mongodb-native/) (se utiliza por debajo).
-
-  ```bash
-  npm i -S mongoose@5.2.13
-  ```
-
-
-## Abrir conexión con Mongoose
-
-- Mediante el método connect, [siguiendo la documentación:](https://mongoosejs.com/)
-
-  ```js
-  const mongoose = require('mongoose');
-  mongoose.connect('mongodb://localhost/test');
-
-  const Cat = mongoose.model('Cat', { name: String });
-
-  const kitty = new Cat({ name: 'Zildjian' });
-  kitty.save().then(() => console.log('meow'));
-  ```
-
-
-- Creamos el fichero *app/db.js* donde configuraremos nuestra conexión a base de datos mediante mongoose:
-
-```js
-const mongoose = require('mongoose')
-
-const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27005/web'
-mongoose.connect(MONGO_URL, { useNewUrlParser: true })
-
-mongoose.connection.on('connected', () => {
-  console.log(`Conectado a la base de datos: ${MONGO_URL}`)
-})
-
-mongoose.connection.on('error', (err) => {
-  console.log(`Error al conectar a la base de datos: ${err}`)
-})
-
-mongoose.connection.on('disconnected', () => {
-  console.log('Desconectado de la base de datos')
-})
-
-process.on('SIGINT', function() {
-  mongoose.connection.close(function () {
-    console.log('Desconectado de la base de datos al terminar la app')
-    process.exit(0)
-  })
-})
-```
-
-
-- En nuestro fichero *app/server.js* incluimos el fichero de configuración de bbdd:
-
-```js
-require('./db')
-```
-
-- Observa que no es necesario asignar el módulo a una constante
-  - El módulo solo abre conexión con la bbdd
-  - Registra eventos de mongodb
-  - No exporta nada
-
-
-- La conexión a bbdd se queda abierta durante todo el funcionamiento de la aplicación: 
-  - Las conexiones TCP son caras en tiempo y memoria
-  - Se reutiliza
-
-
-## Modelos
-
-- Definimos un esquema para nuestra colección
-- Creamos nuestro modelo a partir del esquema
-- Fichero *app/models/Cervezas.js*):
-
-```js
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-
-const cervezaSchema = new Schema({
-  nombre: {
-    type: String,
-    required: true
-  },
-  descripción: String,
-  graduación: String,
-  envase: String,
-  precio: String
-})
-
-const Cerveza = mongoose.model('Cerveza', cervezaSchema)
-
-module.exports = Cerveza
-```
-
-
-- Ahora podríamos crear documentos y guardarlos en la base de datos
-
-```js
-const miCerveza = new Cerveza({ name: 'Ambar' })
-miCerveza.save((err, miCerveza) => {
-  if (err) return console.error(err)
-  console.log(`Guardada en bbdd ${miCerveza.name}`)
-})
-```
-
-
-## Guardar documento
-
-- Crea una cerveza nueva con todos los campos
-- Comprueba desde Robo3T que en nuevo documento aparece en la colección Cervezas
-
-
-## Solución guardar documento
-
-```js
-require('./db')
-
-// en fichero app/server.js después de conectar a bbdd:
-
-const miCerveza = new Cerveza({
-  nombre: 'Ambar',
-  descripción: 'La cerveza de nuestra tierra',
-  graduación: '4,8º',
-  envase: 'Botella de 75cl',
-  precio: '3€'
-})
-miCerveza.save((err, miCerveza) => {
-  if (err) return console.error(err)
-  console.log(`Guardada en bbdd ${miCerveza.nombre}`)
-})
-```
-
 
 ## Uso de controladores
 
-- Desde nuestro fichero de rutas (*app/routes/cervezas.js*), se llama a un controlador, encargado de añadir, borrar o modificar cervezas usando el modelo Cerveza.
+- Desde nuestro fichero de rutas (*app/routes/cervezas.js*), se llama a un controlador, encargado de añadir, borrar o modificar cervezas.
 - **Endpoint -> Recurso -> Fichero de rutas -> Controlador -> Modelo**
 
 
@@ -798,6 +524,68 @@ miCerveza.save((err, miCerveza) => {
 - Un método en el controlador por cada endpoint del recurso
 
 
+## Mi primer método del controlador
+
+- Vamos a crear el método index para que nos devuelva la lista de todas las cervezas.
+- De entrada creamos nuestro controlador que devuelva un mensaje simple:
+
+```js
+//cervezaController.js
+
+const list = (req, res) => {
+  const page = req.query.page || 1
+  return res.json({ mensaje: 'Lista de cervezas, página ' + page })
+}
+
+module.exports = {list}
+```
+
+
+## Tarea:
+
+- Realiza los otros métodos básicos para realizar un CRUD sobre cervezas:
+  - `show` para ver un elemento, ruta GET (/cervezas/:id)
+  - `store` para crear, ruta POST  (/cervezas)
+  - `update` para actualizar, ruta PUT (/cervezas/:id)
+  - `update` para actualizar, ruta PUT (/cervezas/:id)
+
+
+
+## Modelos
+
+- Llega el momento de que el modelo entre es escena.
+- Se trata de recoger los datos en un objeto
+- Y de su persistencia en BBDD: leer, borrar, crear y actualizar
+
+
+## Conexión:
+
+- Nuestro modelo necesita usar una conexión a base de datos:
+
+```js
+
+var mysql = require('mysql');
+    port = process.env.PORT || 4205;
+
+if (port === 4205) {
+
+    var connection = mysql.createConnection({
+        host: 'localhost',
+        port: 3306,
+        user: 'root',
+        password: '',
+        database: 'your_api',
+        insecureAuth: true
+    });
+} else {
+
+   //same as above, with live server details
+}
+
+connection.connect();
+
+module.exports = connection;
+```
 ## Repaso de nuestra API
 
 ![](IMG/rutas-api.png)
