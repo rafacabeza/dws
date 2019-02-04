@@ -572,114 +572,19 @@ module.exports = {list}
 
 ## Conexión:
 
-- Nuestro modelo necesita usar una conexión a base de datos:
+- Nuestro modelo necesita usar una conexión a base de datos
+- Usaremos el módulo [node-mysql2](https://github.com/sidorares/node-mysql2)
 
 ```js
 
-var mysql = require('mysql');
-    port = process.env.PORT || 4205;
+const mysql = require('mysql2')
 
-if (port === 4205) {
-
-    var connection = mysql.createConnection({
-        host: 'localhost',
-        port: 3306,
-        user: 'root',
-        password: '',
-        database: 'your_api',
-        insecureAuth: true
-    });
-} else {
-
-   //same as above, with live server details
-}
-
-connection.connect();
-
-module.exports = connection;
-```
-## Repaso de nuestra API
-
-![](IMG/rutas-api.png)
-
-
-## Configuración final del router Cervezas
-
-```js
-var router = require('express').Router()
-var cervezasController = require ('../controllers/cervezasController')
-
-router.get('/search', (req, res) => {
-  cervezasController.search(req, res)
+const connection = mysql.createConnection({
+  user: 'root',
+  password: 'Root.12345',
+  host: 'localhost',
+  database: 'cervezas'
 })
-router.get('/', (req, res) => {
-  cervezasController.list(req, res)
-})
-router.get('/:id', (req, res) => {
-  cervezasController.show(req, res)
-})
-router.post('/', (req, res) => {
-  cervezasController.create(req, res)
-})
-router.put('/:id', (req, res) => {
-  cervezasController.update(req, res)
-})
-router.delete('/:id', (req, res) => {
-  cervezasController.remove(req, res)
-})
-module.exports = router
-```
-
-
-
-## Implementación del controlador
-
-
-## Workflow
-
-- Utilizaremos enfoque BDD
-  - Desarrollamos un test
-  - Implementamos código
-  - Comprobamos funcionamiento
-
-- Los tests ya están hechos :-)
-
-
-### Test desde el navegador o mediante Postman
-
-- Comprobamos que se genera el listado de cervezas
-- Comprobamos que se busca por keyword:
-
-```bash
-http://localhost:8080/api/cervezas/search?q=regaliz
-```
-...
-
-
-## Test de la API
-
-- Utilizaremos [Mocha](https://mochajs.org/) como test framework
-- [supertest](https://github.com/visionmedia/supertest) para hacer las peticiones http.
-- Chai como librería de aserciones
-
-```bash
-npm i -D mocha supertest chai
-```
-
-- Tenemos nuestros test en el fichero *test/cerveza.test.js*
-
-
-## Configuramos nuestro app para los tests
-
-```js
-// iniciamos nuestro servidor
-// para tests, porque supertest hace el listen por su cuenta
-if (!module.parent) {
-  app.listen(port, () => console.log(`API escuchando en el puerto ${port}`))
-}
-
-// exportamos la app para hacer tests
-module.exports = app
 ```
 
 
@@ -696,213 +601,75 @@ module.exports = app
 
 ## Listar cervezas
 
+- Desde el controlador: 
+
 ```js
-const Cerveza = require('../models/Cerveza')
-
-const list = (req, res) => {
-  Cerveza.find((err, cervezas) => {
+const index = function (req, res) {
+  console.log('Lista de cervezas')
+  const sql = 'SELECT * FROM cervezas'
+  connection.query(sql, (err, result, fields) => {
     if (err) {
-      return res.status(500).json({
-        message: 'Error obteniendo la cerveza'
-      })
+      res.status(500).json(err)
+    } else {
+      console.log(fields)
+      res.json(result)
     }
-    return res.json(cervezas)
   })
-}
-
-module.exports = {
-  list
 }
 ```
 
 
-## Listar cervezas por palabra clave
+## Listar cervezas con el modelo
+
+- Al separar el acceso a la base de datos tenemos un problema
+- ¿Cómo accedemos a los datos obtenidos en una función asícrona?
+- solución: una función de callback debe devolver sus datos a través de otra función de callback.
+
+
+### Modelo
 
 ```js
-const Cerveza = require('../models/Cerveza')
-const search = (req, res) => {
-  const q = req.query.q
-  Cerveza.find({ $text: { $search: q } }, (err, cervezas) => {
+const connection = require('../config/dbconection')
+
+const index = function (callback) {  
+  const sql = 'SELECT * FROM cervezass'
+  connection.query(sql, (err, result, fields) => {
     if (err) {
-      return res.status(500).json({
-        message: 'Error en la búsqueda'
-      })
-    }
-    if (!cervezas.length) {
-      return res.status(404).json({
-        message: 'No hemos encontrado cervezas que cumplan esa query'
-      })
-    } else {
-      return res.json(cervezas)
+    callback(500, err)
+} else {
+    //   console.log(fields)
+      callback(200, result, fields)
     }
   })
 }
+module.exports = { index };
+```
 
-module.exports = {
-  list,
-  search
+
+### Controlador
+
+```js
+const index = function (req, res) { 
+  console.log('Lista de cervezas')
+  Cerveza.index((status, data, fields) => {
+    console.log('data desde el controlador: ' + data)
+    res.status(status).json(data)
+  })
 }
 ```
 
 
 ## Mostrar una cerveza
 
-```js
-const Cerveza = require('../models/Cervezas')
-const { ObjectId } = require('mongodb')
-const show = (req, res) => {
-  const id = req.params.id
-  Cerveza.findOne({ _id: id }, (err, cerveza) => {
-    if (!ObjectId.isValid(id)) {
-      return res.status(404).send()
-    }
-    if (err) {
-      return res.status(500).json({
-        message: 'Se ha producido un error al obtener la cerveza'
-      })
-    }
-    if (!cerveza) {
-      return res.status(404).json({
-        message: 'No tenemos esta cerveza'
-      })
-    }
-    return res.json(cerveza)
-  })
-}
-module.exports = {
-  search,
-  list,
-  show
-}
-```
-
 
 ## Crear una cerveza
-
-```js
-const Cerveza = require('../models/Cervezas')
-const create = (req, res) => {
-  const cerveza = new Cerveza(req.body)
-  cerveza.save((err, cerveza) => {
-    if (err) {
-      return res.status(400).json({
-        message: 'Error al guardar la cerveza',
-        error: err
-      })
-    }
-    return res.status(201).json(cerveza)
-  })
-}
-module.exports = {
-  search,
-  list,
-  show,
-  create
-}
-```
 
 
 ## Actualizar cerveza
 
-```js
-const update = (req, res) => {
-  const id = req.params.id
-  Cerveza.findOne({ _id: id }, (err, cerveza) => {
-    if (!ObjectId.isValid(id)) {
-      return res.status(404).send()
-    }
-    if (err) {
-      return res.status(500).json({
-        message: 'Se ha producido un error al guardar la cerveza',
-        error: err
-      })
-    }
-    if (!ObjectId.isValid(id)) {
-      return res.status(404).send()
-    }
-    if (!cerveza) {
-      return res.status(404).json({
-        message: 'No hemos encontrado la cerveza'
-      })
-    }
-
-    Object.assign(cerveza, req.body)
-
-    cerveza.save((err, cerveza) => {
-      if (err) {
-        return res.status(500).json({
-          message: 'Error al guardar la cerveza'
-        })
-      }
-      if (!cerveza) {
-        return res.status(404).json({
-          message: 'No hemos encontrado la cerveza'
-        })
-      }
-      return res.json(cerveza)
-    })
-  })
-}
-module.exports = {
-  search,
-  list,
-  show,
-  create,
-  update
-}
-```
-
 
 ## Borrar cerveza
 
-```js
-const Cerveza = require('../models/Cervezas')
-const { ObjectId } = require('mongodb')
-const remove = (req, res) => {
-  const id = req.params.id
-
-  Cerveza.findOneAndDelete({ _id: id }, (err, cerveza) => {
-    if (!ObjectId.isValid(id)) {
-      return res.status(404).send()
-    }
-    if (err) {
-      return res.json(500, {
-        message: 'No hemos encontrado la cerveza'
-      })
-    }
-    if (!cerveza) {
-      return res.status(404).json({
-        message: 'No hemos encontrado la cerveza'
-      })
-    }
-    return res.json(cerveza)
-  })
-}
-
-module.exports = {
-  search,
-  list,
-  show,
-  create,
-  update,
-  remove
-}
-```
-
-
-
-## Análisis de código
-
-- Por último podríamos utilizar un paquete como **istanbul** que nos analice el código y ver si nuestras pruebas recorren todas las instrucciones, funciones o ramas del código:
-
-  ```bash
-  npm i -D istanbul
-  ./node_modules/.bin/istanbul cover -x "**/tests/**"  ./node_modules/.bin/_mocha  tests/api.test.js
-  ```
-
-
-- Estos datos son facilmente exportables a algún servicio que nos de una estadística de la cobertura de nuestros tests o que haga un seguimiento de los mismos entre las distintas versiones de nuestro código.
-- Por último también se podría integrar con un sistema de integración continua tipo [Travis](https://travis-ci.org/).
 
 
 ## Uso de middlewares cors y morgan
