@@ -963,25 +963,29 @@ miCerveza.save((err, miCerveza) => {
 
 ## Uso de controladores
 
-- Desde nuestro fichero de rutas (*app/routes/cervezas.js*), se llama a un controlador, encargado de añadir, borrar o modificar cervezas usando el modelo Cerveza.
-- **Endpoint -> Recurso -> Fichero de rutas -> Controlador -> Modelo**
+- Vamos a crear una vesión 2 de nuestra API, esta con MongoDb
+- En nuestro fichero de rutas *routes.js*:
+
+```js
+const routerCervezasV2 = require('./routes/v2/cervezas.js')
+
+router.use('/v2/cervezas', routerCervezasV2);
+
+module.exports = router
+```
 
 
-- Creamos un directorio específico para los controladores (*app/controllers*)
-- Un controlador específico para cada recurso, por ej.  (*app/controllers/cervezasController.js*):
+
+- Creamos un directorio para los controladores v2 (*app/controllers/v2*)
+- Un controlador, en este caso  (*app/controllers/v2/cervezasController.js*):
 - Un método en el controlador por cada endpoint del recurso
-
-
-## Repaso de nuestra API
-
-![](IMG/rutas-api.png)
 
 
 ## Configuración final del router Cervezas
 
 ```js
 var router = require('express').Router()
-var cervezasController = require ('../controllers/cervezasController')
+var cervezasController = require ('../controllers/v2/cervezasController')
 
 router.get('/search', (req, res) => {
   cervezasController.search(req, res)
@@ -1009,16 +1013,6 @@ module.exports = router
 ## Implementación del controlador
 
 
-## Workflow
-
-- Utilizaremos enfoque BDD
-  - Desarrollamos un test
-  - Implementamos código
-  - Comprobamos funcionamiento
-
-- Los tests ya están hechos :-)
-
-
 ### Test desde el navegador o mediante Postman
 
 - Comprobamos que se genera el listado de cervezas
@@ -1028,33 +1022,6 @@ module.exports = router
 http://localhost:8080/api/cervezas/search?q=regaliz
 ```
 ...
-
-
-## Test de la API
-
-- Utilizaremos [Mocha](https://mochajs.org/) como test framework
-- [supertest](https://github.com/visionmedia/supertest) para hacer las peticiones http.
-- Chai como librería de aserciones
-
-```bash
-npm i -D mocha supertest chai
-```
-
-- Tenemos nuestros test en el fichero *test/cerveza.test.js*
-
-
-## Configuramos nuestro app para los tests
-
-```js
-// iniciamos nuestro servidor
-// para tests, porque supertest hace el listen por su cuenta
-if (!module.parent) {
-  app.listen(port, () => console.log(`API escuchando en el puerto ${port}`))
-}
-
-// exportamos la app para hacer tests
-module.exports = app
-```
 
 
 ## Configuración del controlador Cervezas
@@ -1261,67 +1228,5 @@ module.exports = {
   update,
   remove
 }
-```
-
-
-
-## Análisis de código
-
-- Por último podríamos utilizar un paquete como **istanbul** que nos analice el código y ver si nuestras pruebas recorren todas las instrucciones, funciones o ramas del código:
-
-  ```bash
-  npm i -D istanbul
-  ./node_modules/.bin/istanbul cover -x "**/tests/**"  ./node_modules/.bin/_mocha  tests/api.test.js
-  ```
-
-
-- Estos datos son facilmente exportables a algún servicio que nos de una estadística de la cobertura de nuestros tests o que haga un seguimiento de los mismos entre las distintas versiones de nuestro código.
-- Por último también se podría integrar con un sistema de integración continua tipo [Travis](https://travis-ci.org/).
-
-
-## Uso de middlewares cors y morgan
-
-- Normalmente utilizaremos middlewares que ya están hechos, por ejemplo Morgan para logs y cors para Cors.
-- Los instalamos:
-
-  ```bash
-  npm i -S cors morgan
-  ```
-
-
-- Los insertamos en nuestra API (el orden puede ser importante):
-
-```js
-const express = require('express') // llamamos a Express
-const app = express()
-const router = require('./routes')
-
-const cors = require('cors')
-const morgan = require('morgan')
-app.use(morgan('combined'))
-app.use(cors())
-
-require('./db')
-
-const bodyParser = require('body-parser')
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json())
-
-const port = process.env.PORT || 8080 // establecemos nuestro puerto
-
-app.get('/', (req, res) => {
-  res.json({ mensaje: '¡Hola Mundo!' })
-})
-
-app.use('/api', router)
-
-// iniciamos nuestro servidor
-// para tests, porque supertest hace el listen por su cuenta
-if (!module.parent) {
-  app.listen(port, () => console.log(`API escuchando en el puerto ${port}`))
-}
-
-// exportamnos la app para hacer tests
-module.exports = app
 ```
 
