@@ -717,3 +717,610 @@ if (!module.parent) {
 // exportamnos la app para hacer tests
 module.exports = app
 ```
+
+
+
+# MongoDB
+
+- Sistema de base de datos NoSQL
+- Guarda los datos en BSON (Binary JSON)
+- Es ideal para usarlo con Javascript
+- Es muy usado en aplicaciones web: pila MEAN
+- MongoDb, Express, Angular, Node.Js
+
+
+## Instalación de MongoDB
+
+- https://universo-digital.net/como-instalar-mongodb-en-ubuntu-16-04/
+
+- Al final:
+```bash
+  sudo systemctl start mongodb   //iniciar
+  sudo systemctl status mongodb   //comprobar estado
+  sudo systemctl enable mongodb   //activar el servicio
+```
+
+
+## Uso básico de MongoDb por consola
+
+- Usar/crear una base de datos
+
+```
+use mibasededatos
+```
+
+- Ver la o las bases de datos
+
+```
+db   //show database
+show dbs //ver todas
+```
+
+
+## Colecciones (Tablas)
+
+- Creamos una colección de forma implícita
+
+```
+db.usuarios.insert({id: 1, nombre: "pepe"})
+```
+
+- O explícita
+db.createCollection("cervezas")  //crear coleccion
+
+```
+show collections   /ver colecciones
+```
+
+- La borramos con drop:
+
+```
+db.cervezas.drop()  //borrar colección
+db //ver cual es la db actual
+db.dropDatabase()  //borrarla
+```
+
+
+## Consultas
+
+Consultar, filtrar y ordenar:
+
+```
+db.cervezas.find().pretty()
+db.cervezas.find({"precio": 1})
+db.cervezas.find({"precio": { $lt : 1}})
+db.cervezas.find().sort({precio:1})
+```
+
+modificar:
+
+```
+db.productos.update({id: 1}, { $set: {name: "Ambar Especial"}})
+db.productos.update({id: 1}, { $set: {name: "Ambar Especial"}}, {multi: true})
+```
+Borrar:
+
+```
+db.cervezas.deleteOne({"id": 1}
+db.cervezas.delete({"id": 1})
+```
+
+
+# Modelos con Mongo: Mongoose
+
+- Instalaremos [mongoose](https://mongoosejs.com/) en vez de trabajar con el [driver nativo de MongoDB](https://mongodb.github.io/node-mongodb-native/) (se utiliza por debajo).
+- Mongoose es un ODM (Object Document Mapper).
+- Equivale a los ORM como Hibernate en Java o Eloquent en Php/Laravel
+
+
+## Usar Mongoose
+
+- Instalación
+
+```
+npm i -S mongoose
+```
+
+- Probamos la conexión en nuestro código
+
+```js
+  const mongoose = require('mongoose');
+  mongoose.connect('mongodb://localhost/test');
+
+  const Cat = mongoose.model('Cat', { name: String });
+
+  const kitty = new Cat({ name: 'Zildjian' });
+  kitty.save().then(() => console.log('meow'));
+  ```
+
+
+- Creamos el fichero *app/db.js* donde configuraremos nuestra conexión a base de datos mediante mongoose:
+
+```js
+const mongoose = require('mongoose')
+
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/web'
+mongoose.connect(MONGO_URL, { useNewUrlParser: true })
+
+mongoose.connection.on('connected', () => {
+  console.log(`Conectado a la base de datos: ${MONGO_URL}`)
+})
+
+mongoose.connection.on('error', (err) => {
+  console.log(`Error al conectar a la base de datos: ${err}`)
+})
+
+mongoose.connection.on('disconnected', () => {
+  console.log('Desconectado de la base de datos')
+})
+
+process.on('SIGINT', function() {
+  mongoose.connection.close(function () {
+    console.log('Desconectado de la base de datos al terminar la app')
+    process.exit(0)
+  })
+})
+```
+
+
+- El código de la conexión usa [eventos](https://desarrolloweb.com/articulos/eventos-nodejs.html)
+- Nuestro conector se prepara para recibir eventos con ".on". Los eventos los genera mongoose o al cerrar el proceso.
+
+```js
+var eventos = require('events');
+
+var EmisorEventos = eventos.EventEmitter; 
+var ee = new EmisorEventos(); 
+ee.on('datos', function(fecha){ 
+   console.log(fecha); 
+}); 
+setInterval(function(){ 
+   ee.emit('datos', Date.now()); 
+}, 500);
+```
+
+
+- En nuestro fichero *app/server.js* incluimos el fichero de configuración de bbdd:
+
+```js
+require('./db')
+```
+
+- Observa que no es necesario asignar el módulo a una constante
+  - El módulo solo abre conexión con la bbdd
+  - Registra eventos de mongodb
+  - No exporta nada
+
+
+- La conexión a bbdd se queda abierta durante todo el funcionamiento de la aplicación: 
+  - Las conexiones TCP son caras en tiempo y memoria
+  - Se reutiliza
+
+
+## Modelos
+
+- Un modelo mongoose debe definir un esquema
+- Fichero *app/models/Cerveza.js*):
+
+```js
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
+
+const cervezaSchema = new Schema({
+  nombre: {
+    type: String,
+    required: true
+  },
+  descripción: String,
+  graduación: String,
+  envase: String,
+  precio: String
+})
+
+const Cerveza = mongoose.model('Cerveza', cervezaSchema)
+
+module.exports = Cerveza
+```
+
+
+- Ahora podríamos crear documentos y guardarlos en la base de datos
+
+```js
+const miCerveza = new Cerveza({ name: 'Ambar' })
+miCerveza.save((err, miCerveza) => {
+  if (err) return console.error(err)
+  console.log(`Guardada en bbdd ${miCerveza.name}`)
+})
+```
+
+
+## Guardar documento
+
+- Crea una cerveza nueva con todos los campos
+- Comprueba por consola o desde [Robo3T](https://steemit.com/linux/@kennethpham/how-to-install-robo-3t-former-robomongo-on-linux-ubuntu) que en nuevo documento aparece en la colección Cervezas
+
+
+## Solución guardar documento
+
+```js
+require('./db')
+
+// en fichero app/server.js después de conectar a bbdd:
+
+const miCerveza = new Cerveza({
+  nombre: 'Ambar',
+  descripción: 'La cerveza de nuestra tierra',
+  graduación: '4,8º',
+  envase: 'Botella de 75cl',
+  precio: '3€'
+})
+miCerveza.save((err, miCerveza) => {
+  if (err) return console.error(err)
+  console.log(`Guardada en bbdd ${miCerveza.nombre}`)
+})
+```
+
+
+## Uso de controladores
+
+- Desde nuestro fichero de rutas (*app/routes/cervezas.js*), se llama a un controlador, encargado de añadir, borrar o modificar cervezas usando el modelo Cerveza.
+- **Endpoint -> Recurso -> Fichero de rutas -> Controlador -> Modelo**
+
+
+- Creamos un directorio específico para los controladores (*app/controllers*)
+- Un controlador específico para cada recurso, por ej.  (*app/controllers/cervezasController.js*):
+- Un método en el controlador por cada endpoint del recurso
+
+
+## Repaso de nuestra API
+
+![](IMG/rutas-api.png)
+
+
+## Configuración final del router Cervezas
+
+```js
+var router = require('express').Router()
+var cervezasController = require ('../controllers/cervezasController')
+
+router.get('/search', (req, res) => {
+  cervezasController.search(req, res)
+})
+router.get('/', (req, res) => {
+  cervezasController.list(req, res)
+})
+router.get('/:id', (req, res) => {
+  cervezasController.show(req, res)
+})
+router.post('/', (req, res) => {
+  cervezasController.create(req, res)
+})
+router.put('/:id', (req, res) => {
+  cervezasController.update(req, res)
+})
+router.delete('/:id', (req, res) => {
+  cervezasController.remove(req, res)
+})
+module.exports = router
+```
+
+
+
+## Implementación del controlador
+
+
+## Workflow
+
+- Utilizaremos enfoque BDD
+  - Desarrollamos un test
+  - Implementamos código
+  - Comprobamos funcionamiento
+
+- Los tests ya están hechos :-)
+
+
+### Test desde el navegador o mediante Postman
+
+- Comprobamos que se genera el listado de cervezas
+- Comprobamos que se busca por keyword:
+
+```bash
+http://localhost:8080/api/cervezas/search?q=regaliz
+```
+...
+
+
+## Test de la API
+
+- Utilizaremos [Mocha](https://mochajs.org/) como test framework
+- [supertest](https://github.com/visionmedia/supertest) para hacer las peticiones http.
+- Chai como librería de aserciones
+
+```bash
+npm i -D mocha supertest chai
+```
+
+- Tenemos nuestros test en el fichero *test/cerveza.test.js*
+
+
+## Configuramos nuestro app para los tests
+
+```js
+// iniciamos nuestro servidor
+// para tests, porque supertest hace el listen por su cuenta
+if (!module.parent) {
+  app.listen(port, () => console.log(`API escuchando en el puerto ${port}`))
+}
+
+// exportamos la app para hacer tests
+module.exports = app
+```
+
+
+## Configuración del controlador Cervezas
+
+- Debemos definir los métodos siguientes:
+  - search
+  - list
+  - show
+  - create
+  - update
+  - remove
+
+
+## Listar cervezas
+
+```js
+const Cerveza = require('../models/Cerveza')
+
+const list = (req, res) => {
+  Cerveza.find((err, cervezas) => {
+    if (err) {
+      return res.status(500).json({
+        message: 'Error obteniendo la cerveza'
+      })
+    }
+    return res.json(cervezas)
+  })
+}
+
+module.exports = {
+  list
+}
+```
+
+
+## Listar cervezas por palabra clave
+
+```js
+const Cerveza = require('../models/Cerveza')
+const search = (req, res) => {
+  const q = req.query.q
+  Cerveza.find({ $text: { $search: q } }, (err, cervezas) => {
+    if (err) {
+      return res.status(500).json({
+        message: 'Error en la búsqueda'
+      })
+    }
+    if (!cervezas.length) {
+      return res.status(404).json({
+        message: 'No hemos encontrado cervezas que cumplan esa query'
+      })
+    } else {
+      return res.json(cervezas)
+    }
+  })
+}
+
+module.exports = {
+  list,
+  search
+}
+```
+
+
+## Mostrar una cerveza
+
+```js
+const Cerveza = require('../models/Cervezas')
+const { ObjectId } = require('mongodb')
+const show = (req, res) => {
+  const id = req.params.id
+  Cerveza.findOne({ _id: id }, (err, cerveza) => {
+    if (!ObjectId.isValid(id)) {
+      return res.status(404).send()
+    }
+    if (err) {
+      return res.status(500).json({
+        message: 'Se ha producido un error al obtener la cerveza'
+      })
+    }
+    if (!cerveza) {
+      return res.status(404).json({
+        message: 'No tenemos esta cerveza'
+      })
+    }
+    return res.json(cerveza)
+  })
+}
+module.exports = {
+  search,
+  list,
+  show
+}
+```
+
+
+## Crear una cerveza
+
+```js
+const Cerveza = require('../models/Cervezas')
+const create = (req, res) => {
+  const cerveza = new Cerveza(req.body)
+  cerveza.save((err, cerveza) => {
+    if (err) {
+      return res.status(400).json({
+        message: 'Error al guardar la cerveza',
+        error: err
+      })
+    }
+    return res.status(201).json(cerveza)
+  })
+}
+module.exports = {
+  search,
+  list,
+  show,
+  create
+}
+```
+
+
+## Actualizar cerveza
+
+```js
+const update = (req, res) => {
+  const id = req.params.id
+  Cerveza.findOne({ _id: id }, (err, cerveza) => {
+    if (!ObjectId.isValid(id)) {
+      return res.status(404).send()
+    }
+    if (err) {
+      return res.status(500).json({
+        message: 'Se ha producido un error al guardar la cerveza',
+        error: err
+      })
+    }
+    if (!ObjectId.isValid(id)) {
+      return res.status(404).send()
+    }
+    if (!cerveza) {
+      return res.status(404).json({
+        message: 'No hemos encontrado la cerveza'
+      })
+    }
+
+    Object.assign(cerveza, req.body)
+
+    cerveza.save((err, cerveza) => {
+      if (err) {
+        return res.status(500).json({
+          message: 'Error al guardar la cerveza'
+        })
+      }
+      if (!cerveza) {
+        return res.status(404).json({
+          message: 'No hemos encontrado la cerveza'
+        })
+      }
+      return res.json(cerveza)
+    })
+  })
+}
+module.exports = {
+  search,
+  list,
+  show,
+  create,
+  update
+}
+```
+
+
+## Borrar cerveza
+
+```js
+const Cerveza = require('../models/Cervezas')
+const { ObjectId } = require('mongodb')
+const remove = (req, res) => {
+  const id = req.params.id
+
+  Cerveza.findOneAndDelete({ _id: id }, (err, cerveza) => {
+    if (!ObjectId.isValid(id)) {
+      return res.status(404).send()
+    }
+    if (err) {
+      return res.json(500, {
+        message: 'No hemos encontrado la cerveza'
+      })
+    }
+    if (!cerveza) {
+      return res.status(404).json({
+        message: 'No hemos encontrado la cerveza'
+      })
+    }
+    return res.json(cerveza)
+  })
+}
+
+module.exports = {
+  search,
+  list,
+  show,
+  create,
+  update,
+  remove
+}
+```
+
+
+
+## Análisis de código
+
+- Por último podríamos utilizar un paquete como **istanbul** que nos analice el código y ver si nuestras pruebas recorren todas las instrucciones, funciones o ramas del código:
+
+  ```bash
+  npm i -D istanbul
+  ./node_modules/.bin/istanbul cover -x "**/tests/**"  ./node_modules/.bin/_mocha  tests/api.test.js
+  ```
+
+
+- Estos datos son facilmente exportables a algún servicio que nos de una estadística de la cobertura de nuestros tests o que haga un seguimiento de los mismos entre las distintas versiones de nuestro código.
+- Por último también se podría integrar con un sistema de integración continua tipo [Travis](https://travis-ci.org/).
+
+
+## Uso de middlewares cors y morgan
+
+- Normalmente utilizaremos middlewares que ya están hechos, por ejemplo Morgan para logs y cors para Cors.
+- Los instalamos:
+
+  ```bash
+  npm i -S cors morgan
+  ```
+
+
+- Los insertamos en nuestra API (el orden puede ser importante):
+
+```js
+const express = require('express') // llamamos a Express
+const app = express()
+const router = require('./routes')
+
+const cors = require('cors')
+const morgan = require('morgan')
+app.use(morgan('combined'))
+app.use(cors())
+
+require('./db')
+
+const bodyParser = require('body-parser')
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
+
+const port = process.env.PORT || 8080 // establecemos nuestro puerto
+
+app.get('/', (req, res) => {
+  res.json({ mensaje: '¡Hola Mundo!' })
+})
+
+app.use('/api', router)
+
+// iniciamos nuestro servidor
+// para tests, porque supertest hace el listen por su cuenta
+if (!module.parent) {
+  app.listen(port, () => console.log(`API escuchando en el puerto ${port}`))
+}
+
+// exportamnos la app para hacer tests
+module.exports = app
+```
