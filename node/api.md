@@ -672,54 +672,6 @@ const index = function (req, res) {
 
 
 
-## Uso de middlewares cors y morgan
-
-- Normalmente utilizaremos middlewares que ya están hechos, por ejemplo Morgan para logs y cors para Cors.
-- Los instalamos:
-
-  ```bash
-  npm i -S cors morgan
-  ```
-
-
-- Los insertamos en nuestra API (el orden puede ser importante):
-
-```js
-const express = require('express') // llamamos a Express
-const app = express()
-const router = require('./routes')
-
-const cors = require('cors')
-const morgan = require('morgan')
-app.use(morgan('combined'))
-app.use(cors())
-
-require('./db')
-
-const bodyParser = require('body-parser')
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json())
-
-const port = process.env.PORT || 8080 // establecemos nuestro puerto
-
-app.get('/', (req, res) => {
-  res.json({ mensaje: '¡Hola Mundo!' })
-})
-
-app.use('/api', router)
-
-// iniciamos nuestro servidor
-// para tests, porque supertest hace el listen por su cuenta
-if (!module.parent) {
-  app.listen(port, () => console.log(`API escuchando en el puerto ${port}`))
-}
-
-// exportamnos la app para hacer tests
-module.exports = app
-```
-
-
-
 # MongoDB
 
 - Sistema de base de datos NoSQL
@@ -804,6 +756,83 @@ Borrar:
 db.cervezas.deleteOne({"id": 1}
 db.cervezas.delete({"id": 1})
 ```
+
+
+## MongoDB: Aplicaciones gráficas
+
+- [Robo3T](https://robomongo.org/download)
+  - Antes llamado **Robomongo**
+  - El más extendido, será el que utilicemos
+  - [Instalación en ubuntu](https://steemit.com/linux/@kennethpham/how-to-install-robo-3t-former-robomongo-on-linux-ubuntu) 
+
+<!-- ## Robo3T: Instalar y configurar
+
+- Descargamos el paquete de [Robo3T](https://robomongo.org/download)(antes Robomongo)
+- Instalamos y ejecutamos -->
+
+
+## Robo3T: Conexiones a MongoDB
+
+- Robo3T guarda un listado de conexiones a MongoDB
+
+![Lista conexiones MongoDB](./img/robo3t-conexiones.png)
+
+
+## Robo3t: Configurar conexión a MongoDB
+
+- Creamos una nueva conexión a localhost y al puerto que hemos mapeado en Docker (27017)
+
+
+## Conceptos en noSQL
+
+![](img/SQL-MongoDB-correspondence.png)
+
+
+## Schema en noSQL
+
+![](img/no-sql-schema-vs-sql.jpg)
+
+
+## Inserción de datos
+
+- Utilizaremos el fichero *cervezas.json*, de la carpeta data
+
+- Importar nuestro cervezas.json a una base de datos
+
+```bash
+mongoimport --db web --collection cervezas --drop --file cervezas.json --jsonArray
+```
+
+- Otra opción es mediante Robomongo:
+
+```js
+  db.getCollection('cervezas').insertMany(array de objetos)
+```
+
+
+- Para hacer una búsqueda por varios campos de texto, tendremos que hacer un índice:
+
+```js
+  $ mongo # para entrar en la consola de mongo
+  use web; #seleccionamos la bbdd
+  db.cervezas.createIndex(
+    {
+      "nombre": "text",
+      "descripción": "text"
+    },
+    {
+      name: "CervezasIndex",
+      default_language: "spanish"
+    }
+  )
+```
+
+- Comprobamos que el índice esté bien creado
+
+  ```js
+  db.cervezas.getIndexes()
+  ```
+
 
 
 # Modelos con Mongo: Mongoose
@@ -975,7 +1004,6 @@ module.exports = router
 ```
 
 
-
 - Creamos un directorio para los controladores v2 (*app/controllers/v2*)
 - Un controlador, en este caso  (*app/controllers/v2/cervezasController.js*):
 - Un método en el controlador por cada endpoint del recurso
@@ -1088,6 +1116,8 @@ module.exports = {
 
 ## Mostrar una cerveza
 
+- BSON (datos de MongoDb) define el tipo usado para el campo *_id*
+- Su nombre es [ObjectId](https://docs.mongodb.com/manual/reference/bson-types/#objectid), 12b en hexadecimal
 ```js
 const Cerveza = require('../models/Cervezas')
 const { ObjectId } = require('mongodb')
@@ -1189,8 +1219,7 @@ module.exports = {
   list,
   show,
   create,
-  update
-}
+
 ```
 
 
@@ -1230,3 +1259,15 @@ module.exports = {
 }
 ```
 
+
+
+##  Mongoose II
+
+- Hemos completado el ciclo CRUD pero no hemos pasado de puntillas sobre Mongo y Mongoose
+- Vamos a revisar como construir nuestras propias colecciones y modelos Mongo/Mongoose
+
+
+## Modelos y esquemas
+
+
+## Autenticación con Web Tokens
