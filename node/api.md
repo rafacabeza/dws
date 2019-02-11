@@ -1332,26 +1332,16 @@ Son:
 ## Definir un esquema
 
 - Ejemplo 
-var mongoose = require('mongoose');
- 
-var bookSchema = mongoose.Schema({
-    _id: mongoose.Schema.Types.ObjectId,
-    title: String,
-    ...
-});
- 
-var Book = mongoose.model('Book', bookSchema);
- 
-module.exports = Book;
-
 
 ```js
+var mongoose = require('mongoose');
+
 var userSchema = mongoose.Schema({
     firstName: String,
     lastName: String
 });
 
-var Book = mongoose.model('Book', bookSchema);
+var User = mongoose.model('User', bookSchema);
 
 ```
 
@@ -1524,7 +1514,7 @@ Tank.create({ size: 'small' }, function (err, small) {
   if (err) return handleError(err);
   // saved!
 });
-``
+```
 
 
 ### Actualización
@@ -1566,5 +1556,5 @@ Author.findByIdAndUpdate('59b31406beefa1082819e72f',
     - price: requerido, numérico
     - description: máximo 255 caracteres.
     - create: fecha de creación
-- Crea las rutas y el controlador par gestionar los productos.
+- Crea las rutas y el controlador para gestionar los productos.
 
