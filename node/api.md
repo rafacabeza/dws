@@ -1305,7 +1305,7 @@ Son:
 
 ### Buffer
 
-- Tipo de datos binari
+- Tipo de datos binario
 - Por ejemplo para guardar un pdf o una foto en Mongo
 
 
@@ -1314,12 +1314,14 @@ Son:
   - Todo vale
   - Ojo! perdemos posibilidades con su uso como el de la validación
 
+
 ### ObjectId
 
 - Campo de 12B usado para identificar registrso. Se compone de :
   - 4B timestap desde época unix
   - 5B aleatorios 
-  - 3B contador
+  - 3B contador (inicio aleatorio)
+
 
 ### Array 
 
@@ -1330,12 +1332,27 @@ Son:
 ## Definir un esquema
 
 - Ejemplo 
+var mongoose = require('mongoose');
+ 
+var bookSchema = mongoose.Schema({
+    _id: mongoose.Schema.Types.ObjectId,
+    title: String,
+    ...
+});
+ 
+var Book = mongoose.model('Book', bookSchema);
+ 
+module.exports = Book;
+
 
 ```js
 var userSchema = mongoose.Schema({
     firstName: String,
     lastName: String
 });
+
+var Book = mongoose.model('Book', bookSchema);
+
 ```
 
 
@@ -1429,6 +1446,7 @@ var authorSchema = mongoose.Schema({
 });
 ```
 
+
 ### El fichero de modelo
 
 ```js
@@ -1481,11 +1499,13 @@ var Book = mongoose.model('Book', bookSchema);
 module.exports = Book;
 ```
 
+
 ### Validadores (validators)
 
 - Todos los tipos tienen incorporado el validador *required*
 - Los números tienen *min* y *max*
 - Los textos (String), *enum*, *match*, *minlength*, and *maxlength* validators.
+
 
 ### Crear documentos:
 
@@ -1505,6 +1525,7 @@ Tank.create({ size: 'small' }, function (err, small) {
   // saved!
 });
 ``
+
 
 ### Actualización
 
@@ -1536,6 +1557,7 @@ Author.findByIdAndUpdate('59b31406beefa1082819e72f',
 });
 ```
 
+
 ## Ejercicio 1:
 
 - Crea una una colección  productos en la BBDD web
@@ -1546,12 +1568,3 @@ Author.findByIdAndUpdate('59b31406beefa1082819e72f',
     - create: fecha de creación
 - Crea las rutas y el controlador par gestionar los productos.
 
-
-## Ejercicio:
-
-- Crea una una colección  categories en la BBDD web
-- Crea crea un modelo para dicha coleccion.
-- Crea las rutas y el controlador par gestionar las categorías.
-
-
-### Modelo User para validación
