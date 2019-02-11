@@ -1341,7 +1341,7 @@ var userSchema = mongoose.Schema({
     lastName: String
 });
 
-var User = mongoose.model('User', bookSchema);
+var User = mongoose.model('User', userSchema);
 
 ```
 
@@ -1352,7 +1352,7 @@ Podemos usar el nombre como un objeto y añadir una fecha de creación:
 var userSchema = mongoose.Schema({
     name: {
       firstName: String,
-    lastName: String
+      lastName: String
     },
     created: Date
 });
@@ -1520,7 +1520,8 @@ Tank.create({ size: 'small' }, function (err, small) {
 ### Actualización
 
 Buscar + modificar + salvar
-```
+
+```js
 Author.findById('59b31406beefa1082819e72f', function(err, author) {
     if (err) throw err;
      
@@ -1555,6 +1556,6 @@ Author.findByIdAndUpdate('59b31406beefa1082819e72f',
     - name: requerido, máximo 20 caracteres
     - price: requerido, numérico
     - description: máximo 255 caracteres.
-    - create: fecha de creación
+    - created: fecha de creación
 - Crea las rutas y el controlador para gestionar los productos.
 
