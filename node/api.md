@@ -1261,13 +1261,297 @@ module.exports = {
 
 
 
-##  Mongoose II
+##  Mongoose II: La mangosta
 
 - Hemos completado el ciclo CRUD pero no hemos pasado de puntillas sobre Mongo y Mongoose
-- Vamos a revisar como construir nuestras propias colecciones y modelos Mongo/Mongoose
+- Vamos a estudiar como construir nuestras propias colecciones y modelos Mongo/Mongoose
 
 
 ## Modelos y esquemas
 
+- https://mongoosejs.com/docs/models.html
+- Mongoose es un Object Document Mapper (ODM). 
+- Permite definir objetos con un esquema fuertemente tipado que se asigna a un documento MongoDB.
+- Mongoose actualmente contiene ocho tipos de datos o SchemaTypes
 
-## Autenticación con Web Tokens
+
+Son:
+- Date (Fecha)
+- Buffer
+- Boolean (Booleano)
+- Mixed (Mixto)
+- ObjectId
+- Array (Matriz)
+
+
+### Sobre cada tipo podemos definir:
+
+- un valor predeterminado
+- una función de validación personalizada
+- indicar si es requerido
+- una función get que le permite manipular los datos antes de que se devuelva como un objeto
+- una función de conjunto que le permite manipular los datos antes de guardarlos en la base de datos
+- crear índices para permitir que los datos se obtengan más rápido
+
+
+### Sobre los String podemo:
+
+- convertirlo a minúsculas
+- convertirlo a mayúsculas
+- recortar datos antes de guardar
+- una expresión regular que puede limitar los datos que se pueden guardar durante el proceso de validación
+- una enumeración que puede definir una lista de cadenas que son válidas
+
+
+### Buffer
+
+- Tipo de datos binari
+- Por ejemplo para guardar un pdf o una foto en Mongo
+
+
+### Mixed
+
+  - Todo vale
+  - Ojo! perdemos posibilidades con su uso como el de la validación
+
+### ObjectId
+
+- Campo de 12B usado para identificar registrso. Se compone de :
+  - 4B timestap desde época unix
+  - 5B aleatorios 
+  - 3B contador
+
+### Array 
+
+- El tipo de datos Array le permite almacenar matrices similares a JavaScript. 
+- Con un tipo de datos Array, podemos realizar operaciones de matriz JavaScript como push, pop, shift, slice, etc.
+
+
+## Definir un esquema
+
+- Ejemplo 
+
+```js
+var userSchema = mongoose.Schema({
+    firstName: String,
+    lastName: String
+});
+```
+
+
+Podemos usar el nombre como un objeto y añadir una fecha de creación:
+
+```js
+var userSchema = mongoose.Schema({
+    name: {
+      firstName: String,
+    lastName: String
+    },
+    created: Date
+});
+```
+
+
+Ejemplo más completo:
+
+```js
+var authorSchema = mongoose.Schema({
+    _id: mongoose.Schema.Types.ObjectId,
+    name: {
+            firstName: String,
+        lastName: String
+    },
+    biography: String,
+    twitter: String,
+    facebook: String,
+    linkedin: String,
+    profilePicture: Buffer,
+    created: { 
+        type: Date,
+        default: Date.now
+    }
+});
+```
+
+
+## Crear y guardar modelos
+
+```js
+var Author = mongoose.model('Author', authorSchema);
+```
+
+
+Añadimos validación:
+
+```js
+var authorSchema = mongoose.Schema({
+    _id: mongoose.Schema.Types.ObjectId,
+    name: {
+        firstName: {
+            type: String,
+            required: true
+        },
+        lastName: String
+    },
+    biography: String,
+    twitter: {
+        type: String,
+        validate: {
+            validator: function(text) {
+                return text.indexOf('https://twitter.com/') === 0;
+            },
+            message: 'Twitter handle must start with https://twitter.com/'
+        }
+    },
+    facebook: {
+        type: String,
+        validate: {
+            validator: function(text) {
+                return text.indexOf('https://www.facebook.com/') === 0;
+            },
+            message: 'Facebook must start with https://www.facebook.com/'
+        }
+    },
+    linkedin: {
+        type: String,
+        validate: {
+            validator: function(text) {
+                return text.indexOf('https://www.linkedin.com/') === 0;
+            },
+            message: 'LinkedIn must start with https://www.linkedin.com/'
+        }
+    },
+    profilePicture: Buffer,
+    created: { 
+        type: Date,
+        default: Date.now
+    }
+});
+```
+
+### El fichero de modelo
+
+```js
+var mongoose = require('mongoose');
+ 
+var bookSchema = mongoose.Schema({
+    _id: mongoose.Schema.Types.ObjectId,
+    title: String,
+    ...
+});
+ 
+var Book = mongoose.model('Book', bookSchema);
+ 
+module.exports = Book;
+```
+
+
+```js
+var mongoose = require('mongoose');
+ 
+var bookSchema = mongoose.Schema({
+    _id: mongoose.Schema.Types.ObjectId,
+    title: String,
+    summary: String,
+    isbn: String,
+    thumbnail: Buffer,
+    author: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Author'
+    },
+    ratings: [
+        {
+            summary: String,
+            detail: String,
+            numberOfStars: Number,
+            created: { 
+                type: Date,
+                default: Date.now
+            }
+        }
+    ],
+    created: { 
+        type: Date,
+        default: Date.now
+    }
+});
+ 
+var Book = mongoose.model('Book', bookSchema);
+ 
+module.exports = Book;
+```
+
+### Validadores (validators)
+
+- Todos los tipos tienen incorporado el validador *required*
+- Los números tienen *min* y *max*
+- Los textos (String), *enum*, *match*, *minlength*, and *maxlength* validators.
+
+### Crear documentos:
+
+```js
+var Tank = mongoose.model('Tank', yourSchema);
+
+var small = new Tank({ size: 'small' });
+small.save(function (err) {
+  if (err) return handleError(err);
+  // saved!
+});
+
+// or
+
+Tank.create({ size: 'small' }, function (err, small) {
+  if (err) return handleError(err);
+  // saved!
+});
+``
+
+### Actualización
+
+Buscar + modificar + salvar
+```
+Author.findById('59b31406beefa1082819e72f', function(err, author) {
+    if (err) throw err;
+     
+    author.linkedin = 'https://www.linkedin.com/in/jamie-munro-8064ba1a/';
+     
+    author.save(function(err) {
+        if (err) throw err;
+         
+        console.log('Author updated successfully');
+    });
+});
+```
+
+
+O todo en uno con findByIdAndUpdate
+
+```js 
+Author.findByIdAndUpdate('59b31406beefa1082819e72f', 
+    { linkedin: 'https://www.linkedin.com/in/jamie-munro-8064ba1a/' }, 
+    function(err, author) {
+        if (err) throw err;
+     
+        console.log(author);
+});
+```
+
+## Ejercicio 1:
+
+- Crea una una colección  productos en la BBDD web
+- Crea crea un modelo para dicha coleccion.
+    - name: requerido, máximo 20 caracteres
+    - price: requerido, numérico
+    - description: máximo 255 caracteres.
+    - create: fecha de creación
+- Crea las rutas y el controlador par gestionar los productos.
+
+
+## Ejercicio:
+
+- Crea una una colección  categories en la BBDD web
+- Crea crea un modelo para dicha coleccion.
+- Crea las rutas y el controlador par gestionar las categorías.
+
+
+### Modelo User para validación
