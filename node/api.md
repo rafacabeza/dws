@@ -1568,3 +1568,164 @@ Author.findByIdAndUpdate('59b31406beefa1082819e72f',
     - create: fecha de creación
 - Crea las rutas y el controlador par gestionar los productos.
 
+
+
+## Autenticación JWT
+
+- REST significa 
+- Sin estado implica no guardar en el servidor ninguna estructura de datos de sesión ni usar cookies.
+- La autentinticación en este entorno está basada en tokens.
+
+
+### El modelo de Usuario
+
+- Vamos a realizar autenticación basada en email + contraseña
+  - La contraseña debe ir encriptada con *bcrypt*
+  - El email debe ser único y en minúsculas
+- Además guardaremos:
+  - Un nombre de usuario
+  - Fecha de creación
+  - Fecha de último login
+
+
+- Nuestro modelo: imports/exports
+
+```
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
+//cifrado de passwords.
+const bcrypt = require('bcrypt-nodejs')
+
+//aquí falta lo importante
+
+module.exports = mongoose.model('User', UserSchema)
+```
+
+
+- Nuestro modelo: campos
+
+```
+const UserSchema = new Schema({
+    email: {
+        type: String, 
+        unique: true,
+        lowercase: true //lo guardará en minúsculas
+    }
+    name: String
+    password: {type: String, select false}
+    signupDate: {type: Date, defaulta: Date.now()},
+    lastLogin: Date
+})
+
+```
+
+
+### Middleware
+
+- Son funciones invocadas **pre** o **post** la ejecución  funciones asíncronas.
+- Un documento cuenta con las siguientes funciones:
+  - *validate*
+  - *save*
+  - *remove*
+  - *init*
+
+
+- Nuestro modelo: middleware *pre* - *al salvar*
+  - Hacemos uso de los [middleware](https://mongoosejs.com/docs/middleware.html) de Mongoose 
+
+```js
+UserSchema.pre('save', (next) => {
+    let user = this
+    if (!user.isModified('password)) return next()
+    bcrypt.getSalt(10, (err, salt) => {
+        if (err) return next()
+
+        bcrypt.hash(user.password, salt, null, (err, hash) => {
+            if (err) return next(err)
+
+            user.password = hash
+            next()
+        })
+    })
+}
+```
+
+
+### Registro y Login
+
+- Controlador userController
+
+```js
+//npm i -S jwt-simple
+const mongoose = require('mongoose')
+const User  =require('../models/User')
+
+function register() {
+
+}
+
+function login() {
+    
+}
+
+module.exports = {
+    register,
+    login
+}
+```
+
+
+- Función de registro
+
+```js
+function register() {
+  const user = new User({
+    email: req.body.email,
+    name: req.body.name,
+    //password: req.body.password        
+
+    user.save((err) => {
+      if (err) res.status(500).json({message: 'ERROR al crear usuario: ${err}'})
+      //service nos va a crear un token
+      return res.status(200).json({token: servicejwt.createToken(user)})
+    })
+  })
+}
+```
+
+
+** Servicio jwt **
+
+```js
+const jwt = require('jwt-simple')
+//npm install moment
+const moment = require('moment')
+const config = require('../config')
+
+
+function createToken(user) {
+    const payload = {
+        sub: user._id //no es muy seguro ...
+        iat: moment().unix(),
+        exp: moment().add(10, 'days').unix()
+    }
+    return jwt.encode(payload, config.secret)
+}
+```
+
+
+### Login
+
+```js
+function login(req, res) {
+  User.find({email. req.body.email}, (err, user) => {
+    if (err) return res.status(500).json({message: err})
+    if (!user) return res.status(404).json({message: 'no existe el usuario})
+    req. user = user
+
+    res.status(200).send({
+      message: 'login ok',
+      token: servicejwt.createToken
+    })
+  })
+}
