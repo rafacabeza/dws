@@ -1628,15 +1628,15 @@ module.exports = mongoose.model('User', UserSchema)
 
 ```js
 const UserSchema = new Schema({
-    email: {
-        type: String, 
-        unique: true,
-        lowercase: true //lo guardará en minúsculas
-    }
-    name: String
-    password: {type: String, select false}
-    signupDate: {type: Date, defaulta: Date.now()},
-    lastLogin: Date
+  email: {
+    type: String,
+    unique: true,
+    lowercase: true // lo guardará en minúsculas
+  },
+  name: String,
+  password: { type: String, select: false },
+  date: { type: Date, default: Date.now() },
+  lastLogin: Date
 })
 
 ```
