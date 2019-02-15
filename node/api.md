@@ -1568,6 +1568,37 @@ Author.findByIdAndUpdate('59b31406beefa1082819e72f',
 - La autentinticación en este entorno está basada en tokens.
 
 
+### Login: rutas y controlador
+
+- Necesitamos crear un fichero de rutas y un controlador.
+- Rutas:
+
+```js
+const express = require('express')
+const router = express.Router()
+const userController = require('../../controllers/v2/userController')
+
+router.post('/', userController.register)
+  
+module.exports = router
+```
+
+
+- Y controlador (probar):
+
+```js
+
+const register = (req, res) => {
+  return res.json({ message: 'alta de usuario' })
+}
+
+module.exports = {
+  register
+}
+
+```
+
+
 ### El modelo de Usuario
 
 - Vamos a realizar autenticación basada en email + contraseña
@@ -1581,7 +1612,7 @@ Author.findByIdAndUpdate('59b31406beefa1082819e72f',
 
 - Nuestro modelo: imports/exports
 
-```
+```js
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 //cifrado de passwords.
@@ -1593,9 +1624,9 @@ module.exports = mongoose.model('User', UserSchema)
 ```
 
 
-- Nuestro modelo: campos
+- Nuestro modelo: esquema
 
-```
+```js
 const UserSchema = new Schema({
     email: {
         type: String, 
@@ -1611,34 +1642,38 @@ const UserSchema = new Schema({
 ```
 
 
-### Middleware
+#### Modelos y middleware
 
-- Son funciones invocadas **pre** o **post** la ejecución  funciones asíncronas.
+- Son funciones invocadas antes o después (**pre** o **post**) de la ejecución de funciones asíncronas.
 - Un documento cuenta con las siguientes funciones:
   - *validate*
   - *save*
   - *remove*
   - *init*
+- Podemos añadir funciones pro/post de las anteriores
+- Este código lo añadiremos al modelo.
 
 
-- Nuestro modelo: middleware *pre* - *al salvar*
+- Nuestro modelo: middleware *pre - al salvar*
   - Hacemos uso de los [middleware](https://mongoosejs.com/docs/middleware.html) de Mongoose 
+  - NOTA: no usar aquí función flecha.
 
 ```js
-UserSchema.pre('save', (next) => {
-    let user = this
-    if (!user.isModified('password)) return next()
-    bcrypt.getSalt(10, (err, salt) => {
-        if (err) return next()
+UserSchema.pre('save', function (next) {
+  const user = this
+  if (!user.isModified('password')) return next()
 
-        bcrypt.hash(user.password, salt, null, (err, hash) => {
-            if (err) return next(err)
+  bcrypt.genSalt(10, (err, salt) => {
+    if (err) return next(err)
 
-            user.password = hash
-            next()
-        })
+    bcrypt.hash(user.password, salt, null, (err, hash) => {
+      if (err) return next(err)
+
+      user.password = hash
+      next()
     })
-}
+  })
+})
 ```
 
 
@@ -1659,55 +1694,127 @@ function login() {
     
 }
 
-module.exports = {
-    register,
-    login
-}
+module.exports = { register, login }
 ```
 
 
-- Función de registro
+- Función *register* en el controlador:
 
 ```js
-function register() {
+const register = (req, res) => {
   const user = new User({
     email: req.body.email,
     name: req.body.name,
-    //password: req.body.password        
+    password: req.body.password
+  })
 
-    user.save((err) => {
-      if (err) res.status(500).json({message: 'ERROR al crear usuario: ${err}'})
-      //service nos va a crear un token
-      return res.status(200).json({token: servicejwt.createToken(user)})
-    })
+  user.save(err => {
+    if (err) res.status(500).send({ message: `Error al crear usuario: ${err}` })
+    // servicejwt nos va a crear un token
+    return res.status(200).send({ token: servicejwt.createToken(user) })
   })
 }
+
 ```
 
 
-** Servicio jwt **
+### Emitir el token
+
+- Vamos a crear una función en el fichero '/services/servicejwt.js'
+- Mediante la librería [*jwt-simple*](https://jwt.io/introduction/) vamos a generar nuestro token.
 
 ```js
-const jwt = require('jwt-simple')
-//npm install moment
+const jwt = require('jwt-simple') // módulo Json Web Token
+const moment = require('moment') // módulo para fechas
+const config = require('../config/config') // definimos una constante "secreta"
+
+function createToken (user) {
+  const payload = {
+    sub: user._id, // no es muy seguro pero lo simplificamos así
+    email: user.email
+    iat: moment().unix(), // fecha creación
+    exp: moment()
+      .add(30, 'days')
+      .unix() // valido 1 mes
+  }
+
+  return jwt.encode(payload, config.SECRET)
+}
+
+module.exports = { createToken }
+```
+
+
+### Proteger rutas:
+
+- Añadimos este middleware en el enrutador de cervezas o productos. Así protegemos todas las rutas:
+
+```js
 const moment = require('moment')
-const config = require('../config')
+
+router.use((req, res, next) => {
+  console.log(req.headers.authorization)
+  if (!req.headers.authorization) {
+    return res.status(403).send({ message: 'No tienes permiso' })
+  }
+  const token = req.headers.authorization.split(' ')[1]
+
+  try {
+    payload = servicejwt.decodeToken(token)
+  } catch (error) {
+    return res.status(401).send(`${error}`)
+  }
+  res.status(200).send({ message: 'con permiso' })
+})
+```
 
 
-function createToken(user) {
-    const payload = {
-        sub: user._id //no es muy seguro ...
-        iat: moment().unix(),
-        exp: moment().add(10, 'days').unix()
-    }
-    return jwt.encode(payload, config.secret)
+- Mejor refactorizar en una función :
+
+```js
+const auth = function (req, res, next) {
+  console.log(req.headers.authorization)
+  if (!req.headers.authorization) {
+    return res.status(403).send({ message: 'No tienes permiso' })
+  }
+  const token = req.headers.authorization.split(' ')[1]
+  try {
+    payload = servicejwt.decodeToken(token)
+  } catch (error) {
+    return res.status(401).send(`${error}`)
+  }
+  res.status(200).send({ message: 'con permiso' })
 }
 ```
 
 
-### Login
+Y ahora lo usamos:
 
 ```js
+//para proteger todas las rutass:
+router.use(auth)
+
+//para proteger una sóla ruta
+router.get('/', auth, (req, res) => {
+  productController.index(req, res)
+})
+
+//o así
+router.get('/', auth, productController.index})
+```
+
+
+### Tarea: Login
+
+- Una vez registrado tenemos acceso para cierto periodo
+- Nos interesa generar nuevos tokens (login) en nuevas máquinas o tras caducar el que tenemos.
+- Debemos implementar un método login para obtener un nuevo token.
+- Recibimos usuario + contraseña
+- Verificamos si la contraseña es válida. Para hacerlo debemos comparar contraseñas (busca [aquí](https://www.npmjs.com/package/bcrypt))
+  - Si es válida generamos un token y lo entregamos
+  - Si no status 401
+
+<!-- ```js
 function login(req, res) {
   User.find({email. req.body.email}, (err, user) => {
     if (err) return res.status(500).json({message: err})
@@ -1720,3 +1827,12 @@ function login(req, res) {
     })
   })
 }
+``` -->
+
+
+### Tarea:
+
+- Crea un directorio *middlewares* y crea un middleware llamado *auth.js*
+- Coloca en él el código de autenticación
+- Refactoriza el ocntrolador de cervezas para que use ese middleware
+- Úsa el middleware en el controlador de productos.
