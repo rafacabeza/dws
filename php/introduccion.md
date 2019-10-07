@@ -211,31 +211,25 @@ Ejemplo 0
 ### ejercicio9.php
 #### Parte 1
 - Crea una carpeta: ejercicio9
-- TODAS LAS PETICIONES LAS DEBE ATENDER index.php.
-- index.php muestra un formulario para rellenar el nombre.
-- Al enviar el formulario, debemos tomar el nombre enviado y guardarlo en una cookie.
-- El formulario debe recibirlo el propio index. Investiga y usa `_$PHP_SERVER['PHP_SELF']`.
-- Separa vista y funcionalidad.
+- Usaremos dos ficheros: index.php y respuesta.php.
+<!-- - TODAS LAS PETICIONES LAS DEBE ATENDER index.php. -->
+- **index.php** muestra un formulario para rellenar tu nombre.
+- Formulario: método GET, action respuesta.php.
+- Respuesta.php saluda al nombre enviado ("hola fulanito")
+- Antes de saludar, respuesta debe guardar una cookie con el 
+nombre recibido.
+- En visitas sucesivas, el formulario.php debe aparecer pre-relleno con el nombre enviado en la anterior ocasión. Este nombre está en una cookie. 
 
-#### Parte 2. 
-- Modifica la vista para que si ya existe la cookie el encabezado muestre la información del usuario.
-
-#### Parte 3. 
-- Añade a la vista un enlace de logout. 
-
-
-#### Lista de hobbies.
-- Añade la posibilidad crear una lista de hobbies que se guarde en la misma cookie.
 
 
 ### Ejercicio 10
 
 - Modifica el ejercicio anterior para conseguir la misma funcionalidad usando POO.
 - Crea una clasee App con dos métodos, index y home.
-- El método index muestra el formulario de login. Si existe cookie el nombre de usuario debe aparece completado.
+- El método index muestra el formulario de login (sin contraseña). Si existe cookie el nombre de usuario debe aparece completado.
 - El método home recoge los datos del formulario y guarda la cookie. Además da la bienvenida si existe nombre de usuario y si no pregunta _¿Quién eres?_
 
-### Ejerciio 11
+### Ejercicio 11
 
 Ejercicio de sesiones y POO. Se trata de crear una lista de deseos Usaremos la clase App con los siguietens métodos:
 
