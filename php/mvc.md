@@ -253,7 +253,7 @@ Vista del detalle:
 
 - Para lograr esto necesitamos que Apache tenga activo el módulo *rewrite*. 
 - Mira tu Dockerfile de mvc.
-- Necesitamos además un fichero **.htaccess**
+- Necesitamos además un fichero **.htaccess** en el *public*
 
 ```
 #Options +FollowSymLinks
@@ -272,22 +272,27 @@ RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
 ### Procesar la ruta:
 
 - Nuestro index debe cargar una clase App.
-- En el constructor de App tomamos la ruta
-
+- Esta clase es nuestro controlador frontal.
+```php
+<?php
+require "../core/App.php";
+$app = new App();
+```
+- En el constructor de App tomamos la ruta. Vamos a verlo:
 
 
 * En nuestro proyecto de clase el front controller carga un controlador de manera fija de acuerdo a la ruta y después ejecuta uno de sus métodos:
+* Esquema que usaremos: `/controlador/metodo/argumento1/argumento2`
 * Por ejemplo la ruta `/user/index` carga el controlador UserController y ejecuta su método `index()`
+* Si no existe controlador tomamos uno por defecto, por ejemplo `index` o `home` .
+* Si no existe método tomamos uno por defecto, por ejemplo `index`
+
 
 ```php
+
 <?php
-namespace Core;
-/**
-*
-*/
 class App
 {
-
     function __construct()
     {
         if (isset($_GET['url'])) {
@@ -314,17 +319,9 @@ class App
             die();
         }
 
-        $controllerName = '\\App\\Controllers\\' . $controllerName;
         $controllerObject = new $controllerName;
         if (method_exists($controllerName, $method)) {
-            try {
-                $controllerObject->$method($arguments);
-            } catch (\Exception $e) {
-                header("HTTP/1.0 500 Internal Error");
-                echo $e->getMessage();
-                echo "<pre>";
-                echo $e->getTraceAsString();
-            }
+            $controllerObject->$method($arguments);
         } else {
             header("HTTP/1.0 404 Not Found");
             echo "No encontrado";
@@ -332,11 +329,5 @@ class App
         }
     }
 }
+
 ```
-
-* ¿Cómo hacemos que esta clase se ejecute en cada petición?
-  * Fichero `.htaccess`
-  * 
-
-
-
