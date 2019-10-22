@@ -12,6 +12,107 @@
 
 
 
+## Configuración
+
+- Vamos a usar un nuevo sitio web: mvc.local
+- Debes incluirlo en /etc/hosts
+- Debes añadir la configuracion en el dockercompose. Ya lo tienes en GitHub.
+- Debes crear la carpeta `data/mvc`.
+
+
+### Carpeta public:
+
+- En una aplicación Web servimos el contenido de un directorio.
+- Este directorio es conocido como Document Root en Apache.
+- Todo lo que hay en él es accesible desde el exterior
+- Resulta interesante separar nuestro código *php* y otros recursos de lo que realmente queremos publicar.
+
+
+- Por defecto el document root de Apache es `/var/www/html`
+- Nosotros queremos cambiarlo a `/var/www/html/public`
+- El resto de contenido dentro de html será inaccesible desde el exterior
+
+
+- Para lograrlo hay que modificar la configuración de Apache:
+- En el fichero de configuración:
+
+```
+DocumentRoot /var/www/html/public
+```
+
+
+- Nosotros estamos usando docker.
+- La modificación la realizamos desde nuestro Dockerfile. Debemos añadir:
+
+```
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+```
+
+
+- Podemos simplificar nuestro index.php al máximo. Por ejemplo:
+
+```php
+#Fichero `/var/www/html/public/index.php`
+
+<?php
+require "../start.php";
+```
+
+
+- Nuestro start.php:
+
+```php
+#Fichero `/var/www/html/start.php`
+<?php
+
+// echo "Inicio<br>";
+require_once "Controller.php";
+
+$app = new Controller();
+
+if(isset($_GET['method'])) {
+    $method = $_GET['method'];
+} else {
+    $method = 'index';
+}
+
+if(method_exists($app, $method)) {
+    $app->$method();
+} else {
+    http_response_code(404);
+    die("No encontrado");
+}
+```
+
+
+- Nuestro Controller
+
+```php
+<?php
+
+class Controller  
+{
+    public function __construct()
+    {
+        echo "en el controller<br>";
+    }
+    public function index()
+    {
+        echo "en el index<br>";
+    }
+    public function show()
+    {
+        echo "en el show<br>";
+
+    }
+}
+```
+
+
+
+
 ## MVC
 
 ![mvc](/assets/mvc.png)
@@ -128,13 +229,51 @@ Vista del detalle:
 * Este controlador puede realizar tareas repetitivas, filtros, ...
 * De acuerdo a la ruta recibida (URI), puede cargar un controlador u otro y ejecutar el método necesario.
 * Esta funcionalidad se conoce como **enrutamiento**.
-* Es interesante que el enutamiento sea *friendly*, es decir que evite los parámetros:
+* Es interesante que el enutamiento sea *user friendly*, es decir que evite los parámetros:
     ```
     # parámetros GET
     localhost/index.php?controller=user&method=index
     # user friendly
     localhost/users
     ```
+
+
+### Rutas amigables:
+- Vamos a hacer que todas las peticiones lleguen a una única clase App de entrada.
+- Nosotros escribiremos:
+
+    ```http://mvc.local/user/show```
+
+- Apache interpretará:  
+
+    ```http://mvc.local/index.php?url=user/show```
+
+
+### Módulo rewrite
+
+- Para lograr esto necesitamos que Apache tenga activo el módulo *rewrite*. 
+- Mira tu Dockerfile de mvc.
+- Necesitamos además un fichero **.htaccess**
+
+```
+#Options +FollowSymLinks
+#activar motor de reescritura
+RewriteEngine On  
+#no sobreescribir directorios o ficheros si existen
+#importante para css, js, imágenes, ...
+RewriteCond %{SCRIPT_FILENAME} !-d 
+RewriteCond %{SCRIPT_FILENAME} !-f 
+#regla de reescritura de la url
+#RewriteRule ^(.+)*$ index.php?url=$1 [QSA,L]
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+```
+
+
+### Procesar la ruta:
+
+- Nuestro index debe cargar una clase App.
+- En el constructor de App tomamos la ruta
+
 
 
 * En nuestro proyecto de clase el front controller carga un controlador de manera fija de acuerdo a la ruta y después ejecuta uno de sus métodos:
