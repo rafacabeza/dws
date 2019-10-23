@@ -353,9 +353,13 @@ class UserController
 ### Primeros controladores y organizar vistas
 
 - Vamos a crear tres controladores básicos que sólo saluden.
+- Vamos a añadir un poco de estilo: Bootstrap
 - Vamos a dar cierta estructura a nuestras vistas:
     ```
     cabecera
     cuerpo
     pie
     ```
+
+
+* Controladores básicos * 
