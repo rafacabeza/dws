@@ -22,8 +22,7 @@
 ## PHP
 * [Introducción](php/introduccion.md)
 * [MVC y BBDD](php/mvc.md)
-    * [Configuración](php/mvc.md#configuracion)
-* [MVC y BBDD](php/mvc-y-bbdd.md)
+* [MVC y BBDD (viejo)](php/mvc-y-bbdd.md)
     * [Conexión a BBDD](php/mvc-y-bbdd/conexion-a-bbdd.md)
     * [MVC](php/mvc-y-bbdd/mvc.md)
         * [Front Controller](php/mvc-y-bbdd/mvc/front-controller.md)

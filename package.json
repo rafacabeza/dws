@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "reveal-md --css style.css ./node/ --port 2000",
-    "php": "reveal-md --css style.css ./php/ --port 2000"
+    "php": "reveal-md --css style.css ./php/mvc.md --port 2000"
   },
   "repository": {
     "type": "git",
