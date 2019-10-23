@@ -12,8 +12,7 @@
 
 
 
-## Configuración
-
+## Configuración <a name=configuracion></a> 
 - Vamos a usar un nuevo sitio web: mvc.local
 - Debes incluirlo en /etc/hosts
 - Debes añadir la configuracion en el dockercompose. Ya lo tienes en GitHub.
