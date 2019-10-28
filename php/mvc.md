@@ -191,7 +191,7 @@ Vista del detalle:
 ## Front Controller y Enrutamiento:
 
 
-## Arquitectura usada:
+### Arquitectura usada:
 
 * Inconvenientes de la arquitectura anterior:
     - Si hay múltiples recursos o tablas tendremos múltiples controladores
@@ -203,7 +203,7 @@ Vista del detalle:
         - Comprobar si el usuario está autorizado
 
 
-## Front Controller
+### Front Controller
 
 * Se trata de la clase que recibe todas las peticiones
 * Este controlador puede realizar tareas repetitivas, filtros, ...
@@ -382,3 +382,11 @@ class UserController
     - <small>`<?php require __DIR__ . "/header.php" ?>`</small>
     - <small>`<?php require "../app/views/header.php" ?>`</small>
 
+
+- Para terminar podríamos separar incluso más ficheros:
+    - head.php: El contenido de la eiqueta `<head>`
+    - scripts.php: El contenido de los scripts colocados al final del body.
+
+
+
+## 
