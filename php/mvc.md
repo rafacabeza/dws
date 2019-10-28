@@ -347,6 +347,7 @@ class UserController
     }
 }
 ```
+- Ejercicio: Crea y prueba UserController y LoginController
 
 
 
@@ -362,4 +363,22 @@ class UserController
     ```
 
 
-* Controladores básicos * 
+**Controladores básicos**
+
+- Ya hemos creado unos controladores de prueba: home, user y login.
+- Vamos a crear una vista para el index de los tres.
+- Empezamos con el index y nos vamos a basar en una plantilla Bootstrap para darle un poco de estilo:
+
+    https://getbootstrap.com/docs/4.0/examples/sticky-footer-navbar/
+
+
+** Ejercicio **
+- Copia el código del enlace en una vista llamada *app/views/home.php*.
+- Limpia el texto y ajústalo al contenido de nuestra aplicación.
+- Separa la vista en tres ficheros:
+    - Extrae <small>`<header> ....     </header>`</small> al fichero header.php.
+    - Extree <small>`<footer> ... </html>`</small> al fichero footer.php.
+- Añade los header y footer al home.php con require y rutas relativas o aboslutas:
+    - <small>`<?php require __DIR__ . "/header.php" ?>`</small>
+    - <small>`<?php require "../app/views/header.php" ?>`</small>
+
