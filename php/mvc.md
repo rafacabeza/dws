@@ -41,6 +41,7 @@ DocumentRoot /var/www/html/public
 
 
 - Nosotros estamos usando docker.
+- Debemos crear nuestra carpeta public: es decir data/mvc/public.
 - La modificación la realizamos desde nuestro Dockerfile. Debemos añadir:
 
 ```
@@ -50,23 +51,41 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 ```
 
 
-- Podemos simplificar nuestro index.php al máximo. Por ejemplo:
+** ¿Funciona? **
+
+- Crea estos ficheros y conecta tu navegador a `mvc.local`
 
 ```php
-#Fichero `/var/www/html/public/index.php`
-
+#Fichero `mvc/public/index.php`
 <?php
+echo 'Contenido en public<br>';
 require "../start.php";
 ```
 
-
-- Nuestro start.php:
-
 ```php
-#Fichero `/var/www/html/start.php`
+#Fichero `mvc/start.php`
 <?php
+echo 'Contenido fuera de public. Privado<br>';
+```
 
-// echo "Inicio<br>";
+
+
+## MVC
+
+![mvc](/assets/mvc.png)
+
+
+### Ejemplo simple
+- Rama mvc00.
+- Un fichero "cargador": start.php
+- Un controlador: Controller.php
+- Un modelo: User.php
+- Dos vistas: index y show
+
+
+El fichero *start.php*
+```php
+<?php
 require_once "Controller.php";
 
 $app = new Controller();
@@ -84,44 +103,6 @@ if(method_exists($app, $method)) {
     die("No encontrado");
 }
 ```
-
-
-- Nuestro Controller
-
-```php
-<?php
-
-class Controller  
-{
-    public function __construct()
-    {
-        echo "en el controller<br>";
-    }
-    public function index()
-    {
-        echo "en el index<br>";
-    }
-    public function show()
-    {
-        echo "en el show<br>";
-
-    }
-}
-```
-
-
-
-
-## MVC
-
-![mvc](/assets/mvc.png)
-
-
-### Ejemplo simple
-- Rama mvc00.
-- Un controlador: Controller.php
-- Un modelo: User.php
-- Dos vistas: index y show
 
 
 El controlador: 
@@ -270,14 +251,14 @@ RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
 
 ### Procesar la ruta:
 
-- Nuestro index debe cargar una clase App.
-- Esta clase es nuestro controlador frontal.
+- Nuestro controlador frontal va a ser una clase llamada App.
+- Nuestro start.ph debe crear un objeto App.
 ```php
 <?php
 require "../core/App.php";
 $app = new App();
 ```
-- En el constructor de App tomamos la ruta. Vamos a verlo:
+- El constructor de App llevará toda la ejecución de la aplicación, de acuerdo a la ruta recibida:
 
 
 * En nuestro proyecto de clase el front controller carga un controlador de manera fija de acuerdo a la ruta y después ejecuta uno de sus métodos:
@@ -328,5 +309,57 @@ class App
         }
     }
 }
-
 ```
+
+
+### Un poco de orden:
+
+- Necesitamos usar clases controladoras, modelos y vistas.
+- Vamos a borrar las clases Controller y User de días anteriores, y el directorio views.
+- Vamos a crear los siguientes directorios:
+
+    ```
+    mvc/app/controllers
+    mvc/app/models
+    mvc/app/views
+    ```
+
+
+** Probando un controlador **
+
+```php
+<?php
+# app/controllers/UserController
+class UserController  
+{
+    public function __construct()
+    {
+        echo "en el controller<br>";
+    }
+    public function index()
+    {
+        echo "en el index<br>";
+    }
+    public function show()
+    {
+        echo "en el show<br>";
+
+    }
+}
+```
+
+
+
+### Primeros controladores y organizar vistas
+
+- Vamos a crear tres controladores básicos que sólo saluden.
+- Vamos a añadir un poco de estilo: Bootstrap
+- Vamos a dar cierta estructura a nuestras vistas:
+    ```
+    cabecera
+    cuerpo
+    pie
+    ```
+
+
+* Controladores básicos * 
