@@ -8,7 +8,7 @@
     - Aplicaremos el patrón de controlador frontal.
 - Vamos a ver como se hace la conexión y acceso a una base de datos. Usaremos un patrón [*Active Record*](https://es.wikipedia.org/wiki/Active_record)
 - Completaremos una pequeña aplicación que refleje todo esto
-- https://bitbucket.org/rafacabeza/mvc18
+- https://bitbucket.org/rafacabeza/mvc
 
 
 
