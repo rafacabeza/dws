@@ -389,4 +389,116 @@ class UserController
 
 
 
-## 
+## Namespaces
+
+- El código usado hasta el momento es correcto
+- Si usamos librerías externas podemos tener problemas de colisión de nombres.
+- Esto es, que dos clases se llamen igual.
+- Para solucionar este problema se usan los namespaces, concepto análogo a los paquetes de java.
+
+
+- Es como si organizaramos las clases en directorios.
+- Dos ficheros con el mismo nombre pueden estar en directorios distintos. Dos clases con el mismo nombre pueden estar en namespaces distintos.
+- Es habitual nombrar los directorios (minúsculas: models) y namespaces con el mismo nombre (primera mayúscula: Models)
+- Los namespaces tambien se pueden anidar unos dentro de otros
+- En un namespace pueden englobarse: constantes, funciones, clases y otros elementos de POO.
+
+
+### Declaración
+- Al principio del fichero debe declararse:
+- Si no se declara el namespace los elementos pertenecen al namespace global (\\)
+```php
+<?php
+namespace Dwes; //obligatorio primera línea!!!
+```
+- Espacios anidados serían:
+```php
+<?php
+namespace Dwes\Controllers;
+```
+
+
+```php
+<?php
+namespace Dwes;
+//guardado en dwes.php
+
+const PI = 3.14;
+function avisa(){
+    echo "Te estoy avisando";
+}
+class Prueba{
+    public function probando(){
+	echo "Esto es una prueba";
+    }
+}
+```
+
+
+### Uso
+
+- Desde otro fichero php:
+- Podemos usar la ruta completa del namespace:
+
+```php
+include "dwes.php";
+
+echo Dwes\PI;
+Dwes\avisa();
+$prueba = new Dwes\Prueba();
+$prueba->probando();
+```
+
+
+- O podemos declarar el uso de un elemento previamente:
+
+```php
+use const Dwes\PI;
+echo PI;
+
+use function Dwes\avisa;
+avisa();
+
+use Dwes\Prueba;
+$prueba = new Prueba();
+$prueba->probando();
+```
+
+
+- Acceso sin calificar:
+
+```php
+<?php
+namespace Foo\Bar;
+
+echo FOO; //constante FOO en el espacio Foo\Bar
+foo(); //ejecuta la función Foo\Bar\foo()
+$objeto = new MiClase() //objeto de la clase Foo\Bar\Miclase
+```
+- Las búsquedas son en cualquier fichero de el namespace actual
+
+
+- Acceso calificado, el elemento va referido a un namespace de forma relativa (*Namespace\Elemento*):
+
+```php
+<?php
+namespace Foo\Bar;
+
+echo Foo\FOO; //busca la constante FOO en el espacio Foo\Bar\Foo
+Foo\foo(); //busca la función Foo\Bar\Foo\foo()
+$objeto = new Foo\MiClase() //objeto de la clase Foo\Bar\Foo\Miclase
+```
+
+
+- Acceso totalmento calificado.
+    - El elemento se refiere a un namespace desde el global. 
+    - Equivale a una ruta absoluta.
+
+```php
+<?php
+namespace Foo\Bar;
+
+echo \Foo\Bar\FOO; //constante \Foo\Bar\FOO
+\Foo\Bar\foo(); //ejecuta la función Foo\Bar\foo()
+$objeto = new \Foo\Bar\MiClase() //objeto de la clase Foo\Bar\Miclase
+```
