@@ -453,13 +453,13 @@ $prueba->probando();
 - O podemos declarar el uso de un elemento previamente:
 
 ```php
-use const Dwes\PI;
+use const Dwes\PI; //OJO use const
 echo PI;
 
-use function Dwes\avisa;
+use function Dwes\avisa; //OJO use function
 avisa();
 
-use Dwes\Prueba;
+use Dwes\Prueba;  //OJO use (nada más)
 $prueba = new Prueba();
 $prueba->probando();
 ```
@@ -501,4 +501,226 @@ namespace Foo\Bar;
 echo \Foo\Bar\FOO; //constante \Foo\Bar\FOO
 \Foo\Bar\foo(); //ejecuta la función Foo\Bar\foo()
 $objeto = new \Foo\Bar\MiClase() //objeto de la clase Foo\Bar\Miclase
+```
+
+
+**Ejercicio**
+
+- Modifica el código de nuestro proyecto para que todas las clases estén contenidas en un *namespace* (App\Controllers)
+- Idem para la clase App (*namespace* Core)
+- Modifica la clase App para que los controladores sean referidos a su *namespace*
+
+
+
+## Modelo: Active Record y herencia.
+
+- Vamos a acceder a bases de datos.
+- Vamos a usar el conector PDO (está incluído en el *Dockerfile* de mvc).
+- Vamos a usar herencia para que la conexión a la BBDD sea definida en un único sitio.
+
+
+### PDO
+
+- PHP cuenta con multitud de [extensiones para gestionar bases de datos](https://www.php.net/manual/es/refs.database.php).
+- Existen extensiones exclusivas de muchos proveedores.
+- Existen extensiones abstractas que permiten la conexión a múltiples bases de datos.
+    - PDO es uno de estos casos.
+    - Permite migrar de sistema de BBDD sin modificar nuestro código.
+
+
+### Active Record.
+
+![Active Record](../assets/activerecord.png "Esquema Active Record")
+
+
+- El patrón [Active Record](https://www.genbeta.com/desarrollo/patrones-de-diseno-active-record-vs-dao) definde clases que permiten el mapeo objeto relacional.
+- La misma clase:
+    - Contiene los atributos correspondientes a las columnas de un registro.
+    - Define los métodos necesarios para la consulta y modificación de registros.
+
+
+### Conexión y herencia
+
+- Podemos definir la conexión en todas las clases de modelo: User, Product, Order, ...
+- Parece más interesante definir la conexión dentro de una superclase modelo y usar herencia
+
+
+```php
+namespace Core;
+
+class Model
+{
+   protected static function db()
+    {
+        $dsn = 'mysql:dbname=mvc;host=db';
+        $usuario = 'root';
+        $contraseña = 'password';
+        try {
+            $db = new PDO($dsn, $usuario, $contraseña);
+            $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e) {
+            echo 'Falló la conexión: ' . $e->getMessage();
+        }
+        return $db;
+    }
+}
+```
+
+
+- Sería más conveniente usar un fichero de configuración para sacar los parámtros de configuración fuera del código en sí.
+
+
+```php
+<?php
+namespace Core;
+
+require_once '../config/db.php';
+use const Config\DSN;
+use const Config\USER;
+use const Config\PASSWORD;
+
+//necesario para referirnos a ella
+use PDO;
+/**
+*
+*/
+class Model
+{
+    protected static function db()
+    {
+        try {
+            $db = new PDO(DSN, USER, PASSWORD);
+            $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e) {
+            echo 'Falló la conexión: ' . $e->getMessage();
+        }
+        return $db;
+    }
+}
+```
+
+
+**El modelo de Usuario**
+
+- Vamos a analizar cómo podría ser nuestro modelo de usuario
+- Namespace App\Models
+- definirmos herencia de model
+- Usamos herencia para usar una conexión ya definida en Model.php
+- Los atributos podrían definirse en nuestra clase User pero no es necesario, php permite definir en ejecución los atributos.
+
+
+- Primer método: all() para buscar todos los registros.
+- Usamos la conexión del *Model*
+- Usamos su función *query()* para ejecutar SELECT
+- El resultado puede ser tomado usando las funciónes de PDO [*fetch* y *fetch_all*](https://www.php.net/manual/es/book.pdo.php)
+
+
+```php
+<?php
+namespace App\Models; //1
+
+require_once '../core/Model.php'; //2
+use PDO;
+use Core\Model; //2
+
+class User extends Model
+{
+    public static function all()
+    {
+        $db = User::db();
+        $statement = $db->query('SELECT * FROM users');
+        $users = $statement->fetchAll(PDO::FETCH_CLASS, User::class);
+
+        return $users;
+    }
+}
+```
+
+
+- Método find(), [funciones preparadas](https://www.php.net/manual/es/pdo.prepare.php).
+- Este método lo usamos para cargar un registro a partir de su id.
+- Importante: usamos sentencias preparadas para evitar *Sql injection*
+- También se obtiene más velocidad si se ejecuta varias veces la misma sentencia
+- Para cargar un objeto User debemos usar setFetchMode y fetch.
+
+
+```php
+<?php
+namespace App\Models;
+
+use PDO;
+use Core\Model;
+
+require_once '../core/Model.php';
+class User extends Model
+{
+    public static function find($id)
+    {
+        $db = User::db();
+        $stmt = $db->prepare('SELECT * FROM users WHERE id=:id');
+        $stmt->execute(array(':id' => $id));
+        $stmt->setFetchMode(PDO::FETCH_CLASS, User::class);
+        $user = $stmt->fetch(PDO::FETCH_CLASS);
+        return $user;
+    }
+}
+```
+
+
+```php
+<?php
+namespace App\Models;
+
+use PDO;
+use Core\Model;
+
+require_once '../core/Model.php';
+/**
+*
+*/
+class User extends Model
+{
+
+    function __construct()
+    {
+
+    }
+
+    public static function all()
+    {
+        $db = User::db();
+        $statement = $db->query('SELECT * FROM users');
+        $users = $statement->fetchAll(PDO::FETCH_CLASS, User::class);
+
+        return $users;
+    }
+
+    public static function find($id)
+    {
+        $db = User::db();
+        $stmt = $db->prepare('SELECT * FROM users WHERE id=:id');
+        $stmt->execute(array(':id' => $id));
+        $stmt->setFetchMode(PDO::FETCH_CLASS, User::class);
+        $user = $stmt->fetch(PDO::FETCH_CLASS);
+        return $user;
+    }
+
+    public function insert()
+    {
+        $db = User::db();
+        $stmt = $db->prepare('INSERT INTO users(name, surname, age, email) VALUES(:name, :surname, :age, :email)');
+        $stmt->bindValue(':name', $this->name);
+        $stmt->bindValue(':surname', $this->surname);
+        $stmt->bindValue(':age', $this->age);
+        $stmt->bindValue(':email', $this->email);
+        return $stmt->execute();
+    }
+    public function delete()
+    {
+        $db = User::db();
+        $stmt = $db->prepare('DELETE FROM users WHERE id = :id');
+        $stmt->bindValue(':id', $this->id);
+        return $stmt->execute();
+    }
+}
 ```
