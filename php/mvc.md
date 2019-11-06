@@ -193,6 +193,7 @@ Vista del detalle:
 
 ### Arquitectura usada:
 
+- Rama mvc01
 * Inconvenientes de la arquitectura anterior:
     - Si hay múltiples recursos o tablas tendremos múltiples controladores
     - Cada uno de ellos supone un punto de entrada a la aplicación.
@@ -391,7 +392,8 @@ class UserController
 
 ## Namespaces
 
-- El código usado hasta el momento es correcto
+- Rama mvc02
+- El código usado hasta aquí es correcto pero ...
 - Si usamos librerías externas podemos tener problemas de colisión de nombres.
 - Esto es, que dos clases se llamen igual.
 - Para solucionar este problema se usan los namespaces, concepto análogo a los paquetes de java.
@@ -435,22 +437,61 @@ class Prueba{
 ```
 
 
-### Uso
+### Acceso.
 
-- Desde otro fichero php:
-- Podemos usar la ruta completa del namespace:
+- Para acceder a un elemento (constante, función, clase ...):
+    - Primero hemos de hacerlo disponible: include/require.
+    - Después nos podemos acceder a él.
+- El acceso puede ser:
+    - Sin cualificar
+    - Cualificado
+    - Totalmente cualificado
+
+
+- Acceso sin cualificar:
+- Las búsquedas son en cualquier fichero de el namespace actual
+- *Ruta relativa*
 
 ```php
-include "dwes.php";
+<?php
+namespace Foo\Bar;
 
-echo Dwes\PI;
-Dwes\avisa();
-$prueba = new Dwes\Prueba();
-$prueba->probando();
+echo FOO; //constante FOO en el espacio Foo\Bar
+foo(); //ejecuta la función Foo\Bar\foo()
+$objeto = new MiClase() //objeto de la clase Foo\Bar\Miclase
 ```
 
 
-- O podemos declarar el uso de un elemento previamente:
+- Acceso cualificado, el elemento va referido a un namespace (*Namespace\Elemento*)
+- Comienza sin barra: *ruta relativa*
+
+```php
+<?php
+namespace Foo\Bar;
+
+echo Foo\FOO; //busca la constante FOO en el espacio Foo\Bar\Foo
+Foo\foo(); //busca la función Foo\Bar\Foo\foo()
+$objeto = new Foo\MiClase() //objeto de la clase Foo\Bar\Foo\Miclase
+```
+
+
+- Acceso totalmento cualificado.
+    - El elemento se refiere a un namespace desde el global. 
+    - Equivale a una ruta absoluta.
+
+```php
+<?php
+namespace Foo\Bar;
+
+echo \Foo\Bar\FOO; //constante \Foo\Bar\FOO
+\Foo\Bar\foo(); //ejecuta la función Foo\Bar\foo()
+$objeto = new \Foo\Bar\MiClase() //objeto de la clase Foo\Bar\Miclase
+```
+
+
+- Para evitar la referencia cualificada podemos declarar el uso
+- Palabra reservada *use*
+- Suele hacerse en la cabecera del fichero
 
 ```php
 use const Dwes\PI; //OJO use const
@@ -465,42 +506,13 @@ $prueba->probando();
 ```
 
 
-- Acceso sin calificar:
+- Cuando utilizamos *use* podemos renombrar elmentos:
+- Por ejemplo:
 
 ```php
-<?php
-namespace Foo\Bar;
-
-echo FOO; //constante FOO en el espacio Foo\Bar
-foo(); //ejecuta la función Foo\Bar\foo()
-$objeto = new MiClase() //objeto de la clase Foo\Bar\Miclase
-```
-- Las búsquedas son en cualquier fichero de el namespace actual
-
-
-- Acceso calificado, el elemento va referido a un namespace de forma relativa (*Namespace\Elemento*):
-
-```php
-<?php
-namespace Foo\Bar;
-
-echo Foo\FOO; //busca la constante FOO en el espacio Foo\Bar\Foo
-Foo\foo(); //busca la función Foo\Bar\Foo\foo()
-$objeto = new Foo\MiClase() //objeto de la clase Foo\Bar\Foo\Miclase
-```
-
-
-- Acceso totalmento calificado.
-    - El elemento se refiere a un namespace desde el global. 
-    - Equivale a una ruta absoluta.
-
-```php
-<?php
-namespace Foo\Bar;
-
-echo \Foo\Bar\FOO; //constante \Foo\Bar\FOO
-\Foo\Bar\foo(); //ejecuta la función Foo\Bar\foo()
-$objeto = new \Foo\Bar\MiClase() //objeto de la clase Foo\Bar\Miclase
+use Dwes\Prueba as Test
+$prueba = new Test();
+$prueba->probando();
 ```
 
 
@@ -514,6 +526,7 @@ $objeto = new \Foo\Bar\MiClase() //objeto de la clase Foo\Bar\Miclase
 
 ## Modelo: Active Record y herencia.
 
+- Rama mvc03
 - Vamos a acceder a bases de datos.
 - Vamos a usar el conector PDO (está incluído en el *Dockerfile* de mvc).
 - Vamos a usar herencia para que la conexión a la BBDD sea definida en un único sitio.
@@ -567,7 +580,18 @@ class Model
 ```
 
 
+- Refactorizando:
 - Sería más conveniente usar un fichero de configuración para sacar los parámtros de configuración fuera del código en sí.
+
+```php
+<?php
+#fichrero config/db.php
+namespace Config;
+
+const DSN = 'mysql:dbname=mvc;host=db';
+const USER = 'root';
+const PASSWORD = 'password';
+```
 
 
 ```php
@@ -609,19 +633,53 @@ class Model
 - Los atributos podrían definirse en nuestra clase User pero no es necesario, php permite definir en ejecución los atributos.
 
 
+```php
+<?php
+namespace App\Models;
+
+use PDO;
+use Core\Model;
+
+require_once '../core/Model.php';
+/**
+*
+*/
+class User extends Model
+{
+    public static function all(){ //TODO }
+    public static function find($id){ //TODO }
+    public function insert(){ //TODO }
+    public function delete(){ //TODO }
+    public function save(){ //TODO }
+}
+```
+
+
+
+## CRUD
+- Create
+- Read
+- Update
+- Delete
+- ABMC: Alta, Baja, Modificación y Consulta
+
+
+## CRUD (I): READ
 - Primer método: all() para buscar todos los registros.
 - Usamos la conexión del *Model*
 - Usamos su función *query()* para ejecutar SELECT
 - El resultado puede ser tomado usando las funciónes de PDO [*fetch* y *fetch_all*](https://www.php.net/manual/es/book.pdo.php)
+- fetch recoge registro a registro. Si hay muchos requiere un bucle.
+- fetch_all recoge arrays. Ojo si hay un solo registro.
 
 
 ```php
 <?php
-namespace App\Models; //1
+namespace App\Models; # declaro namespace
 
-require_once '../core/Model.php'; //2
+require_once '../core/Model.php'; # preparo el acceso a otro fichero
 use PDO;
-use Core\Model; //2
+use Core\Model; # sigo preparando mediante use.
 
 class User extends Model
 {
