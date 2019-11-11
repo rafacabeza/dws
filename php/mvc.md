@@ -628,7 +628,7 @@ class Model
 
 - Vamos a analizar cómo podría ser nuestro modelo de usuario
 - Namespace App\Models
-- definirmos herencia de model
+- Definimos herencia de model
 - Usamos herencia para usar una conexión ya definida en Model.php
 - Los atributos podrían definirse en nuestra clase User pero no es necesario, php permite definir en ejecución los atributos.
 
@@ -673,6 +673,7 @@ class User extends Model
 - fetch_all recoge arrays. Ojo si hay un solo registro.
 
 
+El modelo:
 ```php
 <?php
 namespace App\Models; # declaro namespace
@@ -695,11 +696,60 @@ class User extends Model
 ```
 
 
-- Método find(), [funciones preparadas](https://www.php.net/manual/es/pdo.prepare.php).
+El controlador, método index:
+```php
+class UserController
+{
+    public function index()
+    {
+        //buscar datos
+        $users = User::all();
+        //pasar a la vista
+        require('../app/views/user/index.php');
+    }
+}
+```
+
+
+La vista:
+```php
+      <h1>Lista de usuarios</h1>
+
+      <table class="table table-striped table-hover">
+        <tr>
+          <th>Nombre</th>
+          <th>Apellidos</th>
+          <th>Email</th>
+          <th>F. nacimiento</th>
+          <th></th>
+        </tr>
+
+        <?php foreach ($users as $key => $user) { ?>
+          <tr>
+          <td><?php echo $user->name ?></td>
+          <td><?php echo $user->surname ?></td>
+          <td><?php echo $user->email ?></td>
+          <td><?php echo $user->birthdate ?></td>
+          <td>
+            <a href="/user/show/<?php echo $user->id ?>" class="btn btn-primary">Ver </a>
+          </td>
+          </tr>
+        <?php } ?>
+      </table>
+```
+
+
+- Segundo método find(), [funciones preparadas](https://www.php.net/manual/es/pdo.prepare.php).
 - Este método lo usamos para cargar un registro a partir de su id.
 - Importante: usamos sentencias preparadas para evitar *Sql injection*
 - También se obtiene más velocidad si se ejecuta varias veces la misma sentencia
 - Para cargar un objeto User debemos usar setFetchMode y fetch.
+
+
+- Paso de **Parámetros:**
+    - Puede realizarse pasando un array en el execute (ejemplos 1 y 2 del manual)
+    - Puede realizarse mediante el método [bindParam](https://www.php.net/manual/es/pdostatement.bindparam.php). En el se pasa una variable. Ideal para bucles.
+    - Puede realizarse mediante el método [bindValue](https://www.php.net/manual/es/pdostatement.bindparam.php). Se pasa un literal o el valor de una variable.
 
 
 ```php
@@ -721,6 +771,219 @@ class User extends Model
         $user = $stmt->fetch(PDO::FETCH_CLASS);
         return $user;
     }
+}
+```
+
+
+El controlador, método show:
+
+```php
+public function show($args)
+{
+    //args es un array, tomamos el id con uno de estos métodos
+    // $id = (int) $args[0];
+    list($id) = $args;
+    $user = User::find($id);
+    require('../app/views/user/show.php');        
+}
+```
+
+
+La vista: 
+```php
+<h1>Detalle del usuario <?php echo $user->id ?></h1>
+<ul>
+    <li><strong>Nombre: </strong><?php echo $user->name ?></li>
+    <li><strong>Apellidos: </strong><?php echo $user->surname ?></li>
+    <li><strong>Email: </strong><?php echo $user->email ?></li>
+    <li><strong>F. nacimiento: </strong><?php echo $user->birthdate ?></li>
+</ul>
+```
+
+
+## CRUD (II): CREATE
+
+- La inserción requiere dos métodos del controlador:
+    - Método *insert* que genera un formulario de alta.
+    - Método *store* que recibe los datos de dicho formulario.
+- El método *store* concluye con un reenvío a la lista, index(), o al detalle, show() del nuevo registro;
+
+
+- Controlador:
+
+```php
+public function create()
+{
+    require '../app/views/user/create.php';
+}
+
+public function store()
+{
+    $user = new User();
+    $user->name = $_REQUEST['name'];
+    $user->surname = $_REQUEST['surname'];
+    $user->age = $_REQUEST['age'];
+    $user->email = $_REQUEST['email'];
+    $user->insert();
+    header('Location:/user');
+}
+```
+
+
+- Vista formulario de alta:
+
+```php
+<h1>Alta de usuario</h1>
+
+<form method="post" action="/user/store">
+
+<div class="form-group">
+    <label>Nombre</label>
+    <input type="text" name="name" class="form-control">
+</div>
+<div class="form-group">
+    <label>Apellidos</label>
+    <input type="text" name="surname" class="form-control">
+</div>
+<div class="form-group">
+    <label>Edad</label>
+    <input type="text" name="age" class="form-control">
+</div>
+<div class="form-group">
+    <label>Email</label>
+    <input type="text" name="email" class="form-control">
+</div>
+<button type="submit" class="btn btn-default">Enviar</button>
+</form>
+```
+
+
+- Modelo User, método insert()
+
+```php
+public function insert()
+{
+    $db = User::db();
+    $stmt = $db->prepare('INSERT INTO users(name, surname, age, email) VALUES(:name, :surname, :age, :email)');
+    $stmt->bindValue(':name', $this->name);
+    $stmt->bindValue(':surname', $this->surname);
+    $stmt->bindValue(':age', $this->age);
+    $stmt->bindValue(':email', $this->email);
+    return $stmt->execute();
+}
+```
+
+
+## CRUD (III): UPDATE
+- La actualización requiere dos métodos del controlador:
+    - Método *edit* que genera un formulario de modificación con los datos del registro. Este método implica buscar en la base de datos antes de construir el formulario.
+    - Método *update* que recibe los datos de dicho formulario. Igualmente, debemos buscar el registro en la base de datos y después modificarlo.  
+- El método *update* también concluye con un reenvío;
+
+
+Controlador:
+
+```php
+public function edit($arguments)
+{
+    $id = (int) $arguments[0];
+    $user = User::find($id);
+    require '../app/views/user/edit.php';
+}
+
+public function update()
+{
+    $id = $_REQUEST['id'];
+    $user = User::find($id);
+    $user->name = $_REQUEST['name'];
+    $user->surname = $_REQUEST['surname'];
+    $user->age = $_REQUEST['age'];
+    $user->email = $_REQUEST['email'];
+    $user->save();
+    header('Location:/user');
+}
+```
+
+
+- Vista formulario de edición:
+
+```php
+<h1>Edición de usuario</h1>
+
+<form method="post" action="/user/update">
+    <input type="hidden" name="id"
+    value="<?php echo $user->id ?>">
+
+<div class="form-group">
+    <label>Nombre</label>
+    <input type="text" name="name" class="form-control"
+    value="<?php echo $user->name ?>"
+    >
+</div>
+<div class="form-group">
+    <label>Apellidos</label>
+    <input type="text" name="surname" class="form-control"
+    value="<?php echo $user->surname ?>"
+    >
+</div>
+<div class="form-group">
+    <label>Edad</label>
+    <input type="text" name="age" class="form-control"
+    value="<?php echo $user->age ?>"
+    >
+</div>
+<div class="form-group">
+    <label>Email</label>
+    <input type="text" name="email" class="form-control"
+    value="<?php echo $user->email ?>"
+    >
+</div>
+<button type="submit" class="btn btn-default">Enviar</button>
+</form>
+```
+
+
+- Modelo User, método save()
+
+```php
+public function save()
+{
+    $db = User::db();
+    $stmt = $db->prepare('UPDATE users SET name = :name, surname = :surname, age = :age, email = :email WHERE id = :id');
+    $stmt->bindValue(':id', $this->id);
+    $stmt->bindValue(':name', $this->name);
+    $stmt->bindValue(':surname', $this->surname);
+    $stmt->bindValue(':age', $this->age);
+    $stmt->bindValue(':email', $this->email);
+    return $stmt->execute();
+}
+```
+
+
+## CRUD (IV): DELETE
+
+- El método más sencillo
+- Sólo requiere borrar y reenviar.
+```php
+public function delete($arguments)
+{
+    $id = (int) $arguments[0];
+    $user = User::find($id);
+    $user->delete();
+    header('Location:/user');
+}
+```
+
+
+- En el modelo la cosa es sencilla:
+
+```php
+public function delete()
+{
+    $db = User::db();
+    $stmt = $db->prepare('DELETE FROM users WHERE id = :id');
+    $stmt->bindValue(':id', $this->id);
+    return $stmt->execute();
 }
 ```
 
