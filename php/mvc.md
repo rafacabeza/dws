@@ -801,6 +801,36 @@ La vista:
 ```
 
 
+### Fechas
+
+- Si echamos un ojo a las fechas veremos que no están bien formateadas.
+- Si no lo hacemos las fechas se mostrarán con el *parseo* de mysql:
+    - Si es tipo Date: año-mes-dia
+    - Si es DateTime: año:mes-dia h:m:s
+- Php puede manejar de forma nativa datos fecha.
+- Se trata de campos numéricos que miden los segundos dede 1970 (fecha unix);
+- Funciones adecuadas son: [date()](https://www.php.net/manual/es/function.date.php) o [strtotime()](https://www.php.net/manual/es/function.strtotime.php)
+- Pero resulta más práctico usar la clase [DateTime](https://www.php.net/manual/es/class.datetime.php)
+
+
+- Debemos decirle al modelo User que *birthdate* es una fecha.
+- Cómo?: 
+
+```php 
+$this->birthdate = DateTime::createFromFormat('Y-m-d', $this->birthdate
+```
+- ¿Dónde?: en el constructor. Este método se invoca cada vez que leamos un registro con fetch o con fetchAll.
+
+```php
+public function __construct()
+{
+    $this->birthdate = DateTime::createFromFormat('Y-m-d', $this->birthdate);
+}
+```
+
+- Después en la vista: $user->format('Y-m-d')
+
+
 ## CRUD (II): CREATE
 
 - La inserción requiere dos métodos del controlador:
@@ -822,7 +852,7 @@ public function store()
     $user = new User();
     $user->name = $_REQUEST['name'];
     $user->surname = $_REQUEST['surname'];
-    $user->age = $_REQUEST['age'];
+    $user->birthdate = $_REQUEST['birthdate'];
     $user->email = $_REQUEST['email'];
     $user->insert();
     header('Location:/user');
@@ -830,7 +860,7 @@ public function store()
 ```
 
 
-- Vista formulario de alta:
+- Vista formulario de alta. Ojo de momento fecha tipo "txt" y en formato "Y-m-d":
 
 ```php
 <h1>Alta de usuario</h1>
@@ -846,8 +876,8 @@ public function store()
     <input type="text" name="surname" class="form-control">
 </div>
 <div class="form-group">
-    <label>Edad</label>
-    <input type="text" name="age" class="form-control">
+    <label>F. cumpleaños</label>
+    <input type="text" name="birthdate" class="form-control">
 </div>
 <div class="form-group">
     <label>Email</label>
@@ -864,11 +894,11 @@ public function store()
 public function insert()
 {
     $db = User::db();
-    $stmt = $db->prepare('INSERT INTO users(name, surname, age, email) VALUES(:name, :surname, :age, :email)');
+    $stmt = $db->prepare('INSERT INTO users(name, surname, birthdate, email) VALUES(:name, :surname, :birthdate, :email)');
     $stmt->bindValue(':name', $this->name);
     $stmt->bindValue(':surname', $this->surname);
-    $stmt->bindValue(':age', $this->age);
     $stmt->bindValue(':email', $this->email);
+    $stmt->bindValue(':birthdate', $this->birthdate);
     return $stmt->execute();
 }
 ```
@@ -897,7 +927,7 @@ public function update()
     $user = User::find($id);
     $user->name = $_REQUEST['name'];
     $user->surname = $_REQUEST['surname'];
-    $user->age = $_REQUEST['age'];
+    $user->birthdate = $_REQUEST['birthdate'];
     $user->email = $_REQUEST['email'];
     $user->save();
     header('Location:/user');
@@ -927,9 +957,9 @@ public function update()
     >
 </div>
 <div class="form-group">
-    <label>Edad</label>
-    <input type="text" name="age" class="form-control"
-    value="<?php echo $user->age ?>"
+    <label>F. cumpleaños</label>
+    <input type="text" name="birthdate" class="form-control"
+    value="<?php echo $user->birthdate ?>"
     >
 </div>
 <div class="form-group">
@@ -949,11 +979,11 @@ public function update()
 public function save()
 {
     $db = User::db();
-    $stmt = $db->prepare('UPDATE users SET name = :name, surname = :surname, age = :age, email = :email WHERE id = :id');
+    $stmt = $db->prepare('UPDATE users SET name = :name, surname = :surname, birthdate = :birthdate, email = :email WHERE id = :id');
     $stmt->bindValue(':id', $this->id);
     $stmt->bindValue(':name', $this->name);
     $stmt->bindValue(':surname', $this->surname);
-    $stmt->bindValue(':age', $this->age);
+    $stmt->bindValue(':birthdate', $this->birthdate);
     $stmt->bindValue(':email', $this->email);
     return $stmt->execute();
 }
@@ -1029,10 +1059,10 @@ class User extends Model
     public function insert()
     {
         $db = User::db();
-        $stmt = $db->prepare('INSERT INTO users(name, surname, age, email) VALUES(:name, :surname, :age, :email)');
+        $stmt = $db->prepare('INSERT INTO users(name, surname, birthdate, email) VALUES(:name, :surname, :birthdate, :email)');
         $stmt->bindValue(':name', $this->name);
         $stmt->bindValue(':surname', $this->surname);
-        $stmt->bindValue(':age', $this->age);
+        $stmt->bindValue(':birthdate', $this->birthdate);
         $stmt->bindValue(':email', $this->email);
         return $stmt->execute();
     }
