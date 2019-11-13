@@ -1075,3 +1075,45 @@ class User extends Model
     }
 }
 ```
+
+
+
+## Composer y autoload
+
+- Composer es un gestor de dependencias en proyectos php.
+- Permite definir las librerías de las que depende un proyecto.
+- Controlar las versiones y mantener las mismas en diferentes instalaciones.
+- Permite autocargar todas las clases sin usar require.
+- https://desarrolloweb.com/manuales/tutorial-composer.html
+
+
+### Ejemplo
+
+- Un proyecto y sus dependencias se define en el fichero composer.json.
+- Ejemplo con *name, authors, require y autoload*:
+
+```json
+{
+    "name": "root/mvc18",
+    "authors": [
+        {
+            "name": "Rafa Cabeza",
+            "email": "rafacabeza@gmail.com"
+        }
+    ],
+    "require": {
+    },
+
+    "autoload": {
+        "psr-4": {
+            "Core\\": "core/",
+            "App\\Controllers\\": "app/controllers/",
+            "App\\Models\\": "app/models/"
+        }
+    }
+}
+```
+
+
+- En *require* definimos librerías a usar por el proyecto.
+- En autoload definimos 
