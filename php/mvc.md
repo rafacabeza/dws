@@ -1087,6 +1087,23 @@ class User extends Model
 - https://desarrolloweb.com/manuales/tutorial-composer.html
 
 
+- Instalamos: 
+
+```bash
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+```
+
+- Iniciamos el proyecto:
+
+```bash
+cd project_directory
+composer init
+```
+
+- El comando init crea un fichero llamado composer.json.
+
+
 ### Ejemplo
 
 - Un proyecto y sus dependencias se define en el fichero composer.json.
@@ -1116,4 +1133,53 @@ class User extends Model
 
 
 - En *require* definimos librerías a usar por el proyecto.
-- En autoload definimos 
+- En autoload definimos los namespaces que vamos a usar y los directorios donde está cada uno de ellos.
+- Debemos ejecutar en el proyecto:
+
+```bash
+composer dump-autoload
+```
+
+- Esto crea unos scripts dentro de `vendor/composer`
+
+- Después debemos añadir un único require, por ejemplo en *star.php*
+
+```php
+//autoload de composer
+require 'vendor/autoload.php';
+```
+
+
+> Nota: no te preocupes por tener muchas dependencias y solo usar unas pocas en cada página. Este archivo autoload no carga nada especialmente, solo tiene el script de autocarga de clases. PHP no resultará más pesado. Solamente se irán cargando las clases que vayas usando en tu código.
+
+
+** Ejercicio **
+- Haz lo indicado en nuestro proyecto MVC y elimina todos los require de clases.
+
+NOTA: cada clase que añadas al proyecto require ejecutar de nuevo *composer dump-autoload*
+
+
+- Para usar librerías de terceros también usamos composer
+- Podemos editar el *composer.json* o ejecutar composer *require nombrelibreria*
+
+```
+composer require 'dompdf/dompdf'
+```
+
+- Observa:
+    - El contenido de composer.json
+    - El nuevo fichero composer.lock
+
+
+** Comandos principales **
+
+- Para instalar las dependencias al clonar un repositorio o tras editar el composer.json:
+
+```bash
+composer install
+```
+- Para actualizar las dependencias a la versión más actual:
+
+```bash
+composer update
+```
