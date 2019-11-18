@@ -1080,6 +1080,7 @@ class User extends Model
 
 ## Composer y autoload
 
+- rama mvc06
 - Composer es un gestor de dependencias en proyectos php.
 - Permite definir las librerías de las que depende un proyecto.
 - Controlar las versiones y mantener las mismas en diferentes instalaciones.
@@ -1182,4 +1183,165 @@ composer install
 
 ```bash
 composer update
+```
+
+
+
+## Login: sesión, contraseñas
+
+- Hacer login supone decirle al servidor que guarde en sesión la información del usuario actual.
+- Lo habitual es usar nombre (o email) + contraseña.
+- La contraseña debe ir cifrada. Ningún sistema serio debe guardar la contraseña sin cifrar.
+
+
+- Existen multitud de sistemas de cifrado.
+- Podríamos usar un hash md5 o sha, disponibles en cualquier sistema.
+- Estos sistemas son indescifrables pero vulnerables a ataques por diccionario.
+- Ejercicio:
+    - Ejecuta `md5('secret')`
+    - Busca el resultado obtenido en internet 
+    - ¿Qué vulnerabilidad encuentras?
+- Usaremos [password_hash](https://www.php.net/manual/es/function.password-hash.php).
+
+
+- Vamos a asignar contraseña a nuestros usuarios de forma masiva usando la consola
+- Hasta ahora siempre corríamos php desde el navegador. 
+- También podemos hacerlo desde la consola.
+- Ejemplo:
+
+```php
+<?php
+# fichero console/hola.php
+echo "Hola mundo consola \n\n";
+```
+
+
+- Vamos a crear dos métodos en User:
+    - setPassword($password) para asignarle contraseña.
+    - passwordVerify($password) para comprobarla.
+
+
+```php
+public function setPassword($password)
+{
+    $password = password_hash($password, PASSWORD_BCRYPT);
+    $db = User::db();
+    $stmt = $db->prepare('UPDATE users SET password = :password WHERE id = :id');
+    $stmt->bindValue(':id', $this->id);
+    $stmt->bindValue(':password', $password);
+    $stmt->execute();
+    return $password;
+}
+
+```
+
+```php
+public function passwordVerify($password)
+{
+    return password_verify($password, $this->password);
+}
+```
+
+
+- Script de asignación de contraseñas masivas:
+
+```php
+<?php
+# console/setpassword.php
+require "../app/models/User.php";
+
+$users = \App\Models\User::all();
+
+foreach ($users as $user) {
+    // echo $user->name . "\n";
+    echo $user->name . ': ' . $user->setPassword('secret') . "\n";
+
+}
+```
+
+
+### Ejercicio:
+
+- Login de usuario.
+- En la ruta /login debe mostrarse una vista: email + contraseña
+- Al enviar el formulario debe comprobarse que la contraseña es válida
+- Si es válida se envía a home
+- Si no lo es se regresa a la vista de login.
+
+
+- Si el usuario está logueado, el botón login debe cambiarse por otro de cerrar sesión (login/out).
+    - El método out debe eliminar el usuario de la sesión.
+- Haz que las rutas de usuarios, productos y tipos de producto sean exclusivas de usuarios logueados.
+    - Usa reenvío a login en caso contrario.
+- Uso de la sesión para guardar el email: si falla el login haz que no se olvide el email.
+    - Guarda antes de reenviar de vuelta.
+    - Elimina tras cargar la vista.
+
+
+
+## Relaciones 1:n entre modelos
+
+
+- Alta y modificación:
+    - En el alta debe aparecer un select en vez de una caja de texto
+    - En el select deben cargarse todas las opciones de acuerdo a la tabla product_types
+    - En la modificación debemos marcar la opción correspondiente con el parámetro "selected".
+
+
+- Lista de productos: 
+    - Lo deseable es mostrar el nombre del tipo de producto que corresponda, no su id: ambar --> cerveza, no product_type = 1
+    - Lo deseable es contar con un atributo product_type en cada producto para poder hacer: 
+    
+    ```php
+    echo $product->product_type->name;
+    ```
+    - ¿Cómo hacer esta magia?
+
+
+- Vamos a decirle al sistema lo siguiente:
+    - Si piden un atributo desconocido pero hay un método con ese nombre:
+    - Primero ejecuta el método para que cree ese atributo.
+    - Después devuelve el atributo ya existente.
+
+```php
+public function __get($atributoDesconocido)
+{
+    // return "atributo $atributoDesconocido desconocido";
+    if (method_exists($this, $atributoDesconocido)) {
+        $this->$atributoDesconocido = $this->$atributoDesconocido();
+        return $this->$atributoDesconocido;
+        // echo "<hr> atributo $x <hr>";
+    } else {
+        return;
+    }
+}
+```
+
+
+- Ejemplo:
+
+```php
+    public function patata()
+    {
+        return  "Patatas fritas";
+    }
+```
+
+
+- Vamos a añadir un método `type()` que cargue un atributo con ese nombre y que contenga toda la información del `product_type`
+
+```php
+public function type()
+{
+    //un producto pertenece a un tipo:
+    $db = Product::db();
+    $statement = $db->prepare('SELECT * FROM product_types WHERE id = :id');
+    $statement->bindValue(':id', $this->type_id);
+    $statement->execute();
+
+    $statement->setFetchMode(PDO::FETCH_CLASS, ProductType::class);
+    $product = $statement->fetch(PDO::FETCH_CLASS);
+
+    return $product;
+}
 ```
