@@ -1282,21 +1282,20 @@ foreach ($users as $user) {
 ## Relaciones 1:n entre modelos
 
 
-- Alta y modificación:
-    - En el alta debe aparecer un select en vez de una caja de texto
-    - En el select deben cargarse todas las opciones de acuerdo a la tabla product_types
-    - En la modificación debemos marcar la opción correspondiente con el parámetro "selected".
-
-
 ### $hijo->padre->atributo
 - En una relación 1:N, un *padre* tiene muchos *hijos*, un *hijo* pertenece a un *padre*.
-- Lista de productos: 
-    - Lo deseable es mostrar el nombre del tipo de producto que corresponda, no su id: ambar --> cerveza, no product_type = 1
-    - Lo deseable es contar con un atributo product_type en cada producto para poder hacer: 
-    
-    ```php
-    echo $product->product_type->name;
-    ```
+- En nuestra ruta */product/index* mostramos la lista de productos.
+- En ella mostramos el *type_id*
+
+```php
+echo $product->type_id
+```
+
+- Sería más interesante mostrar el nombre del tipo de produto:
+
+```php
+echo $product->type->name
+```
 
 
 - ¿Cómo hacer esta magia?
@@ -1349,22 +1348,80 @@ public function type()
 
 ### $padre->hijos *array!!*
 
+- En la ruta */producttype/show/id* me puede interesar mostrar la lista de productos de cada tipo.
+- Por ejemplo al ver el tipo refresco, quiero ver la lista de todos los refrescos.
 - Con lo ya explicado parece fácil
+
+
 - En el caso de los productos, en el modelo Producttype definimos un método *products*:
 
 ```php
-public function type()
+public function products()
 {
     //un producto pertenece a un tipo:
     $db = Producttype::db();
     $statement = $db->prepare('SELECT * FROM products WHERE type_id = :type_id');
     $statement->bindValue(':type_id', $this->id);
     $statement->execute();
-
-    $statement->setFetchMode(PDO::FETCH_CLASS, Product::class);
-    $products = $statement->fetch(PDO::FETCH_CLASS);
+    $products = $statement->fetchAll(PDO::FETCH_CLASS, Product::class);
 
     return $products;
 }
 ```
 
+
+#### Ejercicio:
+
+- En el show de tipos de producto añade la lista de productos asociados.
+- Una pista:
+
+```php
+foreach ($productType->products as $product) {
+    echo 
+}
+```
+
+
+### Etiqueta select en creación y actualización  
+
+- Alta y modificación:
+    - En el alta debe aparecer un select en vez de una caja de texto
+    - En el select deben cargarse todas las opciones de acuerdo a la tabla product_types
+    - En la modificación debemos marcar la opción correspondiente con el parámetro "selected".
+
+
+- ¿Cómo construir el select de creación?
+- En el controlador:
+
+```php
+public function create()
+{
+    $types = Producttype::all
+    require '../app/views/product/create.php';
+}
+```
+
+- En la vista:
+ 
+```php
+<select>
+<?php
+foreach $types as $type {
+    echo "<option value=\" $type->id \">$type->name</option>"
+}
+?>
+</select>
+```
+
+
+- ¿y en el formulario de actualización?
+- En el controlador hacemos como en el método *create*
+- En la vista de nuevo usamos foreach para el select
+- Ojo, ahora    debemos añadir el atributo *selected* dentro del *option* que corresponda
+
+```php
+foreach $types as $type {
+    $selected = $product->type_id == $type->id ? 'selected' : ''
+    echo "<option value=\" $type->id \" $selected>$type->name</option>"
+}
+```
