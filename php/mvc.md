@@ -1288,6 +1288,8 @@ foreach ($users as $user) {
     - En la modificación debemos marcar la opción correspondiente con el parámetro "selected".
 
 
+### $hijo->padre->atributo
+- En una relación 1:N, un *padre* tiene muchos *hijos*, un *hijo* pertenece a un *padre*.
 - Lista de productos: 
     - Lo deseable es mostrar el nombre del tipo de producto que corresponda, no su id: ambar --> cerveza, no product_type = 1
     - Lo deseable es contar con un atributo product_type en cada producto para poder hacer: 
@@ -1295,9 +1297,9 @@ foreach ($users as $user) {
     ```php
     echo $product->product_type->name;
     ```
-    - ¿Cómo hacer esta magia?
 
 
+- ¿Cómo hacer esta magia?
 - Vamos a decirle al sistema lo siguiente:
     - Si piden un atributo desconocido pero hay un método con ese nombre:
     - Primero ejecuta el método para que cree ese atributo.
@@ -1311,8 +1313,6 @@ public function __get($atributoDesconocido)
         $this->$atributoDesconocido = $this->$atributoDesconocido();
         return $this->$atributoDesconocido;
         // echo "<hr> atributo $x <hr>";
-    } else {
-        return;
     }
 }
 ```
@@ -1340,8 +1340,31 @@ public function type()
     $statement->execute();
 
     $statement->setFetchMode(PDO::FETCH_CLASS, ProductType::class);
-    $product = $statement->fetch(PDO::FETCH_CLASS);
+    $product_type = $statement->fetch(PDO::FETCH_CLASS);
 
-    return $product;
+    return $product_type;
 }
 ```
+
+
+### $padre->hijos *array!!*
+
+- Con lo ya explicado parece fácil
+- En el caso de los productos, en el modelo Producttype definimos un método *products*:
+
+```php
+public function type()
+{
+    //un producto pertenece a un tipo:
+    $db = Producttype::db();
+    $statement = $db->prepare('SELECT * FROM products WHERE type_id = :type_id');
+    $statement->bindValue(':type_id', $this->id);
+    $statement->execute();
+
+    $statement->setFetchMode(PDO::FETCH_CLASS, Product::class);
+    $products = $statement->fetch(PDO::FETCH_CLASS);
+
+    return $products;
+}
+```
+
