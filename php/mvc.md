@@ -1269,7 +1269,7 @@ foreach ($users as $user) {
 - Si no lo es se regresa a la vista de login.
 
 
-- Si el usuario está logueado, el botón login debe cambiarse por otro de cerrar sesión (login/out).
+- Si el usuario está logueado, el botón login debe cambiarse por otro de cerrar sesión (login/logout).
     - El método out debe eliminar el usuario de la sesión.
 - Haz que las rutas de usuarios, productos y tipos de producto sean exclusivas de usuarios logueados.
     - Usa reenvío a login en caso contrario.
@@ -1425,3 +1425,150 @@ foreach $types as $type {
     echo "<option value=\" $type->id \" $selected>$type->name</option>"
 }
 ```
+
+
+
+## Trabajo
+
+- Vamos a poner en práctica lo que hemos visto y alguna cosa más como trabajo de este tema.
+
+- Buena parte de este trabajo puede haberse realizado en el seguimiento de lo explicado hasta aquí, o tal vez se ha hecho algo parecido.
+
+- En la rama *trabajo* tienes el sql de las tablas
+
+
+### Fase 1
+# HISTORIA 1:
+
+- El sistema debe permitir mantener una lista de usuarios:
+
+```sql
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `name` varchar(50) DEFAULT NULL,
+  `surname` varchar(50) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `birthdate` datetime DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `active` BOOLEAN DEFAULT false,
+  `admin` BOOLEAN DEFAULT false,
+  UNIQUE INDEX (`email`)
+)
+```
+
+- Ejecuta el fichero users.sql desde phpmyadmin. Crearás la BBDD mvc18trabajo con una tabla users y 7 registros iniciales.
+
+
+Se espera acceder a las siguientes rutas:
+
+ - `/user` y `/user/index` Lista de usuarios
+
+ - `/user/show/{id}` Detalles del usuario con id {id}. La contraseña ni se modifica ni se muestra.
+
+ - `/register`  y `/register/index` Formulario de registro (alta de usuario).
+ - `/register/register` Tomar los datos del registro
+
+
+### Fase 2
+
+- Crea un controlador LoginController (ya existe)
+    - Método index: muestra la vista de login
+    - Método login: comprueba los datos del formulario de login.
+        - Si son válidos, guarda el usuario en sesión.
+        - Si no son válidos reenvía al usuario a la ruta anterior con un mensaje de error (usa $_SESSION['error'])
+        - A partir de ahí debes mostrar en la cabecera la información de usuario (header.php)
+        - Si el usuario existe: nombre + link de logout
+        - Si no existe link a login.
+    - El método logout debe cerrar la sesión y reenviar a login.
+
+
+### Fase 3
+
+- Ejecuta los sql 02 y 03
+
+```sql
+DROP TABLE IF EXISTS `product_types`;
+CREATE TABLE `product_types` (
+  `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `name` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `product_types` (`id`, `name`) VALUES
+(1, 'cervezas'),
+(2, 'refrescos'),
+(3, 'licores'),
+(4, 'caf�s'),
+(5, 'combinados'),
+(6, 'tapas'),
+(7, 'bocadillos')
+;
+```
+
+
+```sql
+DROP TABLE IF EXISTS `products`;
+CREATE TABLE `products` (
+  `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `name` varchar(50) DEFAULT NULL,
+  `price` double not null,
+  `type_id` int,
+  INDEX (type_id),
+ FOREIGN KEY (type_id) REFERENCES product_types(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `products` VALUES
+(1, 'ambar', 1, 0.8),
+(2, 'Coca Cola', 2, 1),
+(3, 'Fanta Lim�n', 2, 1),
+(4, 'Fanta Naranja', 2, 1),
+(5, 'Gin Tonic', 5, 3)
+;
+```
+
+
+- Crea un controlador ProductController responsable de un CRUD completo sobre la tabla "products".
+    - lista: /product/index
+    - detalle: /product/show/{id}
+    - formulario de alta: /product/create
+    - alta del producto: /product/store   (action del formulario anterior)
+    - edición de un producto: /product/edit/{id}
+    - actualización del producto: /product/update  (action del formulario anterior)
+    - borrado de producto: /product/delete/{id}
+
+
+### Fase 4
+
+- Modifica el CRUD sobre la tabla de productos:
+
+	- En la lista de productos debe aparecer el nombre del tipo y no su id
+
+	- En el alta y modificación de producto debe aparecer un select con la lista de tipos para elegir el adecuado.
+
+
+- Además debes crear el controlador ProducttypeController y los métodos index y show:
+	- Añade la ruta /producttype que muestra todos los tipos de productos.
+
+	- Añade la lista /producttype/show/{id} que muestra el detalle de un tipo de producto y, debajo, la lista de productos asocidados disponibles.
+
+
+### Fase 5
+
+- Vamos a gestionar la realización de "pedidos" en la peña. Se trata de que cada usuario registre aquellos productos que consume.
+- Añade las siguientes rutas:
+    /basket/add/{id}  Este enlace debe estar en la lista de productos. Al hacer click sobre el se añade a la lista de productos en la cesta.
+    Si un producto se clica y ya existe en la cesta se aumenta la cantidad.
+
+
+- /basket Muestra el contenido de la cesta en cada momento (producto, cantidad, precio).
+- /basket/remove/{id}
+- /basket/up/{id} y /basket/down/{id} aumenta o disminuye en 1 la cantidad de cada producto. (enlaces en la vista de /basket).
+
+- Al cerrar sesión se debe perder el contenido de la cesta. El próximo día veremos como guardarla en BBDD.
+
+
+### Fase 6
+
+- Ruta /basket/store Guarda el contenido de la cesta en la tabla orders y order_product. La cesta se vacía. Usa transacciones.
+- Ruta /order muestra la lista de pedidos: fecha en formato d/m/yyy y nombre completo del comprador.
+- Ruta /order/show/{id} muestra información completa del pedido, productos, cantidades y precio (el del pedido, no el del producto).
+
