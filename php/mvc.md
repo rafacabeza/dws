@@ -1428,6 +1428,88 @@ foreach $types as $type {
 
 
 
+## Paginación
+
+- Cuando manejamos tablas con numerosos registros resulta fundamental mostrarlos de forma paginada.
+- Vamos a ver cómo realizar la paginación:
+
+
+### El modelo
+
+```php
+public function paginate($page = 1, $size = 15)
+{
+    //obtener conexión
+    $db = User::db();
+    //preparar consulta
+    $sql = "SELECT count(id) as N  FROM users";
+    //ejecutar
+    $statement = $db->query($sql);
+    //recoger datos con fetch_all
+    $n = (int) $statement->fetch(PDO::FETCH_NUM)[0]; //registros
+    $n = ceil($n / $size); //pages
+
+    $offset = ($page -1 ) * $size;
+    $sql = "SELECT * FROM users LIMIT $offset, $size";
+    //ejecutar
+    $statement = $db->query($sql);
+    //recoger datos con fetch_all
+    $users = $statement->fetchAll(PDO::FETCH_CLASS, User::class);
+    //retornar
+    $pages = new \stdClass;
+    $pages->users = $users;
+    $pages->n = $n;
+    return $pages;        
+}
+```
+
+
+### El controlador
+
+```php
+public function index()
+{
+    if ($_GET['page']) {
+        $page = $_GET['page'];
+    } else {
+        $page = 1;
+    }
+    
+    //buscar datos
+    $pages = User::paginate($page, 2);
+    //pasar a la vista
+    require('../app/views/user/index.php');
+}
+```
+
+
+### La vista
+
+```php
+<?php foreach ($pages->users as $key => $user) { ?>
+    <tr>
+    <td><?php echo $user->name ?></td>
+    <td><?php echo $user->surname ?></td>
+    <td><?php echo $user->email ?></td>
+    <td><?php echo $user->birthdate ? $user->birthdate->format('d-m-Y') : 'nonato' ?></td>
+    <td>
+    <a href="/user/show/<?php echo $user->id ?>" class="btn btn-primary">Ver </a>
+    <a href="/user/edit/<?php echo $user->id ?>" class="btn btn-primary">Editar </a>
+    <a href="/user/delete/<?php echo $user->id ?>" class="btn btn-primary">Borrar </a>
+    </td>
+    </tr>
+<?php } ?>
+</table>
+
+<?php
+for ($i=1; $i <= $pages->n; $i++) { 
+    echo "<a href=?page=$i class='btn btn-primary'>$i</a> &nbsp" ;
+}
+?>
+```
+
+
+
 ## Trabajo
 
 - Vamos a poner en práctica lo que hemos visto y alguna cosa más como trabajo de este tema.
