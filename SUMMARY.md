@@ -51,7 +51,8 @@
 * [JPA](java-ee/spring/jpa.md)
 
 ## Laravel
-* [Laravel](Laravel/README.md)
+* [Laravel 6.*](Laravel/laravel6.md)
+* [Laravel 5.3](Laravel/README.md)
     * [Instalar](Laravel/instalar.md)
     * [Configuración](Laravel/configuración.md)
     * [Rutas](Laravel/rutas.md)
