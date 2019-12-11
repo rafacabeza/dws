@@ -332,16 +332,266 @@ Route::get('foo', 'Photos\AdminController@method');
     - ...
 
 
+
 ## MVC
+- Laravel es mucho más que una arquitectura MVC
+- No obstante esta es una parte fundamental del framework
 
 
 ### Controladores
 
+- Su ubican en _app/Http/Controllers_ (Podríamos usar subdirectorios)
+- Para crear un controlador usaremos:
+```
+php artisan make:controller ControllerName
+```
+    - Deberemos definir los métodos que necesitemos y asociarlos a una ruta del fichero de rutas (web.php).
+
+
+- Si queremos usar rutas de tipo resource:
+```
+php artisan make:controller ControllerName --resource
+```
+    - Ya nos vendrá con los 7 métodos asociados a una ruta resource
+
+* OJO! Los formularios HTML no pueden usar PUT, PATCH ni DELETE. Podemos usar campos ocultos para falsear los vervos. El metodo helper `method_field` lo puede hacer por nosotros:
+
+```php
+{{ method_field('PUT') }}
+{{ method_field('DELETE') }}
+```
+
+
+- Si en un método necesitamos hacer uso del objeto $request debemos incluírlo en su cabecera con _type hinting_:
+
+```php
+    public function foo(Request $request)
+    {
+        //
+    }
+```
+
 
 ### Vistas: Blade
 
+* Las vistas en php: php + html ==> código poco claro.
+* Mejor motores de plantillas que facilitan la inclusión de contenido variable en nuestro html.
+* Motores de plantillas son:
+  * **Blade**, usado por Laravel
+  * Smarty, muy habitual, no ceñido a ningún framework
+  * Twig, usado por Simphony.
+* Código más limpio. 
+
+```
+plantilla + compilación transparente = html + php
+```
+
+
+- En laravel se devuelven con la función helper _view()_
+- Desde un controlador o ruta: 
+    ```php
+    return view('grupo.vista'); //estilo habitual
+    return view('grupo/vista'); //también válido
+    ```
+    - Buscará una vista en el directorio _resources/views/grupo_
+    - El fichero se llamará _vista.blade.php_ o _vista.php_
+
+
+- Para llevar variables a la vista debemos hacer lo siguiente:
+    ```php
+    return view('grupo.vista', $arrayAsociativo);
+    ```
+- Ejemplos:
+    ```php
+    return view('user.index', ['name' => 'James']);
+    ```
+    ```php
+    return view('blog.history', [
+            'mes' => $mes,
+            'ano' => $ano,
+            'posts' => $posts
+    ]);
+    ```
+
+
+- Existen otras variantes:
+    * Con with:
+
+    ```php
+    return view('greeting')->with('name', 'Victoria');
+    ```
+
+    * Y por último usando compact.
+
+    ```php
+    return view('users', compact('mes', 'ano', 'posts'));
+    //equivale a:
+    return view('blog.history', [
+            'mes' => $mes,
+            'ano' => $ano,
+            'posts' => $posts
+    ]);
+    ```
+
 
 ### Modelo
+
+
+### Bases de datos
+- Para acceder a bases de datos podemos (por orden):
+ - ORM: Eloquent. Usado por Laravel y que usa una arquitectura Active Record.
+ - Fluent Query Builder. Un sistema de creación de consultas independiente del gestor de bbdd utilizado.
+ - SQL. Usar consultas de Raw Sql (sql en crudo o a pelo). Poco habitual
+
+
+- Bases de datos compatibles:
+ - MySQL
+ - Postgres
+ - SQLite
+ - SQL Server
+- https://laravel.com/docs/6.x/database
+
+
+- Configuración:
+ - Fichero _config/database.php_.
+ - Pero basada en el _.env_.
+- Podemos usar las bases de datos de forma convencional, creadas previamente. 
+- Más interesante usar migraciones como veremos. 
+
+
+ ### Modelo
+- Las clases modelo extienden una superclase llamada Model
+- Heredan métodos muy interesantes. 
+- Permiten realizar multitud de operaciones sin escribir una sóla línea de código a través de Eloquent.
+
+
+- Nomenclatura:
+    - El nombre del modelo: tiene que ser en singular y mayúscula. P.ej. "User"
+    - La la tabla asociada estará en plural y minúscula. P. ej. "users"
+    - Clave primaria por defecho "id".
+    - Eloquent usa las columnas created_at y updated_at para actualizar automáticamente esos valores de tiempo.
+
+
+- Artisan nos ayuda a crear los modelos:
+ ```
+ php artisan make:model Study    // sólo modelo
+ php artisan make:model Study -m // modelo y migración
+ ```
+- La migración es un fichero que nos permite ir creando a la BBDD a nuestra medida
+    - Método up: crea o modifica una tabla
+    - Método down: retrocede los cambios o borra la tabla
+
+
+- Si queremos cambiar los parámetros por defecto respecto a nombre de tabla, clave primaria y uso de columnas temporales:
+
+ ```php 
+<?php
+namespace App;
+use Illuminate\Database\Eloquent\Model;
+class Study extends Model
+{
+   protected $table = 'estudio';
+   $primaryKey = 'id_estudio';
+   public $timestamps = false;
+}
+``` 
+
+
+- Veamos un ejemplo de CRUD Study. Vamos a ver el código de las clases Study y de StudyController.
+
+ - Clase modelo. Muy sencillo porque Eloquent nos provee de los métodos que necesitamos.
+ 
+```php
+<?php
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Study extends Model
+{
+    //$fillable indica que atributos se deben cargar en asignación masiva.
+    protected $fillable = ['code', 'name', 'shortName', 'abreviation'];
+}
+```
+
+
+- Clase modelo. Usamos los métodos que nos facilita Eloquent como son:
+```
+find($id) //Busca un registro
+findOrFail($id) //Similar pero lanza excepción si falla. 
+all() //Carga todos los registros.
+paginate() //Carga una página de registros. Ver paginación.
+save() //Guarda el objeto previamente cargado.
+push() //Guarda el objeto y si hay objtetos relacionados modificados también lo hace.
+delete() //Borra el objeto previamente cargado.
+destroy($id) //Localiza y borra un registro (la variable tb. podría ser un array de ids).
+```
+
+
+- El controlador:
+
+```php
+<?php
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request; 
+use App\Http\Requests\StudyRequest; //usado para validación avanzada
+use App\Study; //modelo Study
+
+class StudyController extends Controller
+{
+    public function index()
+    {
+        $studies = \App\Study::all(); //toma todos los registros
+        return view('study.index', ['studies' => $studies]);
+    }
+    
+    public function create()
+    {
+        return view('study.create');
+    }
+    
+    public function store(Request $request)
+    {
+        $this->validate($request, [
+            'code' => 'required|unique:studies',
+            'abreviation' => 'required|unique:studies',
+            'name' => 'required',
+            'shortName' => 'required'
+            ]);
+        $study = new Study($request->all());
+        $study->save();
+        return redirect('/study');
+    }
+
+    public function delete($id)
+    {
+        // modo 1
+        // $study = Study::find($id);
+        // $study->delete();
+        // modo 2
+        Study::destroy($id);
+        return redirect('/study'); //redirigir
+    }
+
+    public function update($id)
+    {
+        $study = Study::find($id);
+        return view('study.update', ['study' => $study]);
+    }
+
+    public function save(StudyRequest $request)
+    {
+        $study = Study::find($request->id);
+        $study->code = $request->code;
+        $study->name = $request->name;
+        $study->shortName = $request->shortName;
+        $study->abreviation = $request->abreviation;
+        $study->save();
+        return redirect('/study');
+    }
+}
+```
 
 
 
