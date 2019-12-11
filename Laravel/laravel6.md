@@ -62,10 +62,27 @@ chrl+C             # para cerrar
     ```
     127.0.0.1   laravel.local
     ```
-    - Colocamos nuestro Laravel limpio en `data/laravel`
+    - Levantamos nuestro servicio:
+
+        ```
+        cd entornods 
+        docker-compose up -d
+        ```
+    - Colocamos nuestro Laravel limpio en _data/laravel_
     - ¿Cómo?
 
 
+- __OPCION 1__ (composer)
+    - Levantamos nuestro _entornods_. 
+    - Entramos en el contenedor _laravel_: 
+    ```
+    docker exec -it --user devuser laravel bash
+    ```
+
+    - Ya podemos acceder a http://laravel.local
+
+
+__ OPCION 2 __ (git + composer)
 - Clonamos el código desde https://github.com/laravel/laravel.git o desde nuestro repositorio. 
 - Lo hacemos en el directorio `entornods/data/laravel`
 
@@ -79,12 +96,11 @@ composer install
 - El directorio de partida puede ser `git@github.com:laravel/laravel.git` o el de nuestro proyecto particular
 
 
-- Si no tenemos instalado php 7.2 ni composer podemos usar docker:
+OJO!!! 
+- El _entornods_ viene configurado para una aplicación ubicada en data/laravel
+- El resto de instrucciones también
+- Si usamos otro nombre deberemos ajustar alguno de estos comados y el contenido del fichero _docker-compose.yml_
 
-    ```
-    cd entornods 
-    docker-compose up -d
-    ```
 
 - Entramos en el contendor laravel y ejecuamos un par de comandos: 
 
@@ -119,11 +135,42 @@ composer install
     * El fichero .env define variables utilizadas únicamente en el entorno de desarrollo. 
     * Cada sitio de desarrollo o producción mantiene su propio `.env`
     * Este fichero debe excluirse de _git_. Compruébalo en el fichero .gitignore.
+    * Debemos ajustar la parte de BBDD y el APP_URL=http://laravel.local
 - El directorio de configuración es _config_. Buena parte de la configuración es condicionada al contenido del fichero `.env`
 
 
 
 ## Arquitectura
+
+
+- Configuramos nuestro servidor para que todas las peticiones lleguen a _index.php_ (var https://laravel.com/docs/6.x/installation)
+- _index.php_ sólo crea un objeto $app a partir del script _bootstrap/app.php_.
+- Tras esto la petición o _request_ se pasa al kernel (nucleo) http o de consola:
+
+
+- Kernel Http:
+    ```php
+    class Kernel extends HttpKernel
+    ```
+    - Carga clases _bootstrapers_ que preparan la aplicación (heredado)
+    - Define una serie de _middlewares_ (filtros) que se ejecutan antes de tratar el _request_
+    - Por fin, el kernel trata el _request_ y devuelve un _response_ (heredado)
+- Todas las clases dentro de _Iluminate_ están dentro de vendor, son parte del framework y no debemos modificarlas en absoluto. Todo lo "heredado" está ahí.
+
+
+- La respuesta
+    - Tras preparar la aplicación, la petición se pasa al _router_
+    - De acuerdo a las rutas definidas se genera una respuesta o se delega en un controlador.
+    - A las rutas y controladores se les puede asignar middlewares.
+
+
+- Los Service Providers
+    - Son el elemento clave en el arrange (_bootstraping_) de la aplicación.
+    - Definen los componentes disponibles en la aplicación.
+    - El fichero `config/app.php` cuenta con un array donde definimos cuales otros queremos usar
+        - Muchos de ellos están en el frameword (empiezan por _Illuminate_)
+        - Otros están en  _app/Providers_
+        - Si añadimos librerías o creamos los nuestros propios (avanzado) deberemos añadir elementos a este array.
 
 
 
