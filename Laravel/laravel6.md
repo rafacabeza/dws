@@ -74,9 +74,11 @@ chrl+C             # para cerrar
 
 - __OPCION 1__ (composer)
     - Levantamos nuestro _entornods_. 
+        - nota: hay que cambiar los permisos de data/laravel a 777.
     - Entramos en el contenedor _laravel_: 
     ```
     docker exec -it --user devuser laravel bash
+    composer create-project --prefer-dist laravel/laravel blog
     ```
 
     - Ya podemos acceder a http://laravel.local
