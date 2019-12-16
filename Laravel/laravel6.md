@@ -139,6 +139,19 @@ OJO!!!
 - El directorio de configuración es _config_. Buena parte de la configuración es condicionada al contenido del fichero `.env`
 
 
+Repositorio de clase
+
+- Vamos a usar el  repositorio: [laravel19](https://bitbucket.org/rafacabeza/laravel19)
+- Recomendación: hacer un fork del mismo. De esta manera siempor podrás hacerte con el código de la clase:
+    - Ve a bitbucket y realiza un fork
+    - Clona dentro de `entornods/data` tu repositorio
+    - Obten una copia del fichero `.env`
+    - Ejecuta (recuerda que laraa es un alias): 
+        ```
+        laraa key:generate
+        ```
+
+
 
 ## Arquitectura
 
