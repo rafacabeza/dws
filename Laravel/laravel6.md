@@ -932,6 +932,7 @@ $factory->define(App\User::class, function (Faker $faker) {
 });
 ```
 
+
 * Usar el factory:
 
   * Crear un objeto con `make()` o con `create()`, el primero crea una variable, el segundo además la guarda en base de datos:
@@ -953,69 +954,336 @@ $factory->define(App\User::class, function (Faker $faker) {
   ```
 
 
+## Middleware
+
+- Los middleware son filtros que se ejecutan antes de que el control pase a una ruta o a un controlador.
+
+- Podemos asciar un middleware a una ruta:
+```php
+Route::get('profile', 'UserController@show')->middleware('auth');
+```
+- O a un controlador, en su constructor:
+```php
+class UserController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('auth'); //aplicable a todos los métodos
+        $this->middleware('log')->only('index');//solamente a ....
+        $this->middleware('subscribed')->except('store');//todos excepto ...
+    }
+}
+```
 
 
+### kernel.php
 
-## Test
-
-
-
-## Request y formularios
-
-
-
-## Modelos y BBDD
+- En el kernel.php de la aplicación se definen varias cuestiones relativas a los middleware.
+- Un grupo de middleware que se aplican a todas las peticiones. Atributo $middleware.
+- Se asignan nombres a los middleware para ser usados en las rutas. Atributo `$routeMiddleware`.
+- Dos grupos de middleware:
+    - _web_ que se aplica a todas las rutas definidas en el fichero de rutas web.php
+    - _api_ que se aplica a las rutas del fichero api.php
 
 
+### Ejemplos de middleware
 
-    ## Eloquent & Query Builder    
-    
-
-
-    ## Relaciones
-    
-
-
-## Errores
-
-
-
-## Multi Idioma
+- _CheckForMaintenanceMode_ Se aplica a todas las rutas. Se activa su funcionalidad con los comandos:
+```
+php artisan down
+php artisan up
+```
+ - Después de down genera un error 503
+ - Comprueba la existencia del fichero /storage/framework/down
+ - Down crea el fichero, up lo borra.
 
 
+- Vamos a ver los que se aplican a todas las peticiones web.
+ - EncryptCookies. Encripta las cookies
+ - AddQueuedCookiesToResponse. Añade las cookies creadas mediante el método `Cookie::queue($micookie)`;
+ - StartSession. Inicia sesión de forma automática.
+ - ShareErrorsFromSession Hace visible el objeto errors tras la validación.
+ - VerifyCsrfToken. Verifica los token CSRF.
+ - SubstituteBindings ¿?
 
-## Ajax
+
+- Además, dispondemos de los siguientes definidos en route:
+ - auth. Pasa el filtro si estás autenticado.
+ - guest. Pasa el filtro si no has hecho login
+ - can. Filtro usado para autorización.
+ - throttle. Limita el número de peticiones por minuto aceptadas desde un host determinado.
+
+
+### Construir un middleware:
+ - Usamos artisasn:
+ ``` 
+ php artisan make:controller MiddlewareEsAdmin
+ ```
+ - Código. 
+  - La lógica está en la función handle.
+  - Si se dan las condiciones adecuadas se pasa el filtro (`return $next($request);`)
+  - Si no se dan las condiciones abortar o redirigir.
+
+
+ ```php
+ <?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+
+class IsAdmin
+{
+    public function handle($request, Closure $next)
+    {
+        $user = $request->user();
+        if ($user && $user->username == 'admin') {
+            return $next($request);
+        }
+        abort(403, 'acceso denegado');
+    }
+}
+```
+
+- Registrar el middleware en el kernel dentro de $routeMiddleware
+  
+- Ya podemos usarlo como el resto:
+
+```php
+Route::get('families/ajax', 'FamilyController@ajax')->middleware('admin');
+``` 
 
 
 
 ## Sesiones y Autenticación
 
 
+### Autenticación
+- Ya vimos como añadir el sistema de autenticación propio de Laravel
+- Disponde de un juego de migraciones, rutas, controladores y vistas que hacen posible la gesión de usuarios
 
-## Middleware
-
-
-
-## Autorización
-
-
-
-## Response
+* Documentación oficial: [https://laravel.com/docs/6.x/authentication](https://laravel.com/docs/6.x/authentication)
+* Autenticarse es identificarse, que la apliación nos reconozca como un usuario concreto.
 
 
-
-## Paginación
-
-
-
-## Mail
-
-
-
-## Pdf
+* Para hacerlo debemos hacer uso de variables de sesión.
+* Laravel viene con un sistema base muy completo. Para instalarlo (v5 es distiono!!):
+  ```
+    composer require laravel/ui
+    php artisan ui bootstrap --auth
+  ```
+* Las vistas generadas están construidas con Twiter Bootstrap y se almacenan en el directorio: resources/views/auth.
 
 
+* Rutas:
+  * Para login se usa `/login`
+  * Tras el login se usa `/home`. Puede personalizarse en el LoginController.
+  * Por defecto el nombre de usuario es su e-mail.
+  * Para cerrar la sesión: `logout`
+  * Para resetear la contraseña: `password/reset`
 
-## Trabajo
+
+* Para el reseteo de contraseñas se envia un correo con un token.
+* Para pasar los mails a log y no enviar realmente:
+  * En el fichero `.env` cambiar el parámetro: \`MAIL\_DRIVER=log
+    \`
+  * Completar en config/mail.php:
+    ```php
+    'from' => [
+      'address' => env('MAIL_FROM_ADDRESS', 'admin@example.com'),
+      'name' => env('MAIL_FROM_NAME', 'Adminstrador'),
+    ],
+    ```
+  * Los correos se guardan en storage/logs
+  * Podemos ver el correo enviado para resetear contraseña
 
 
+* Si queremos acceder a la información del usuario actual debemos usar la clase fachada Auth.
+
+```php
+//Mostrar la información de usuario
+Route::get('usuario', function () {
+    $user = Auth::user();  //namespace global: \Auth
+    dd($user);
+});
+```
+
+
+## Sesiones
+
+* Los parámetros de configuración de sesiones se definen en `config/session.php`. 
+* Importante es el almacenamiento y el tiempo de vida de la sesión.
+* Con Laravel no es preciso usar directamente la variable $_SESSION.
+* ni debemos usar las funciones session\_start\(\)  o session\_destroy\(\)
+
+
+* Podemos acceder a un dato guardado en sesión de tres modos:
+
+  * El request, esto requiere inyección de dependencias:
+    ```php
+    public function showProfile(Request $request, $id)
+    {
+      $value = $request->session()->get('key');
+    }
+    ```
+  * La fachada Session
+    ```php
+    $value = Session::get('key');
+    ```
+  * La función helper session\(\):
+    ```php
+    $value = session('key');
+    ```
+
+
+* Obtener todos los datos de una sesión
+  ```php
+  $data = $request->session()->all();
+  $data = Session::all(); //usando el Facade
+  ```
+
+* Podemos guardar datos en sesión de dos modos:
+
+  ```php
+  $request->session()->put('email', 'me@example.com');
+  session(['email' => 'me@example.com']); //usando el helper
+  ```
+
+* Podemos eliminar datos de sesión:
+
+  ```php
+  $request->session()->forget('key'); //elemento key
+  $request->session()->flush();   // todos
+  Session::flush();               //todos con la fachada
+  ```
+
+
+* Guardar datos sólo durante una petición \(request\) sólamente. 
+* Esto se usa en validaciones de forma automática, transparente al usuario 
+    - Para los datos antiguos (old)
+    - Para los mensajes de error
+  ```php
+  //después de una petición se elimina. 
+  $request->session()->flash('mensaje', '¡El usuario fue eliminado!');   
+  //guardar los datos flasheados un request más.
+  $request->session()->reflash();  
+  //guardadr datos flasheados.
+  $request->session()->keep(['mensaje', 'email']); 
+  ```
+
+
+
+## Autorización: reglas y políticas
+- Laravel nos brinda dos sistemas para autorizar acciones: reglas y puertas.
+- Reglas
+ - Las reglas se definen asociadas a la clase _Gate_.
+ - Son una solución más simple.
+- Políticas
+ - Son soluciones más elaboradas que engloban la autorización referida a un modelo concreto.
+ - Se definen en clases dentro guardadas en _app/Policies_
+- Tienen una analogía a rutas y controladores, simpliciad vs complejidad y orden.
+- En un proyecteo usaremos una u otra (o ambas) de acuerdo a su complejidad y envergadura.
+
+### Definir reglas
+
+- Las reglas se definen en el AuthServiceProvider.php, dentro de su función boot.
+- Podemos definir una regla con un closure (función anónima) dentro de dicho método:
+```php
+public function boot()
+{
+    $this->registerPolicies(); 
+    //nuestra regla es esta:
+    Gate::define('update-post', function ($user, $post) {
+        return $user->id == $post->user_id;
+    });
+}
+```
+### Usar reglas
+- Para comprobar las reglas debemos usar la fachada Gate y alguno de sus métodos (allows, denies). Lo podemos hacer en la propia ruta o más correctamente en el controlador o en un middleware:
+```php
+if (Gate::denies('update-post', $post)) {
+    abort(403);
+    //o podríamos redireccionar:
+    // return redirect('/home');
+    // o mostrar una vista
+    // return view('nombreVista');
+}
+```
+- Observa que el $user no es pasado a la clase Gate, toma el autenticado. Si quisieramos pasarlo debemos hacerlo así:  
+```php
+//preguntando si se le permite
+if (Gate::forUser($user)->allows('update-post', $post)) {
+    // The user can update the post...
+}
+//o al revés ...
+if (Gate::forUser($user)->denies('update-post', $post)) {
+    // The user can't update the post...
+}
+```
+### Políticas
+- Si el proyecto es pequeño la solución anterior es válida pero para algo grande puede no ser una buena solución.
+- Las políticas separan código para no sobrecargar el código del AuthServiceProvider.
+- Las políticas son clases guardadas en app/Policies y que se crean así:
+```php
+//clase en blanco
+php artisan make:policy PostPolicy
+//clase con los cuatro métodos CRUD definidos
+php artisan make:policy PostPolicy --model=Post
+```
+
+- Tras crear las políticas, éstas deben ser regitradas en el AuthServiceProvider:
+```php
+class AuthServiceProvider extends ServiceProvider
+{
+    //deben incluírsee en el siguiiente array:
+    protected $policies = [
+        Post::class => PostPolicy::class,
+    ];
+```
+
+### Escribiendo las políticas:
+- Podemos crear los métodos que necesitemos. Por ejemplo el método update lo podemos usar para actualizar un objeto del modelo afectado. Sus argumentos deben ser el user y un objeto del modelo protegido:
+```php
+public function update(User $user, Post $post)
+{
+    return $user->id === $post->user_id;
+}
+//aunque si el método no usa ningún objeto del modelo lo podemos dejar así:
+public function create(User $user)
+{
+    return true; //una expresión booleana...
+}
+```
+- El método before permite tomar decisiones generales sin evaluar la política
+
+```php
+public function before($user, $ability)
+{
+    if ($user->isSuperAdmin()) {
+        return true;
+    }
+}
+// si devuelve true -> autorizado. No comprueba nada más
+// si devuelve false -> denegado. No comprueba nada más
+// si devuelve null -> lo que diga la política
+```
+
+<!--
+4 videos de como programar los permisos dinámicamente, registrando permisos y su asignación en bbdd
+https://youtu.be/-go8BMcpCf4?list=PLdKRooEQxDnW6OsnV4HQuVo-SX8fCgD1s
+--> 
+
+## TODO:
+- Test
+- Request y formularios
+- Modelos y BBDD
+- Errores
+    - Eloquent & Query Builder    
+    - Relaciones
+- Multi Idioma
+- Ajax
+- Response
+- Paginación
+- Mail
+- Pdf
+- Trabajo
