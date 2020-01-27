@@ -966,6 +966,7 @@ $factory->define(App\User::class, function (Faker $faker) {
   ```
 
 
+
 ## Middleware
 
 - Los middleware son filtros que se ejecutan antes de que el control pase a una ruta o a un controlador.
@@ -1058,7 +1059,8 @@ class IsAdmin
 ```
 
 - Registrar el middleware en el kernel dentro de $routeMiddleware
-  
+
+
 - Ya podemos usarlo como el resto:
 
 ```php
