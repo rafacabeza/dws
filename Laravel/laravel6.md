@@ -144,14 +144,26 @@ OJO!!!
 Repositorio de clase
 
 - Vamos a usar el  repositorio: [laravel19](https://bitbucket.org/rafacabeza/laravel19)
-- Recomendación: hacer un fork del mismo. De esta manera siempor podrás hacerte con el código de la clase:
+- Recomendación: hacer un fork del mismo:
     - Ve a bitbucket y realiza un fork
     - Clona dentro de `entornods/data` tu repositorio
+    - Instalar dependencias.
     - Obten una copia del fichero `.env`
     - Ejecuta (recuerda que laraa es un alias): 
         ```
-        laraa key:generate
+        larai //para entrar al contenedor
+        cp .env.example .env
+        composer install
+        php artisan key:generate
         ```
+
+
+- Es interesante poder descargar el código de clase:
+
+```
+cd data/laravel
+git remote add rafa git@bitbucket.org:rafacabeza/laravel19.git
+```
 
 
 
