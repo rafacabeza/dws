@@ -215,7 +215,7 @@ git remote add rafa git@bitbucket.org:rafacabeza/laravel19.git
 
 * Las rutas se definien en el directorio `routes`:
     - `web.php` define todas las rutas de la aplicación web
-    - `api.php` define las rutas asociadas a un servicio web RESTfull
+    - `api.php` define las rutas asociadas a un servicio web RESTful
     - `console.php` define rutas usadas desde la consola con `php artisan`
     - `channels.php` se usa en aplicaciones en tiempo real y websockets. No toca...
 
