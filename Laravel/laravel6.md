@@ -695,7 +695,6 @@ return Redirect::back()->withErrors(['msg', 'The Message']);
 
 
 * Debemos crear una migración por cada tabla.
-* Para modificar una tabla podemos modificar la migración implicada o añadir una nueva migración de modificación.
 * Debemos crearla con artisan y editarla después.
 * Nota, en la versión 6 podemos crearla a la vez que el modelo:
 
@@ -745,6 +744,49 @@ class CreateStudiesTable extends Migration
 ```
 
 
+- Para modificar una tabla tenemos dos opciones:
+    - Modificar la migración de creación. NO SIEMPRE POSIBLE
+    - Crear una migración de modificación. Ejemplo: 
+
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class ModifyUsersTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->bigInteger('role_id')->unsigned()->default(1)->after('id');
+            $table->foreign('role_id')->references('id')->on('roles');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign('users_role_id_foreign');
+            $table->dropColumn('role_id');
+        });        
+    }
+}
+
+```
+
+
 ## Ejecutar migraciones
 
 *
@@ -772,17 +814,15 @@ class CreateStudiesTable extends Migration
     php artisan make:migration create_users_table
     // ej. comando para creación de tabla. Añade código de creación.
     php artisan make:migration create_users_table --create=users
-    // ej. comando de modificación de tabla
-    php artisan make:migration add_votes_to_users_table --table=users
     ```
 
-* El resultado es una clase hija de _Migration_, guardada en un fichero que comienza con la fecha de creación para que sea ordenado y ejecutado adecuadamente.
+* El resultado es una clase hija guardada **database/migrations** 
+* El fichero se nombra usando el *timestamp* de creación para que sea ejecutado en el orden correcto.
 
 
-### Estructura de una migracion
-* Las migraciones tienen dos métodos:
-  * up\(\) sirve para modificar la base de datos. Típicamente crear una tabla.
-  * down\(\) sirve para devolver la base de datos a su estado previo. Típicamente borrar una tabla.
+### Métodos de una migración
+* up\(\) sirve para modificar la base de datos. Típicamente crear una tabla.
+* down\(\) sirve para devolver la base de datos a su estado previo. Típicamente borrar una tabla.
 
 ```php
 <?php
@@ -824,9 +864,10 @@ class CreateStudiesTable extends Migration
 * Dentro de las funciones _up_ y _down_ usamos las funciones de la clase esquema para:
 
   * Crear tablas: `Schema::create('nommbreTabla', 'funcion_closure');`
-  * Renombrar tablas: \`Schema::rename\($original, $nuevo\);
+  * Renombrar tablas: `Schema::rename\($original, $nuevo\);`
   * Borrar tablas: `Schema::drop('users');` o `Schema::dropIfExists('users');`
   * Modificación de tablas: `Schema::table('nommbreTabla', 'funcion_closure');`
+
 
 * En las funciones anónimas \(closure\) de creación y modificación podemos hacer prácticamente cualquier cosa que soporte SQL. Debemos usar los métodos de la clase Blueprint aplicados a la variable $table:
 
@@ -853,6 +894,7 @@ class CreateStudiesTable extends Migration
   //podríamos añadir ->onDelete(cascade) ...
   ```
 
+
   * Los posibles modificadores son:
     ```
     ->first() | Place the column “first” in the table (MySQL Only)
@@ -876,6 +918,7 @@ class CreateStudiesTable extends Migration
   `php artisan make:seeder StudySeeder`
 
   * Los seeders tienen un método _run\(\)_ donde se registra el contenido de los registros a insertar. Puede usarse sintáxis de _Query Builder_ o de _Eloquent_
+
 
 * Ejemplo:
 
@@ -903,6 +946,7 @@ class StudiesSeeder extends Seeder
 }
 ```
 
+
 * El orden en que se ejecutan los seeders se establece manualmente. Debe rellenarse el método _run\(\)_ de la clase _DatabaseSeeder_ ubicada en _database/seeds_
 
 ```php
@@ -912,6 +956,7 @@ public function run()
     $this->call(ModuleSeeder::class);
 }
 ```
+
 
 * Su ejecución es desde artisan:
   * Modo general
@@ -926,11 +971,12 @@ public function run()
 
 * Crear un _factory_:
 
-```php
+```
 php artisan make:factory PostFactory
 ```
 
 * Codificar un factory:
+
 ```php
 use Faker\Generator as Faker;
 
@@ -955,15 +1001,17 @@ $factory->define(App\User::class, function (Faker $faker) {
   ```
   * Podemos crear más de un registro en la misma orden:
   ```php
-  $users = factory(App\User::class, 3)->make(); //O create
+  $users = factory(App\User::class, 3)->create();
   ```
 
+
   * Además podemos fijar o sobreescribir el valor de los campos:
-  ```php
-  $user = factory(App\User::class)->make([
+
+```php
+$user = factory(App\User::class)->create([
     'name' => 'Abigail',
-  ]);
-  ```
+]);
+```
 
 
 
@@ -1192,11 +1240,14 @@ Route::get('usuario', function () {
 - Reglas
  - Las reglas se definen asociadas a la clase _Gate_.
  - Son una solución más simple.
+
+
 - Políticas
  - Son soluciones más elaboradas que engloban la autorización referida a un modelo concreto.
  - Se definen en clases dentro guardadas en _app/Policies_
 - Tienen una analogía a rutas y controladores, simpliciad vs complejidad y orden.
 - En un proyecteo usaremos una u otra (o ambas) de acuerdo a su complejidad y envergadura.
+
 
 ### Definir reglas
 
@@ -1212,6 +1263,8 @@ public function boot()
     });
 }
 ```
+
+
 ### Usar reglas
 - Para comprobar las reglas debemos usar la fachada Gate y alguno de sus métodos (allows, denies). Lo podemos hacer en la propia ruta o más correctamente en el controlador o en un middleware:
 ```php
@@ -1223,6 +1276,8 @@ if (Gate::denies('update-post', $post)) {
     // return view('nombreVista');
 }
 ```
+
+
 - Observa que el $user no es pasado a la clase Gate, toma el autenticado. Si quisieramos pasarlo debemos hacerlo así:  
 ```php
 //preguntando si se le permite
@@ -1234,6 +1289,8 @@ if (Gate::forUser($user)->denies('update-post', $post)) {
     // The user can't update the post...
 }
 ```
+
+
 ### Políticas
 - Si el proyecto es pequeño la solución anterior es válida pero para algo grande puede no ser una buena solución.
 - Las políticas separan código para no sobrecargar el código del AuthServiceProvider.
@@ -1241,9 +1298,11 @@ if (Gate::forUser($user)->denies('update-post', $post)) {
 ```php
 //clase en blanco
 php artisan make:policy PostPolicy
-//clase con los cuatro métodos CRUD definidos
+//clase con reglas CRUD predefinidas asociada a un modelo
+//recomendable:
 php artisan make:policy PostPolicy --model=Post
 ```
+
 
 - Tras crear las políticas, éstas deben ser regitradas en el AuthServiceProvider:
 ```php
@@ -1254,6 +1313,7 @@ class AuthServiceProvider extends ServiceProvider
         Post::class => PostPolicy::class,
     ];
 ```
+
 
 ### Escribiendo las políticas:
 - Podemos crear los métodos que necesitemos. Por ejemplo el método update lo podemos usar para actualizar un objeto del modelo afectado. Sus argumentos deben ser el user y un objeto del modelo protegido:
@@ -1268,6 +1328,8 @@ public function create(User $user)
     return true; //una expresión booleana...
 }
 ```
+
+
 - El método before permite tomar decisiones generales sin evaluar la política
 
 ```php
@@ -1279,7 +1341,7 @@ public function before($user, $ability)
 }
 // si devuelve true -> autorizado. No comprueba nada más
 // si devuelve false -> denegado. No comprueba nada más
-// si devuelve null -> lo que diga la política
+// si devuelve null -> lo que diga la regla usada
 ```
 
 <!--
@@ -1287,17 +1349,18 @@ public function before($user, $ability)
 https://youtu.be/-go8BMcpCf4?list=PLdKRooEQxDnW6OsnV4HQuVo-SX8fCgD1s
 --> 
 
+
+
 ## TODO:
 - Test
-- Request y formularios
 - Modelos y BBDD
 - Errores
-    - Eloquent & Query Builder    
-    - Relaciones
+- Eloquent & Query Builder    
+- Relaciones
 - Multi Idioma
 - Ajax
-- Response
 - Paginación
 - Mail
 - Pdf
 - Trabajo
+
