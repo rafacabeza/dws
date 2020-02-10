@@ -6,7 +6,8 @@
   "scripts": {
     "start": "reveal-md --css style.css ./node/ --port 2000",
     "php": "reveal-md --css style.css ./php/mvc.md --port 2000",
-    "laravel": "reveal-md --css style.css ./Laravel/laravel6.md --port 2000"
+    "laravel": "reveal-md --css style.css ./Laravel/laravel6.md --port 2000",
+    "node": "reveal-md --css style.css ./node/intro.md --port 2000"
   },
   "repository": {
     "type": "git",

@@ -23,6 +23,21 @@
   - Compila a código máquina
 
 
+
+### Instalación.
+
+- ¿Qué necesitamos instalar?
+  - **Node.js**: entorno de ejecución de JavaScript orientado a eventos asíncronos.
+  - **npm**. Node Package Manager es un gestor de paquetes. Composer se basa en npm. Permite agragar dependencias y distribuir paquetes
+  - **nvm**. Node Version Manager.
+
+
+- Si instalamos node de forma *simple* sólo tenemos una versión de node. La última.
+- Si trabajamos con múltiples proyectos puede ser que necesitemos varias versiones:
+- Nvm nos permite tener varias instaladas y seleccionar la que necesitemos en cada proyecto.
+
+
+
 ## Hola Mundo en node
 
 ![](./img/hola-mundo-consola-node.png)
@@ -96,6 +111,7 @@ $ echo $?
 
 >V8 compiles JavaScript directly to native machine code before executing it, instead of more traditional techniques such as interpreting bytecode or compiling the whole program to machine code and executing it from a filesystem. The compiled code is additionally optimized (and re-optimized) dynamically at runtime, based on heuristics of the code's execution profile. 
 [(wikipedia)](https://en.wikipedia.org/wiki/Chrome_V8)
+
 
 
 ## Características de node
@@ -224,6 +240,7 @@ console.log(`El contenido del fichero es este: ${data}`)
 
 
 ![](./img/es-evolution.png)
+![](./img/es-evolution2.png)
 
 
 ## Versiones actuales
@@ -233,7 +250,7 @@ console.log(`El contenido del fichero es este: ${data}`)
 
 - **ES2016** (ES7)
 
-- **ES2017** (ES8)
+- **ES2017** (ES8) ... **ES2019** (ES10) 
 
 - **ES.Next**: Término dinámico, se refiere a la próxima versión de ECMAScript.
 
@@ -245,7 +262,7 @@ console.log(`El contenido del fichero es este: ${data}`)
   - SpiderMonkey Firefox (GNOME, Adobe).
   - Chakra -  Microsoft IE y Edge
 - En Node es más sencillo porque:
-  - Solo hay un motor
+  - Solo hay un motor: v8
   - Nosotros elegimos su versión
 
 
@@ -512,7 +529,7 @@ module.exports = {
 
 ## Caso Práctico
 
-- [Hola Usuario](./1-hola.md)
+- [Hola Usuario](./hola.md)
 <!-- - [Hola Usuario 2](./1-hola.md#/0/13) -->
 
 
