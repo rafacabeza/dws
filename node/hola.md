@@ -23,7 +23,7 @@
 - Entender el funcionamiento de los módulos
   - Utilizar módulos del núcleo (os, fs)
   - Crear un módulo sencillo
-- Usar sintaxis de ES6 (*destructuring* y *template string*)
+- Usar sintaxis de ES6 (*[destructuring](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Operadores/Destructuring_assignment)* y *[template string](https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/template_strings)*)
 
 
 ## Comenzar proyecto

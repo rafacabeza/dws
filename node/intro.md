@@ -720,3 +720,31 @@ $ node_modules/.bin/eslint --init # o npx eslint --init
 - [Configuración sin Visual Code Editor](https://prettier.io/docs/en/eslint.html)
 
 
+
+## Configuración de npm
+
+- Cuando creemos un nuevo proyecto nos interesa que genere automaticamente datos como nuestro nombre o email
+- Ver [documentación para su configuación](https://docs.npmjs.com/) o mediante consola:
+  - *npm config --help* para ver los comandos de configuración
+
+
+```bash
+npm set init-author-name pepe
+npm set init-author-email pepe@pepe.com
+npm set init-author-url http://pepe.com
+npm set init-license MIT
+npm adduser   # login en npmjs.com. Necesiario para publicar
+```
+
+- Los cambios se guardan en el fichero $HOME/.npmrc
+- *npm adduser* genera un authtoken = login automático al publicar en el registro de npm
+
+
+## Versiones en node
+
+- Se utiliza [Semantic Versioning](http://semver.org/)
+- Formato versiones: ***major.minor.patch***
+  - **major**: Cambios en compatibilidad de API
+  - **minor**: Añade funcionalidad. Mantiene compatibilidad.
+  - **patch**: Soluciona bug. Mantiene compatibilidad.
+- ¡Puede obligarnos a cambiar el **major** muy a menudo!
