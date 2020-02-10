@@ -288,7 +288,7 @@ console.log(`El contenido del fichero es este: ${data}`)
 - Es el elemento que nos permite dividir un proyecto en unidades de código más pequeñas.
 
 
-## Módulos incorporados en Node.jsx
+## Módulos incorporados en Node.js
 - Node incorpora un buen número de módulos para ser utilizados en nuestros proyectos:
  - **fs** para el sistema de ficheros.
  - **os** para el sistema operativo.
