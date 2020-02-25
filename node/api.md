@@ -5,109 +5,122 @@
 ## Configurar Visual Studio Code
 
 
-## Multicursor
-- TODO:
+## Autocompletar código
+- Para que nos ayude a completar código usamos el atajo `ctrl+space`
+- Si este atajo lo usamos para otra cosa (p.ej. Albert) debemos añadir los siguientes atajos a nuestro gusto:
 
-
-## Duplicar, subir y bajar
-- TODO:
+```json
+{ 
+    "key": "ctrl+shift+space",            
+    "command": "editor.action.triggerSuggest",
+    "when": "editorHasCompletionItemProvider && textInputFocus && !editorReadonly" 
+},
+{ 
+    "key": "ctrl+shift+space",            
+    "command": "toggleSuggestionDetails",
+    "when": "suggestWidgetVisible && textInputFocus" 
+}
+```
 
 
 ## Estilo de código
 
-- Puede que colabore más gente en nuestra librería
-  - Queremos un estilo uniforme
+- Puede que nuestro proyecto sea desarrollado por varias personas.
+- Queremos un estilo uniforme
 - Y si nos detecta fallos mejor
-
-- Instalaremos eslint (*D* o *--save-dev*)
-
-  ```js
-  npm i -D eslint
-  ```
+- Vamos a ver que configuración necesitamos.
+- Podemos partir desde este *boilerplate*: https://github.com/rafacabeza/vscode_node_boilerplate
 
 
-## Configuración de eslint
-- Elegir estilo Standard --> Javascript
-```bash
-$ node_modules/.bin/eslint --init # o npx eslint --init
-? How would you like to configure ESLint?
-  Use a popular style guide
-? Which style guide do you want to follow?
-  Standard
-? What format do you want your config file to be in?
-  JSON
-? Would you like to install them now with npm?
-  Yes
+## Prettier
+- Vamos a añadir el complemento Prettier (Esben Petersen)
+- vamos a añadir la dependencia al proyecto: 
+
+```
+npm i -D prettier
 ```
 
-
-## Análisis configuración
-
-- Debemos cambiar nuestro código de src/index.js
-- *.eslintrc.json* tiene la configuración de nuestro linter
-- [Podríamos modificarla](https://eslint.org/docs/rules/), por ej:
-
+- Vamos a modificar algunas pautas para que prettier uniformice nuestro código (js, css, html, json). 
 ```json
+# Fichero *.prettierrc*
 {
-    "extends": "standard",
-    "rules": {
-        "prefer-const": "error",
-        "no-var": "error"
-    }
+  "trailingComma": "none",
+  "tabWidth": 2,
+  "semi": true,
+  "singleQuote": true
 }
 ```
 
-- Ayuda: Pulsa *CTRL + espacio* para autocompletado
+
+## ESLint: ECMAScript Linter
+
+- Además ESLint nos va a ayudar a depurar el código: detectar errores y corregir algunos.
+- ESLint puede usarse desde la consola pero nosotros queremos usarlo desde el editor.
+- Su configuración puede ser compleja. La definimos en el fichero *.eslintrc.json*
+- Además puede requerir varias dependencias, entre otras cosas para que VSCode lo pueda usar.
 
 
-## Modificaciones Visual Code Editor
-
-- VS Code viene con el complementos Prettier (Esben)
-- Queremos que Prettier se base en esLint
-- Su funcionamiento se basa en el fichero eslintrc
-- Modificaciones de eslint al guardar
-- Visual Code da sugerencias por ejemplo para cambiar el tipo de módulos de Node.JS (CommonJs, síncrono) a ES6 Modules (asíncrono).
-  - [No nos interesan](https://nodejs.org/api/esm.html): lo desactivaremos
-
-
-- Cambiamos las preferencias en Visual Code Editor:
-
-  - Ctrl+Shift+P : Preferences: Open Settings (JSON)
-  - Integrar Prettier con esLint
-  - Auto arreglar al guardar
-  - Desactivar sugerencias de javascript de Visual Code
-
-```json
-  "prettier.eslintIntegration": true,
-  "eslint.autoFixOnSave": true, //podríamos usar prettier-eslint
-  "javascript.suggestionActions.enabled": false
+- Dependencias de desarrollo que añadiremos a nuestro proyecto:
 ```
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-config-node": "^4.0.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-react": "^7.18.3",
+    "eslint-plugin-react-hooks": "^1.7.0",
+  }
+```
+- No te olvides de ejecutar ahora: `npm install`
 
 
-- Añadimos lo siguiente:
+- Crearemos el fichero .eslintrc.json con este contenido:
+```json
+{
+  "extends": ["airbnb", "prettier"],
+  "plugins": ["prettier"],
+  "rules": {
+    "prettier/prettier": "error",
+    "no-unused-vars": "warn",
+    "no-console": "off"
+  }
+}
+```
+- Las reglas las podemos añadir/modificar en rules
+- Vamos a usar el standard de codificación de airbnb.
+- Para ficheros javascript, eslin se ocupará de ejecutar prettier
+
+
+## Configurar VS Code
+- Nos falta añadir algunas reglas para que nuestro editor use los pluggins instalados:
+
+  - Que formatee al salvar, salvo el javascript.
+  - Que active ESLint para notificar errores de código (menu view->problems)
+  - Que arregle nuestro javascript al salvar (esto incluye pasar prettier)
+- Esto lo podemos hacer en el json general de VSCode
+- O sólo para el proyecto actual guardando el json en un fichero llamado *.vscode/settings.json*
+
+
+- Contenido guardado en **.vscode/settings.json**
 
 ```json
-  "editor.tabSize": 2,
-  "prettier.eslintIntegration": true,
-  "eslint.run": "onSave",
-  "eslint.autoFixOnSave": true, //podríamos usar prettier-eslint
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
-  "javascript.suggestionActions.enabled": false
+  "[javascript]": {
+    "editor.formatOnSave": false
+  },
+  "eslint.enable": true,
+  "eslint.alwaysShowStatus": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  }
+}
 ```
-
-
-- Observa que prettier tiene unas configuraciones por defecto:
-
-  ```json
-    // Whether to add a semicolon at the end of every line
-    "prettier.semi": true,
-
-    // If true, will use single instead of double quotes
-    "prettier.singleQuote": false,
-  ```
-
-- Debemos quedarnos con lo que se define en eslint, que es más parametrizable.
-- [Configuración sin Visual Code Editor](https://prettier.io/docs/en/eslint.html)
 
 
 
@@ -122,13 +135,6 @@ $ node_modules/.bin/eslint --init # o npx eslint --init
 - Conocer arquitecturas MVC
 - Familiarizarse con base de datos no relacional
 - Comprender las ventajas en JavaScript de MongoDB frente a bases de datos relacionales
-- Familiarizarse con el uso de contenedores (docker)
-
-
-## Pasos previos
-
-- Entender [como funciona un servidor express (proyecto anterior)](./5-express.md)
-- Tener claro [que es una API y una arquitectura API REST](./arquitectura-api-rest.md)
 
 
 ## Primeros pasos
