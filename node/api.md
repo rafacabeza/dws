@@ -760,7 +760,7 @@ db.dropDatabase()  //borrarla
 ```
 
 
-## Consultas
+## [Consultas](http://www.diegocalvo.es/tutorial-de-mongodb-con-ejemplos/)
 
 Consultar, filtrar y ordenar:
 
