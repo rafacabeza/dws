@@ -689,18 +689,38 @@ const index = function (req, res) {
 
 ## Instalación de MongoDB
 
-- https://universo-digital.net/como-instalar-mongodb-en-ubuntu-16-04/
+- Utilizaremos **contenedores docker**:
+  - Eliminamos conflictos en la máquina base
+  - Podemos cambiar de versiones con facilidad
+  - Nuestro proyecto es más portable
 
-- Al final:
-```bash
-  sudo systemctl start mongodb   //iniciar
-  sudo systemctl status mongodb   //comprobar estado
-  sudo systemctl enable mongodb   //activar el servicio
+
+## Fichero de instalación mediante docker
+
+- Definiremos un fichero *docker-compose.yml*
+- Para ver que imagen necesitamos podemos consultar en el [docker hub](https://hub.docker.com/)
+
+```yml
+version: '3'
+services:
+  mongodb:
+    hostname: mongodb
+    container_name: mongodb
+    image: mongo:4.0.1
+    volumes:
+      - ./mongodb-data:/data/db
+    ports:
+      - "27017:27017"
 ```
 
 
 ## Uso básico de MongoDb por consola
 
+- Accedemos al contenedor:
+
+```
+docker exec -it mongodb bash
+```
 - Usar/crear una base de datos
 
 ```
@@ -766,9 +786,17 @@ db.cervezas.delete({"id": 1})
 
 ## MongoDB: Aplicaciones gráficas
 
+- Vamos a usar [MongoDB Compass](https://www.mongodb.com/products/compass)
+- Robo3T guarda un listado de conexiones a MongoDB
+![Lista conexiones MongoDB](./img/compass-conexiones.png)
+
+
+
+## MongoDB: Aplicaciones gráficas
+
 - [Robo3T](https://robomongo.org/download)
   - Antes llamado **Robomongo**
-  - El más extendido, será el que utilicemos
+  - El más extendido
   - [Instalación en ubuntu](https://steemit.com/linux/@kennethpham/how-to-install-robo-3t-former-robomongo-on-linux-ubuntu) 
 
 <!-- ## Robo3T: Instalar y configurar
