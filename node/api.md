@@ -724,7 +724,8 @@ docker exec -it mongodb bash
 - Usar/crear una base de datos
 
 ```
-use mibasededatos
+mongo //entramos en el CLI
+use mibasededatos  //usamos una BBDD
 ```
 
 - Ver la o las bases de datos
@@ -787,14 +788,11 @@ db.cervezas.delete({"id": 1})
 ## MongoDB: Aplicaciones gráficas
 
 - Vamos a usar [MongoDB Compass](https://www.mongodb.com/products/compass)
-- Robo3T guarda un listado de conexiones a MongoDB
-![Lista conexiones MongoDB](./img/compass-conexiones.png)
-
 
 
 ## MongoDB: Aplicaciones gráficas
 
-- [Robo3T](https://robomongo.org/download)
+- TAmbién podríamos usar [Robo3T](https://robomongo.org/download)
   - Antes llamado **Robomongo**
   - El más extendido
   - [Instalación en ubuntu](https://steemit.com/linux/@kennethpham/how-to-install-robo-3t-former-robomongo-on-linux-ubuntu) 
