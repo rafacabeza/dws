@@ -901,7 +901,10 @@ npm i -S mongoose
 const mongoose = require('mongoose')
 
 const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/web'
-mongoose.connect(MONGO_URL, { useNewUrlParser: true })
+mongoose.connect(MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
 
 mongoose.connection.on('connected', () => {
   console.log(`Conectado a la base de datos: ${MONGO_URL}`)
@@ -961,7 +964,7 @@ require('./db')
 ## Modelos
 
 - Un modelo mongoose debe definir un esquema
-- Fichero *app/models/Cerveza.js*):
+- Fichero *app/models/v2/Cerveza.js*):
 
 ```js
 const mongoose = require('mongoose')
@@ -1098,7 +1101,7 @@ http://localhost:8080/api/cervezas/search?q=regaliz
 ## Listar cervezas
 
 ```js
-const Cerveza = require('../models/Cerveza')
+const Cerveza = require('../models/v2/Cerveza')
 
 const list = (req, res) => {
   Cerveza.find((err, cervezas) => {
@@ -1295,7 +1298,7 @@ module.exports = {
 
 ##  Mongoose II: La mangosta
 
-- Hemos completado el ciclo CRUD pero no hemos pasado de puntillas sobre Mongo y Mongoose
+- Hemos completado el ciclo CRUD pero hemos pasado de puntillas sobre Mongo y Mongoose
 - Vamos a estudiar como construir nuestras propias colecciones y modelos Mongo/Mongoose
 
 
@@ -1326,7 +1329,7 @@ Son:
 - crear índices para permitir que los datos se obtengan más rápido
 
 
-### Sobre los String podemo:
+### Sobre los String podemos:
 
 - convertirlo a minúsculas
 - convertirlo a mayúsculas
@@ -1397,7 +1400,7 @@ Ejemplo más completo:
 var authorSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     name: {
-            firstName: String,
+        firstName: String,
         lastName: String
     },
     biography: String,
