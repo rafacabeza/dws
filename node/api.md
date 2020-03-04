@@ -1586,13 +1586,24 @@ Author.findByIdAndUpdate('59b31406beefa1082819e72f',
 
 ## Ejercicio 1:
 
-- Crea una una colección  productos en la BBDD web
+- Crea una una colección de tipos de productos (*families*) en la BBDD web
 - Crea crea un modelo para dicha coleccion.
+    - code: código, requerido, texto de longitud máxima 4 caracteres
     - name: requerido, máximo 20 caracteres
+- Crea las rutas y el controlador para gestionar los productos.
+
+
+## Ejercicio 2:
+
+- Crea una una colección  productos (*products*) en la BBDD web
+- Crea crea un modelo para dicha coleccion.
+    - name: requerido, máximo 30 caracteres
     - price: requerido, numérico
     - description: máximo 255 caracteres.
     - created: fecha de creación
+    - family: requerido, relación con el modelo de familias.
 - Crea las rutas y el controlador para gestionar los productos.
+- Usa populate para mostrar los datos de la familia en el detalle y en la lista de productos.
 
 
 
@@ -1865,7 +1876,7 @@ function login(req, res) {
 ``` -->
 
 
-### Tarea:
+### Ejercicio 3:
 
 - Crea un directorio *middlewares* y crea un middleware llamado *auth.js*
 - Coloca en él el código de autenticación
