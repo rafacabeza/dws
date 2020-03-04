@@ -1869,5 +1869,5 @@ function login(req, res) {
 
 - Crea un directorio *middlewares* y crea un middleware llamado *auth.js*
 - Coloca en él el código de autenticación
-- Refactoriza el ocntrolador de cervezas para que use ese middleware
-- Úsa el middleware en el controlador de productos.
+- Refactoriza el controlador de cervezas para que use ese middleware
+- Usa el middleware en el controlador de productos.
