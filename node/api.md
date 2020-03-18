@@ -724,7 +724,8 @@ docker exec -it mongodb bash
 - Usar/crear una base de datos
 
 ```
-use mibasededatos
+mongo //entramos en el CLI
+use mibasededatos  //usamos una BBDD
 ```
 
 - Ver la o las bases de datos
@@ -759,7 +760,7 @@ db.dropDatabase()  //borrarla
 ```
 
 
-## Consultas
+## [Consultas](http://www.diegocalvo.es/tutorial-de-mongodb-con-ejemplos/)
 
 Consultar, filtrar y ordenar:
 
@@ -787,14 +788,11 @@ db.cervezas.delete({"id": 1})
 ## MongoDB: Aplicaciones gráficas
 
 - Vamos a usar [MongoDB Compass](https://www.mongodb.com/products/compass)
-- Robo3T guarda un listado de conexiones a MongoDB
-![Lista conexiones MongoDB](./img/compass-conexiones.png)
-
 
 
 ## MongoDB: Aplicaciones gráficas
 
-- [Robo3T](https://robomongo.org/download)
+- TAmbién podríamos usar [Robo3T](https://robomongo.org/download)
   - Antes llamado **Robomongo**
   - El más extendido
   - [Instalación en ubuntu](https://steemit.com/linux/@kennethpham/how-to-install-robo-3t-former-robomongo-on-linux-ubuntu) 
@@ -903,7 +901,10 @@ npm i -S mongoose
 const mongoose = require('mongoose')
 
 const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/web'
-mongoose.connect(MONGO_URL, { useNewUrlParser: true })
+mongoose.connect(MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
 
 mongoose.connection.on('connected', () => {
   console.log(`Conectado a la base de datos: ${MONGO_URL}`)
@@ -963,7 +964,7 @@ require('./db')
 ## Modelos
 
 - Un modelo mongoose debe definir un esquema
-- Fichero *app/models/Cerveza.js*):
+- Fichero *app/models/v2/Cerveza.js*):
 
 ```js
 const mongoose = require('mongoose')
@@ -1100,7 +1101,7 @@ http://localhost:8080/api/cervezas/search?q=regaliz
 ## Listar cervezas
 
 ```js
-const Cerveza = require('../models/Cerveza')
+const Cerveza = require('../models/v2/Cerveza')
 
 const list = (req, res) => {
   Cerveza.find((err, cervezas) => {
@@ -1297,7 +1298,7 @@ module.exports = {
 
 ##  Mongoose II: La mangosta
 
-- Hemos completado el ciclo CRUD pero no hemos pasado de puntillas sobre Mongo y Mongoose
+- Hemos completado el ciclo CRUD pero hemos pasado de puntillas sobre Mongo y Mongoose
 - Vamos a estudiar como construir nuestras propias colecciones y modelos Mongo/Mongoose
 
 
@@ -1328,7 +1329,7 @@ Son:
 - crear índices para permitir que los datos se obtengan más rápido
 
 
-### Sobre los String podemo:
+### Sobre los String podemos:
 
 - convertirlo a minúsculas
 - convertirlo a mayúsculas
@@ -1399,7 +1400,7 @@ Ejemplo más completo:
 var authorSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     name: {
-            firstName: String,
+        firstName: String,
         lastName: String
     },
     biography: String,
@@ -1585,13 +1586,24 @@ Author.findByIdAndUpdate('59b31406beefa1082819e72f',
 
 ## Ejercicio 1:
 
-- Crea una una colección  productos en la BBDD web
+- Crea una una colección de tipos de productos (*families*) en la BBDD web
 - Crea crea un modelo para dicha coleccion.
+    - code: código, requerido, texto de longitud máxima 4 caracteres
     - name: requerido, máximo 20 caracteres
+- Crea las rutas y el controlador para gestionar los productos.
+
+
+## Ejercicio 2:
+
+- Crea una una colección  productos (*products*) en la BBDD web
+- Crea crea un modelo para dicha coleccion.
+    - name: requerido, máximo 30 caracteres
     - price: requerido, numérico
     - description: máximo 255 caracteres.
     - created: fecha de creación
+    - family: requerido, relación con el modelo de familias.
 - Crea las rutas y el controlador para gestionar los productos.
+- Usa populate para mostrar los datos de la familia en el detalle y en la lista de productos.
 
 
 
@@ -1888,11 +1900,11 @@ function login(req, res) {
 ``` -->
 
 
-### Tarea:
+### Ejercicio 3:
 
 - Crea un directorio *middlewares* y crea un middleware llamado *auth.js*
 - Coloca en él el código de autenticación
-- Refactoriza el ocntrolador de cervezas para que use ese middleware
+- Refactoriza el controlador de cervezas para que use ese middleware
 - Úsa el middleware en el controlador de productos.
 
 
