@@ -1597,9 +1597,17 @@ Author.findByIdAndUpdate('59b31406beefa1082819e72f',
 
 ## Autenticación JWT
 
-- REST significa 
+- RESTful define arquitecturas sin estado.
 - Sin estado implica no guardar en el servidor ninguna estructura de datos de sesión ni usar cookies.
 - La autentinticación en este entorno está basada en tokens.
+- Una implementación muy habitual es Json Web Token (JWT)
+
+
+- Para llevar a cabo el uso de JWT necesitamos algunas dependencias:
+  - jwt-simple, paquete que gestiona los jwt
+  - bcryptjs  , encriptado
+  - moment    , uso de fechas
+- Debemos intalar todas ellas con "npm i -S ..."
 
 
 ### Login: rutas y controlador
@@ -1650,7 +1658,7 @@ module.exports = {
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 //cifrado de passwords.
-const bcrypt = require('bcrypt-nodejs')
+const bcrypt = require('bcryptjs')
 
 //aquí falta lo importante
 
@@ -1684,11 +1692,14 @@ const UserSchema = new Schema({
   - *save*
   - *remove*
   - *init*
+
+
 - Podemos añadir funciones pro/post de las anteriores
 - Este código lo añadiremos al modelo.
+- Nosotros necesitamos que antes de salvar un nuevo usuario genere un nuevo token.
 
 
-- Nuestro modelo: middleware *pre - al salvar*
+- Nuestro caso: middleware *pre - al salvar*
   - Hacemos uso de los [middleware](https://mongoosejs.com/docs/middleware.html) de Mongoose 
   - NOTA: no usar aquí función flecha.
 
@@ -1779,7 +1790,20 @@ module.exports = { createToken }
 ```
 
 
+Ojo!! necesitamos crear el fichero de configuración **config/config.js**
+```js
+module.exports = {
+  SECRET: 'ClaveSecretaDeCifrado'
+};
+```
+
+
 ### Proteger rutas:
+
+- El token transporta de forma cifrada información del usuario.
+- Vamos a añadir una función de descifrado en el *auth*
+- Esa función la vamos a usar en un middleware asociado a las rutas
+
 
 - Añadimos este middleware en el enrutador de cervezas o productos. Así protegemos todas las rutas:
 
@@ -1870,3 +1894,7 @@ function login(req, res) {
 - Coloca en él el código de autenticación
 - Refactoriza el ocntrolador de cervezas para que use ese middleware
 - Úsa el middleware en el controlador de productos.
+
+
+
+## Asincronía: callbacks, promesas y async-await
