@@ -10,6 +10,7 @@
 ## PHP
 * [Introducción](php/introduccion.md)
 * [MVC y BBDD](php/mvc.md)
+<!-- 
 * [MVC y BBDD (viejo)](php/mvc-y-bbdd.md)
     * [Conexión a BBDD](php/mvc-y-bbdd/conexion-a-bbdd.md)
     * [MVC](php/mvc-y-bbdd/mvc.md)
@@ -20,6 +21,7 @@
     * [Paginacion](php/mvc-y-bbdd/paginacion.md)
     * [Fechas](php/mvc-y-bbdd/fechas.md)
 * [Ejercicio CRUD Book](php/ejercicio-crud-book.md)
+-->
 
 ## JAVA EE
 * [Entorno](java-ee/introduccion.md)
