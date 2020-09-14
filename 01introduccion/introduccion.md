@@ -14,7 +14,7 @@ El desarrollo de aplicaciones web se apoya en la  arquitectura cliente-servidor.
 
 
 - La solicitud que hacen los clientes al servidor se le llama petición (__request__) 
-- Lo que el servidor devuelve a dicho cliente le llamamos respuesta (__request__).
+- Lo que el servidor devuelve a dicho cliente le llamamos respuesta (__response__).
 - Estos términos son los usados por el protocolo HTTP y los encontrarés en cualquier lenguaje DWS.
 
 
