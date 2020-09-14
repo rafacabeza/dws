@@ -4,20 +4,8 @@
 
 ## Introducción
 * [Introducción](01introduccion/introduccion.md)
-    * [El servicio HTTP](01introduccion/el-servicio-http.md)
-    * [Entorno de trabajo](01introduccion/entorno-de-trabajo.md)
-        * [Linux](01introduccion/ubuntu.md)
-        * [Windows](01introduccion/windows.md)
-    * [Git](01introduccion/Git/git.md)
-        * [Introducción](01introduccion/Git/empezando.md)
-        * [Trabajo Local](01introduccion/Git/trabajo-local.md)
-        * [Repositorios  remotos](01introduccion/Git/repositorios--remotos.md)
-        * [Historia](01introduccion/Git/historia.md)
-        * [Ramas](01introduccion/Git/ramas.md)
-    * [Sublime Text](01introduccion/SublimeText/README.md)
-        * [Leccion 1](01introduccion/SublimeText/leccion-1.md)
-        * [Leccion 2](01introduccion/SublimeText/leccion-2.md)
-        * [Leccion 3](01introduccion/SublimeText/leccion-3.md)
+    * [HTTP](01introduccion/introduccion.md#http)
+    * [Entorno de trabajo](01introduccion/introduccion.md#entorno-de-trabajo.md)
 
 ## PHP
 * [Introducción](php/introduccion.md)
