@@ -43,5 +43,5 @@ La nota final obtenida en este módulo es la media aritmética de dos elementos 
 * [UT02: Introducción al lenguaje PHP y Java EE. 36 h.](/php/introduccion.md)
 * [UT03: El patrón MVC. Acceso a BBDD. 36 h.](/php/mvc.md)
 * [UT04: Uso de frameworks. 36 h.](/Laravel/laravel6.md)
-* [UT05: Aplicaciones web dinámicas. AJAX. Servicios web. 36 h.](/node.js/intro.md)
+* [UT05: Aplicaciones web dinámicas. AJAX. Servicios web. 36 h.](/node/intro.md)
 * [UT06: Aplicaciones web híbridas. 36 h.](/aplicaciones-hibridas/)
