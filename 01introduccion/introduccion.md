@@ -253,7 +253,7 @@ pero aquí tenemos un amplio resumen
 
 
 
-## Entorno de  trabajo
+# Entorno de  trabajo
 
 - Vamos a usar Linux como entorno de trabajo. En concreto una máquina virtual con Linux Mint ya instalado.
 - Enlace...
