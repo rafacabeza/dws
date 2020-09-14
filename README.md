@@ -40,7 +40,7 @@ La nota final obtenida en este módulo es la media aritmética de dos elementos 
 ## Temas
 
 * [UT01: Plataformas de programación web en entorno servidor. 9 h.](/01introduccion/introduccion.md)
-* [UT02: Introducción al lenguaje PHP y Java EE. 36 h.](/php/introduccion.md)
+* [UT02: Introducción al lenguaje PHP y Java EE. 36 h.](/php/README.md)
 * [UT03: El patrón MVC. Acceso a BBDD. 36 h.](/php/mvc.md)
 * [UT04: Uso de frameworks. 36 h.](/Laravel/laravel6.md)
 * [UT05: Aplicaciones web dinámicas. AJAX. Servicios web. 36 h.](/node/intro.md)
