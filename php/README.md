@@ -58,3 +58,88 @@ git clone git@github.com:rafacabeza/entornods.git
 - Conectese a http://phpmyadmin.docker e importe el script citado.
 - Pruebe a acceder ahora de nuevo a http://web1.com/ 
 - Analiza lo ocurrido y crea otro sitio web en el mismo entorno llamado web3 (web3.com).
+
+
+
+## Primeros pasos
+
+- Damos por hecho que el alumno tiene una base de programación y de orientación a objetos.
+- Vamos a hacer un recorrido rápido sobre las bases de PHP.
+- Para completar información respecto a lo que aquí se cuenta el mejor sitio
+    es la documentación oficial  <a href="http://php.net/manual/es/"> php.net/manual/es/ </a>
+
+
+- El objetivo esta documentación es ayudar al aprendizaje rápido del lenguaje 
+PHP por parte de estudiantes de 2º curso de Desarrollo de Apliaciones Web. 
+No obstante pueden ser útiles por aquellos que ya conozcan otros lenguajes 
+de programación como JAVA, C++ o C#.
+- Por este motivo se omitirá mucho contenido teórico sobre lo que es un 
+lenguaje de programación orientado a objetos.
+Igualmente, las explicaciones de sintaxis serán mínimas, pues la sintaxis es
+muy parecida a los citadso lenguajes.
+
+
+### ¿Qué es PHP?
+
+- PHP (acrónimo recursivo de "PHP: Hypertext Preprocessor") es un lenguaje de código abierto muy popular especialmente adecuado para el desarrollo web y que puede ser incrustado en HTML. 
+
+```php
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Ejemplo</title>
+    </head>
+    <body>
+
+        <?php
+            echo "¡Hola, soy un script de PHP!";
+        ?>
+
+    </body>
+</html>
+```
+
+
+- PHP está construído a partir de Perl
+- Perl está basado en C.
+- Las variables son al estilo Perl
+- La sintáxis es muy similar a C (y por tanto a Java)
+
+
+### Marcado:
+
+- Los ficheros php deben tener extensión ".php"
+- El php puede estar embebido en código html
+    - Los fragmentos de php deben ir etiquetasdos entre `<?php ?>`
+- O pueden ser ficheros código php puro.
+    - Sólo debe aparecer al inicio la marca de apertura: `<?php`
+    ```php
+    echo "Hola mundo!";
+    ```
+
+
+### Variables y tipos
+
+- Los tipos básicos son:
+    - Entero: número entero con signo
+    - Flotante: número decimal con signo
+    - Booleano: vale true o false
+    - Cadena de caracteres: cadena de caracteres delimitada por comillas simples o dobles.
+
+
+- Las variables deben comenzar por dolar: `$miVariable`
+- No deben ser definidas previamente
+- No tienen un tipo fijo.
+- Deben segir notación de estilo `$camelCase`;
+- Podemos consultar si una variable está definida y su tipo de dato:
+    - isset($num)
+
+
+- Las constantes se crear usarndo la palabra
+
+
+### Operadores
+
+
+### Operadores
+
