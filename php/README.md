@@ -255,20 +255,248 @@ git clone git@github.com:rafacabeza/entornods.git
 
 
 ## Arrays
-### Declarar un array
+
+- En Php un array es un tipo de dato compuesto. Es una colección de datos.
+- En un array hay una asociación entre cada valor y su clave de acceso.
+- Las claves pueden ser:
+  - Números: arrays ordenados.
+  - Cadenas de texto: arrays asociativos (mapas).
+
+
+### Declarar un array ordenado:
+
+- Podemos usar los corchetes o la función `array`.
+
+  ```php
+  $frutas = ['manzana', 'naranja', 'uva'];
+  $frutas = array('manzana', 'naranja', 'uva');
+  $frutas = [0 => 'manzana', 1 => 'naranja', 2 => 'uva'];
+  $frutas = array(0 => 'manzana', 1 => 'naranja', 2 => 'uva');
+  //las cuatro sentencias son equivalentes
+  ```
+
+- Ojo, podríamos combinar tipos de datos:
+
+  ```php
+  $array = [2, 'naranja', 3.1416];
+  ```
+
+- Y acceder así:
+
+  ```php
+  echo "Me gusta la $frutas[2]";
+  ```
+
+
 ### Añadir y quitar elementos
+
+Podemos añadir elementos. El array crece a demanda:
+
+  ```php
+  $frutas[] = 'manzana'; // si fruta está vacío, posición 0
+  $frutas[] = 'naranja'; // ahora posición 1
+  $frutas[2] = 'uva'; //ahora posición 2 porque lo ponemos, o cualquier otra.
+  ```
+
+Y podemos eliminar elementos:
+
+  ```php
+  unset($frutas[1]);  
+  ```
+
+
 ### Recorrer un array
 
+- Lo ideal es usar un bucle `foreach`. Hay dos variantes:
+```php
+//si no nos preocupa la clave de cada valor
+foreach ($frutas as $fruta){
+    echo $fruta . '<br>';
+}
+foreach ($frutas as $clave => $fruta){
+    echo $clave . ": " . $fruta . '<br>';
+}
+```
+
+
+### Arrays asociativos
+
+- En un array asociativo las **claves** para referenciar cada **valor** son *strings*.
+- Para declarar un array o añadir elementos:
+
+  ```php
+  //podemos declarar un array:
+  $alumno = array (
+      'id' => 5,
+      'nombre' => 'Manuel',
+      'apellido' => 'García López',
+      'edad' => 23
+  );
+  $alumno['sexo'] = "V"; //y podemos añadir elementos 
+  ```
+
+
+- Igualmente podemos usar foreach en cualquiera de sus variantes.
+- Y podemos acceder a un valor usando corchetes: $alumno['nombre'] = "Juan";
+
+
+### Arrays multidimensionales
+
+- Un elemento de un array puede ser otro array.
+- Esto nos permite definir arrays de dos o más dimensiones.
+
+```php
+$filas  = [
+    0 => [11, 12],
+    1 => [21, 22],
+    3 => [31, 32]
+];
+```
 
 
 
 ## Formularios
+
+- Los formularios son la forma más común de enviar información del cliente al servidor.
+- Vamos a ver en qué consiste.
+
+
+### HTML
+
+- ¿Qué puedo encontrar en un formulario?
+  - La etiqueta form que define el método (*method* *get* o *post*)
+  - El destinatario (*action*)
+  - Y los datos a rellenar o inputs
+
+```html
+
+<form action="/ruta_destino" method="get">
+    <input type="text" name="nombre" value="">
+    <input type="password" name="password" value="">
+    <input type="hidden" name="secreto" value="">
+    <input type="submit" value="enviar">
+</form>
+```
+
+
+- El método GET envía los datos en la cabecera. 
+  - Los datos se ven en la barra del navegador. 
+  - Pueden usarse en enlaces.
+
+  ```
+  http://misitioweb.com/destino.php?nombre="juan"&edad="16"
+  ```
+
+- El método POST envía los datos en el cuerpo. Es más seguro.
+  ```
+  http://misitioweb.com/destino.php
+  ```
+
+
+- Normalmente el formulario lo crea un fichero y recibe sus datos otro fichero indicado en el *action*.
+- El *action* puede:
+  - Usar rutas absolutas  (**RECOMENDABLE**)
+   
+  ```php
+  action="/destino.php"
+  ```
+
+  - Usar rutas relativas
+  ```php
+  action="destino.php"
+  ``` 
+  - Hacer referencia al fichero actual
+  ```php
+  `action="#"`
+  ```
+
+
+- Los input que debéis usar son los del ejemplo: text, password, hidden y submit.
+- No debéis usar tipos como numeric o date. Estos tipos mejoran la esperiencia de usuario pero no permiten probar algunas cosas en el servidor. **No nos interesa usarlos en este módulo**
+
+
 ### Variables superglobales
-### Uso de métodos GET y POST
+
+- Las variables superglobales son creadas por el sistema.
+- Las variables que podemos encontrar son:
+  <small>
+
+    - $_SERVER. Inf. del script actual y del servidor.
+    - $_GET. Datos formulario con método GET.
+    - $_POST. Idem con método POST.
+    - $_FILES. Ficheros enviados en un formulario.
+    - $_COOKIE. Cookies (para más adelante)
+    - $_REQUEST. Combina las tres anteriores.
+    - $_SESSION. Datos de sesión (para más adelante)
+  
+  </small>
+
+
+
+### Recepción de datos
+
+- Los datos se reciben así:
+  ```php
+  $nombre = $_GET['nombre']; //si el método es GET
+  $nombre = $_POST['nombre']; //si es POST
+  $nombre = $_REQUEST['nombre'];//válido en ambos casos
+  ```
+- Puede ser conveniente comprobar si existe la variable:
+
+```php
+if (isset($_GET['nombre'])) {
+  $nombre = $_GET['nombre'];
+} else {
+  $nombre = '';
+}
+```
+
+
+### Uso de checkbox y de radio
+
+
+### Uso de select
+
+
 ### Enviar formularios al script de origen
+
+
 ### Usar arrays en formularios
+
+
 ### Usar elementos ocultos en formularios
 
+
+#### Ejercicio
+
+- Crea un formulario para enviar los datos de registro de un libro: título, autor, editorial, pá<ginas class=""></ginas>
+
+
+#### Ejercicio
+
+- Crea un formulario para enviar campo nombre. Si el nombre existe se da un saludo. Si no existe se vuelve atrás indicando que el campo es obligatorio.
+
+
+#### Ejercicio
+
+- Crea un formulario para enviar campo nombre. El nombre debe existir y debe tener un tamaño mínimo de 3 caracteres. Si es válido se da un saludo. Si no lo es se vuelve atras indicando que el campo es obligatorio y mostrando en el "input" el valor anterior no válido.
+
+
+#### Ejercicio
+
+- Crea un formulario que funcione como calculadora. Debe contener dos input como operandos y un select para elegir operador.
+  - Si se reciben los datos muestra el resultado. 
+  - Si no son válidos o no existen debe devolver a la página anterior.
+
+
+#### Ejercicio
+
+- Crea un formulario que envíe un array de 3 nombres. Para hacerlo debes usar el mismo nombre en todos los input (name="nombres[]").
+
+
+#### Ejercicio
+
+- Inspírate en el anterior. Crea un formulario que envíe un nombre. El action debe ser el mismo script. Muestra el nombre recibido en un input. Añade otro input vacío para un nuevo nombre. A cada pulsación, la lista de nombres debe ir creciendo.
 
 
 ## Funciones 
