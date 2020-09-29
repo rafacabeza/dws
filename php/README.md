@@ -3,6 +3,13 @@
 
 ## Entorno de desarrollo.
 
+- El enfoque tradicional sería usar una máquina con windows o linux y:
+  - Servidor web. Típicamente Apache 2.
+  - Servidor de bases de datos. Típicamente Mysqsl.
+  - Entorno de administración de bases de datos. Típicamente PhpMyAdmin.
+- Yo opto por usar `docker`. Esto me da más seguridad respecto al entorno usado por los alumnos.
+
+
 - Vamos a partir del entorno de desarrollo preparado con docker:
 
 https://github.com/rafacabeza/entornods
@@ -15,13 +22,35 @@ git clone git@github.com:rafacabeza/entornods.git
 ```
 
 
-- Entorno Docker para el módulo de Desarrollo Web en Entorno Servidor
+- Obtenemos un entorno docker para desarrollar en php:
+  - Uno o más servicios web.
+  - Un servicio de base de datos Mysql
+  - Un servicio PhpMyAdmin para administrar las bases de datos.
+
+
+- Para gestionarlo necesitamos la consola y necesitamos ir a la carpeta que lo contine.
+  
+  ```
+  cd entornods
+  ```
+
 - Iniciar servicio:
-    `docker-compose up -d`
+  
+  ```
+  docker-compose up -d
+  ```
+
 - Parar servicio:
-    `docker-compose down`
+  
+  ```
+  docker-compose down
+  ```
+
 - Ver máquinas corriendo:
-    `docker-compose ps`
+  
+  ```
+  docker-compose ps
+  ```
 
 
 - En este entorno se van a usar tres sitios web de prueba. Para poder usarlos debemos *engañar* al DNS.
@@ -80,19 +109,77 @@ git clone git@github.com:rafacabeza/entornods.git
 
 
 ### Entorno
-- Vamos a cambiar a la rama ejercicios de nuestro "entornods"
-- Añadimos una entrada al fichero `/etc/hosts`
 
-  ```bash
+- El repositorio entornods está en su rama master. Ahí tenemos los servicios que hemos explicado.
+- Pero ahora no necesitamos web1 ni web2. Necesitamos un servicio para hacer ver ejemplos y hacer ejercicios.
+- El uso de ramas en *git* me permite hacer esto fácilmente
+
+
+- Vamos a cambiar a la rama ejercicios de nuestro "entornods"
+  ```
+  cd ~/entornods
+  git checkout --track origin/ejercicios
+  ```
+- Nuestro docker-compose ya está preparado para servir el contendio de "data/ejercicios". Examina el fichero docker-composer.yml para comprobarlo.
+
+
+- Lo siguiente es crear ese directorio *data/ejercicios*. 
+- Podríamos hacerlo desde 0 pero vamos a usar el [repositorio que a hemos preparado para eso](https://github.com/rafacabeza/ejerciciciosphp/).
+- Ese repositorio es propiedad del profesor. Me sirve para descargarme cosas pero no para guardar mis soluciones.
+
+
+- Por eso no me interesa hacer un "clon" sino un "fork".
+  - Hacer un clon consiste en descargar el código del profesor (no me intereasa).
+  - Hacer un fork consiste en copiar el repositorio del profesor en el espacio de GitHub del alumno.
+  - Ese repositorio resultante es el que debe ser clonado.
+
+  ```
+  cd data
+  git clone git@github.com:USUARIO_ALUMNO_EN_GITHUB/ejerciciciosphp.git
+  ```
+
+
+- Una vez clonado, nuestro repositorio local está vinculado al que guardamos en GitHub
+- Podemos comprobarlo ejecutando:
+  
+  ```
+  cd ejercicios
+  git remote -v  
+  ```
+
+- El resultado indica algo así:
+
+  ```
+  origin	git@github.com:USUARIO_ALUMNO_EN_GITHUB/ejerciciciosphp.git (fetch)
+  origin	git@github.com:USUARIO_ALUMNO_EN_GITHUB/ejerciciciosphp.git (push)
+  ```
+
+
+- Como vermos más adelante, me puede interesar vincular un repositorio local a dos remotos:
+  - El mío (alumno) con mis ejercicios.
+  - El del profesor, por si añade ejemplos o enunciados de problemas.
+- Para hacerlo:
+
+  ```
+  cd ejercicios
+  git remote add rafa git@github.com:rafacabeza/ejerciciciosphp.git
+  ```
+
+
+- Nos falta preparar el fichero  `/etc/hosts`. Debemos añadir:
+
+  ```
   127.0.0.1     ejercicios.local
   ```
 
-- Clonamos el directorio [ejercicios](https://github.com/rafacabeza/ejerciciciosphp)
-- Levantamos el servicio: 
+- Ya casí está. Vamos a "entornods", paramos los servicios y los vovemos a levantar:
 
   ```bash
+  cd ~/entornods
+  docker-compose down
   docker-compose up -d
   ```
+- Y vamos a nuestro navegador: http://ejercicios.local
 
 
 
