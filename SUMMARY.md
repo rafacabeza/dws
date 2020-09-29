@@ -1,8 +1,9 @@
 # Summary
 
 * [Presentación](README.md)
-* [Introducción](01introduccion/introduccion.md)
-* [PHP](php/README.md)
+
+1. [Introducción](01introduccion/introduccion.md)
+2. [PHP](php/README.md)
 
 ## Laravel
 * [Laravel 6.*](Laravel/laravel6.md)
