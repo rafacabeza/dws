@@ -1,44 +1,8 @@
 # Summary
 
 * [Presentación](README.md)
-
-## Introducción
 * [Introducción](01introduccion/introduccion.md)
-    * [HTTP](01introduccion/introduccion.md#http)
-    * [Entorno de trabajo](01introduccion/introduccion.md#entorno-de-trabajo.md)
-
-## PHP
-* [Introducción](php/introduccion.md)
-* [MVC y BBDD](php/mvc.md)
-<!-- 
-* [MVC y BBDD (viejo)](php/mvc-y-bbdd.md)
-    * [Conexión a BBDD](php/mvc-y-bbdd/conexion-a-bbdd.md)
-    * [MVC](php/mvc-y-bbdd/mvc.md)
-        * [Front Controller](php/mvc-y-bbdd/mvc/front-controller.md)
-        * [CRUD: index](php/mvc-y-bbdd/mvc/crud-index.md)
-        * [Relaciones](php/mvc-y-bbdd/mvc/relaciones.md)
-    * [Namespaces](php/mvc-y-bbdd/namespaces.md)
-    * [Paginacion](php/mvc-y-bbdd/paginacion.md)
-    * [Fechas](php/mvc-y-bbdd/fechas.md)
-* [Ejercicio CRUD Book](php/ejercicio-crud-book.md)
--->
-
-## JAVA EE
-* [Entorno](java-ee/introduccion.md)
-    * [Entorno Linux](java-ee/entorno/entorno-linux.md)
-    * [Git](java-ee/entorno/git.md)
-* [JSP y Servlets](java-ee/jsp-y-servlets.md)
-    * [Servlets](java-ee/jsp-y-servlets/servlets.md)
-    * [JSP](java-ee/jsp-y-servlets/jsp.md)
-    * [BBDD & MVC](java-ee/jsp-y-servlets/bbdd-and-mvc.md)
-* [Trabajo](java-ee/trabajo.md)
-
-## Spring Java
-* [Spring MVC](java-ee/spring/README.md)
-    * [Plantilla](java-ee/spring/plantilla.md)
-* [JSTL](java-ee/spring/jstl.md)
-* [Root Context](java-ee/spring/root-context.md)
-* [JPA](java-ee/spring/jpa.md)
+* [PHP](php/README.md)
 
 ## Laravel
 * [Laravel 6.*](Laravel/laravel6.md)
