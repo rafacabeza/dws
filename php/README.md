@@ -469,7 +469,7 @@ if (isset($_GET['nombre'])) {
 
 #### Ejercicio
 
-- Crea un formulario para enviar los datos de registro de un libro: título, autor, editorial, pá<ginas class=""></ginas>
+- Crea un formulario para enviar los datos de registro de un libro: título, autor, editorial, páginas.
 
 
 #### Ejercicio
