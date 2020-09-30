@@ -539,19 +539,40 @@ if (isset($_GET['nombre'])) {
 ```
 
 
-### Uso de checkbox y de radio
+### Elegir entre varias opciones:checkbox, radio y select
+
+- Para entender las posibilidades debes analizar el ejemplo 11.
 
 
-### Uso de select
+- Si queremos elegir uno entre varios podemos usar
+  - Radio: 
+
+  ```
+  <input type="radio" name="sexo" value="male" checked> Varón <br>
+  <input type="radio" name="sexo" value="female"> Mujer <br>
+  ```
+
+  - Select:
+
+  ```
+  <select name="color">
+      <option>rojo</option>
+      <option>azul</option> 
+      ...
+      <option selected>blanco</option>
+  </select>
+  ```
+<small>MIRA BIEN: para preseleccionar una opción debemos usar checker o selected.</small>
 
 
-### Enviar formularios al script de origen
+- Si queremos seleccionar varios entre varios debemos usar checkbox (o select multiple).
+- En ambos casos nos interesa recibir un array con la colección de *varios* elegida.
+- En PHP, debemos nombrar a nuestros inputs (o select) con corchetes:
 
-
-### Usar arrays en formularios
-
-
-### Usar elementos ocultos en formularios
+  ```
+  <input type="text" name="ideas[]"> 
+  <input type="text" name="ideas[]"> 
+  ```
 
 
 #### Ejercicio
@@ -566,12 +587,12 @@ if (isset($_GET['nombre'])) {
 
 #### Ejercicio
 
-- Crea un formulario para enviar campo nombre. El nombre debe existir y debe tener un tamaño mínimo de 3 caracteres. Si es válido se da un saludo. Si no lo es se vuelve atras indicando que el campo es obligatorio y mostrando en el "input" el valor anterior no válido.
+-  Envío del script al mismo script. Crea un formulario para enviar campo nombre. El nombre debe existir y debe tener un tamaño mínimo de 3 caracteres. Si es válido se da un saludo. Si no lo es se vuelve a mostar el formulario indicando que el campo es obligatorio y mostrando en el "input" el valor anterior no válido. 
 
 
 #### Ejercicio
 
-- Crea un formulario que funcione como calculadora. Debe contener dos input como operandos y un select para elegir operador.
+- Envío del script al mismo script. Crea un formulario que funcione como calculadora. Debe contener dos input como operandos y un select para elegir operador. 
   - Si se reciben los datos muestra el resultado. 
   - Si no son válidos o no existen debe devolver a la página anterior.
 
@@ -583,7 +604,7 @@ if (isset($_GET['nombre'])) {
 
 #### Ejercicio
 
-- Inspírate en el anterior. Crea un formulario que envíe un nombre. El action debe ser el mismo script. Muestra el nombre recibido en un input. Añade otro input vacío para un nuevo nombre. A cada pulsación, la lista de nombres debe ir creciendo.
+-  Crea una lista usando etiquetas ul y li. La lista inicialmente estará vacía pero un formulario con un input servirá para añadir los elementos. Usa input de tipo hiddens para que no "olvidar" los elementos ya añadidos a la lista. 
 
 
 ## Funciones 
