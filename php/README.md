@@ -575,6 +575,25 @@ if (isset($_GET['nombre'])) {
   ```
 
 
+- Otra cosa interesante es que un script puede enviarse los datos a sí mismo. Basta con poner en el action del formulario el propio script, o más fácil todavía, dejando el action en blanco:
+
+  ```php
+  //Código del ejemplo 13
+  <form action="">
+    <input type="text" name="nombres[]">
+    <input type="submit" value="Nuevo">  
+    <hr>
+    <?php
+    if (isset($_GET['nombres'])) {
+      foreach($_GET['nombres'] as $nombre) {
+        echo '<input type="text" name="nombres[]" value="' . $nombre . '"><br>';
+      }
+    }
+    ?>
+  </form>
+  ```
+
+
 #### Ejercicio
 
 - Crea un formulario para enviar los datos de registro de un libro: título, autor, editorial, páginas.
@@ -608,6 +627,28 @@ if (isset($_GET['nombre'])) {
 
 
 ## Funciones 
+
+- Php es un lenguaje de scripting. El punto de entrada es la primera línea de un script siempre.
+- Pero soporta programación estructurada, por tanto funciones, y programación orientada a objetos, por tanto clases.
+
+
+- No vamos a poner mucha energía en las funciones (sí en POO), pero veamos un ejemplo:
+
+  ```php
+    <?php
+
+    function factorial($numero) {
+      $resultado = 1;
+      for ($i=1; $i <= $numero; $i++) { 
+        $resultado = $resultado * $i;
+      }
+      return $resultado;
+    }
+    echo "El factorial de 5 es " . factorial(5);
+    echo "<br>";
+    echo "Y el factorial de 10 es " . factorial(10);
+    ?>
+  ```
 
 
 
