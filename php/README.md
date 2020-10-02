@@ -519,7 +519,6 @@ $filas  = [
   </small>
 
 
-
 ### Recepción de datos
 
 - Los datos se reciben así:
@@ -654,10 +653,308 @@ if (isset($_GET['nombre'])) {
 
 ## POO
 
+- Php soporta POO desde la versión 5
+- En las versiones 7.* las posibilidades son muy completas.
+- Vamos a ver las cuestiones básicas.
 
 
-## Namespaces
+- Conceptos base: clases, objetos, atributos y métodos.
+- Visibilidad: public, protected, private
+- Métodos mágicos: constructor, destructor, toString, ...
+- Herencia, interfaces, métodos y atributos estáticos y finales
+- Muchas cosas y algunas de ellas no las emplearemos nunca.
+- Vamos a ir explicando conceptos ya conocidos segun nos haan falta.
 
 
+### Notación
 
-## Separar vista de lógica
+- Nombre de la clase *CamelCase*.
+- Una clase - un fichero, y ambos con el mismo nombre.
+- Atributos y funciones con nombres *camelCase*
+
+```php
+class ClaseSencilla
+{
+    // Declaración de una propiedad
+    public $var = 'un valor predeterminado';
+
+    // Declaración de un método
+    public function mostrarVar() {
+        echo $this->var;
+    }
+    //NOTA: $this hace referenca a este objeto
+    //"->" se usa para acceder a métodos y atributos
+}
+?>
+```
+
+
+### Métodos mágicos
+
+- Reciben este nombre los que se ejecutan de foma "mágica". Sin petición explícita.
+- Siempre empiezan por doble guión bajo. Los más destacables:
+  - `__construct()`: constructor. Se ejecuta al crear un objeto.
+  - `__destruct()`: destructor. Se ejecuta al eliminar un objeto.
+  - `__toString()`: se ejecuta cuando imprimimos un objeto. Lo convierte a string.
+
+
+### Particularidades
+
+- Para acceder a métodos y atributos usamos **"->"**.
+- Para acceder a constantes de clase y métodos estáticos usamos **"::"**
+- Para referirnos al propio objeto usamos **$this**
+
+
+### Mi primera clase
+
+```php
+
+<?php
+
+class Persona  
+{
+  public $nombre;
+  public $apellido;
+  public $edad;
+
+  public function __construct($nombre, $apellido, $edad)
+  {
+    $this->nombre = $nombre;
+    $this->apellido = $apellido;
+    $this->edad = $edad;
+  }
+
+  public function saludar()
+  {
+    echo "Buenos días!";
+  }
+
+  public function __toString()
+  {
+    return $this->nombre;
+  }
+}
+```
+
+
+- Y ahora la usamos:
+
+```php
+<body>
+  <?php
+    require('Persona.php');
+    $juan = new Persona('Juan', 'García', 15);
+
+    echo $juan-> saludar();
+    echo "<br>";
+    echo "Soy $juan";
+    echo "<br>";
+    echo "Mi nombre completo es $juan->nombre $juan->apellido y tengo $juan->edad años";
+  ?>
+</body>
+```
+
+
+### Una clase como aplicación web
+
+- El script de entrada:
+
+```php
+<?php
+
+require_once "App.php";
+$app = new App;
+$app->run();
+```
+
+
+- La clase
+
+```php
+<?php
+
+class App
+{
+  public function __construct($name = "Aplicación PHP")
+  {
+    echo "Consturyendo la app <hr>";
+    $this->name = $name;
+    $this->module = "Desarrollo Web en Entorno Servidor";
+    $this->teacher = "Rafael Cabeza";
+    $this->student = "Fulano De Tal";
+  }
+
+  public function run()
+  {
+    echo "Moneda al aire... <hr>";
+    $moneda = rand(0,1);
+    // if ($moneda == 1) {
+    if ($moneda) {
+      echo "<h3>Ha salido cara:  </h3> <br>";
+      $this->index();
+    } else {
+      echo "<h3> Ha salido cruz: </h3> <br>";
+      $this->login();
+    }
+  }
+
+  public function index()
+  {
+    echo "Estamos en el index<br>";
+    echo "Estos es $this->name<br>";
+    echo "Me llamo $this->student<br>";
+    echo "Estamos estudiando $this->module con el profesor $this->teacher<br>";
+  }
+  
+  public function login()
+  {
+    echo "Ahora podría mostrar un formulario de login <br>";
+  }  
+}
+```
+
+
+### Separar vista de lógica
+
+- Pero podemos ser un poco formales en nuestro código:
+  - Los cálculos que debamos hacer los hacemos dentro de un método de la clase. Un fichero php puro.
+  - El html lo generaremos en un fichero mixto html/php.
+- Esto no es obligatorio. No es requisito del lenguaje. Pero nos ayudará a crear código limpio.
+
+
+- Podríamos trasformar nuestra clase así:
+
+```php
+  public function index()
+  {
+    echo "Estamos en el index<br>";
+    include('views/index.php');
+  }
+  
+  public function login()
+  {
+    echo "Estamos en login <br>";
+    include('views/form.php');
+  }  
+```
+
+- **Ojo**. Necesiamos un carpeta views
+
+
+- Y nuestras vistas quedarían así:
+
+```php
+...
+<body>
+  <h1>Home de <?= $this->name ?></h1>
+  <div>
+  Estamos en el index
+  </div>
+
+  Me llamo <?= $this->student ?>
+  <br>
+  Estamos estudiando <?= $this->module ?> con el profesor <?= $app->teacher ?>
+</body></html>
+```
+
+
+```php
+...
+<body>
+  <h1>Login de  <?= $this->name ?></h1>
+
+  <form action="">
+    <label for="">nombre</label>
+    <input type="text" name="name"> <br>
+    <label for="">contraseña</label>
+    <input type="password" name="password"> <br>
+    <input type="submit">
+  </form>
+</body>
+</html>
+```
+
+
+- Vamos a refinar un poco más nuestra aplicación
+- Dejemos de jugar al azar. ¿Cómo decidimos qué método?
+- Podemos hacerlo de muchas maneras. Vamos a optar por *argumentos* GET.
+
+```
+http://ejercicios.local/ejemplos/18/index.php?method=index
+http://ejercicios.local/ejemplos/18/index.php?method=login
+//equivalente:
+http://ejercicios.local/ejemplos/18?method=index
+http://ejercicios.local/ejemplos/18?method=login
+```
+
+
+- Debemos recoger esos argumentos en el *run* de *App*:
+
+```php
+  public function run()
+  {
+    if (isset($_GET['method'])) {
+      $method = $_GET['method'];
+    } else {
+      $method = 'index';
+    }
+    $this->$method();
+  }
+```
+
+
+- Y debemos añadir enlaces en ambas páginas.
+
+  ```php
+  <header>
+    <ul>
+      <li><a href="/ejemplos/18?method=index">Inicio</a></li>
+      <li><a href="/ejemplos/18?method=login">Login</a></li>
+    </ul>
+  </header>
+  ```
+
+
+- ¿Lo ponemos en cada vista? 
+  - Mejor creamos un *header.php*
+  - Y lo incluímos en ambas vistas
+
+  ```php
+    <?php
+      require('views/header.php');
+    ?>
+  ```
+
+
+- Además podemos añadir un poco de CSS
+
+```css
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+li {
+  float: left;
+}
+
+li a {
+  display: block;
+  padding: 8px;
+  background-color: #dddddd;
+}
+```
+
+
+#### Ejercicio.
+
+- Crea una aplicación web con una clase App y varios métodos. En todos los casos se trata de obtener una serie numérica. El método debe calcular la serie y guardarla en un array, después hay que incluir una vista que muestre la serie. Puede ser que necesites crear métodos auxiliares (private) para el cálculo del array, por ejemplo: esPrimo(). Los métodos necesarios son:
+
+
+  - Index (**index**). Presentación de la App y enlaces.
+  - Fibonacci (**fibonacci**). Muestra la serie de Fibonacci. Debe mostrar todos los términos menores a un millón.
+  - Potencias de 2 (**potencias2**). Debe mostrar los valores de las potencias de 2 hasta 2 elevado a 24 (nº de colores True Color, por ejemplo).
+  - Factorial (**factoriales**). Debe mostar los factoriales desde 1 hasta n de tal manera que el último término sea el más próximo cercano al millón.
+  - Nº. primos (**primos**). Debe encontrar los números primos entre 1 y 10.000. 
