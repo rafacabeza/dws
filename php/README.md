@@ -1002,7 +1002,7 @@ setcookie(x,y,time()-1)
   - json_encode/json_decode: estándar. Los objetos se recrean como stdClass.
 
 
-### ejercicio
+### Ejercicio
 
 - Vamos a crear una App con estos métodos: 
   - login: muestra un formulario de login (usuario y contraseña).
