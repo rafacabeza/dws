@@ -958,3 +958,74 @@ li a {
   - Potencias de 2 (**potencias2**). Debe mostrar los valores de las potencias de 2 hasta 2 elevado a 24 (nº de colores True Color, por ejemplo).
   - Factorial (**factoriales**). Debe mostar los factoriales desde 1 hasta n de tal manera que el último término sea el más próximo cercano al millón.
   - Nº. primos (**primos**). Debe encontrar los números primos entre 1 y 10.000. 
+
+
+
+## Cookies
+
+- Una cookie es un fichero de texto que se guarda en el equipo del cliente.
+- Este fichero está ligado al sitio web que lo crea y al navegador usado.
+- En él se almacena el contenido de un array de variables.
+
+
+- Se crea mediante la función setcookie(). La función necesita:
+  - Clave: nombre de la variable.
+  - Valor: contenido de la misma. Debe ser texto (o convertible).
+  - Tiempo unix de vida (en segundos). Por defecto, 0, se elimina al cerrar el navegador.
+- Se accede a su contenido mendiante la variable superglobal $_COOKIE
+- Para eliminar una cookie usa setcookie con tiempo menor al actual: 
+
+```php
+setcookie(x,y,time()-1)
+```
+
+
+- Ejemplo de creación de cookies. Incluso arrays y objetos:
+
+```php
+    setcookie("user", "Fulanito de Tal", time() + 3600);
+
+    //ojo para guardar arrays:
+    $hobbies = ['futbol', 'música rock', 'tocar la guitarra con mis amigos'];
+    setcookie("hobbies", serialize($hobbies), time() + 3600);
+    setcookie("hobbies2", json_encode($hobbies), time() + 3600);
+
+    //y objetos:
+    $persona = new Persona("Juan", "Pérez", 21);
+    setcookie("persona", serialize($persona), time() + 3600);
+    setcookie("persona2", json_encode($persona), time() + 3600);
+```
+
+
+- Arrays y objetos deben tratarse con:
+  - serialize/unserialize: nativo php. Los objetos se recrean en su clase.
+  - json_encode/json_decode: estándar. Los objetos se recrean como stdClass.
+
+
+### ejercicio9.php
+
+- Vamos a crear una App con estos métodos: 
+  - login: muestra un formulario de login (usuario y contraseña).
+  - auth: guarda el usuario y su contraseña en una cookie. Después reenvía la petición a home.
+  - home: Muestra un saludo y un enlace para cerrar sesión.
+  - logout: elimina las cookies (setcookie(...., time() - 1)) y reenvía a login.
+- Depura tu código. En login, comprueba que no hay ya un usuario. Si lo hay reenvía a home.
+
+
+### Ejercicio
+
+Se trata de crear una lista de deseos Usaremos la clase App con los siguietens métodos:
+
+- **login** método que muestra formulario de entrada.
+- **auth** método que toma el nombre de usuario tras el login. Tras hacer esto reenvía a **home**.
+- **home** método que muestra la lista de deseos. Además muestra un formulario de nuevos deseos. El formulario envía al método **new**
+- **new** toma el nuevo deseo y lo incluye en la lista.
+
+
+- **delete** borra un deseo de la lista. Debe recibir el indice del deseo.
+- **empty** vacía la lista de deseos.
+- **close** Cierra sesión: borra la cookie.
+
+
+
+## Sesiones
