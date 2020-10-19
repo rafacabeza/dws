@@ -1002,6 +1002,27 @@ setcookie(x,y,time()-1)
   - json_encode/json_decode: estándar. Los objetos se recrean como stdClass.
 
 
+### Reenvío
+
+- Habitualmente una petición acaba con la construcción de una vista html.
+  - home: página de inicio de una apliación
+  - login: página con formulario de entrada, ...
+- Pero otras veces queremos que el servidor haga una tarea y después el navegador vaya a una dirección determinada. Por ejemplo:
+  - auth: toma los datos de login. Si son "buenos" reenvía a "home" y si son malos reenvía a "login" de nuevo.
+
+
+- Para hacer esto hay que usar el status 302 de HTTP.
+- Con php debemos hacer esto con la función header. Veamos ejemplos
+
+  ```
+  header('Location: direccion');
+  header('Location: /index.php');
+  header('Location: ?method=home');
+  header('Location: https://google.com');
+  ```
+- Siempre que te pidan reenvío usa **header()** y no **include()**
+
+
 ### Ejercicio
 
 - Vamos a crear una App con estos métodos: 
@@ -1012,7 +1033,23 @@ setcookie(x,y,time()-1)
 - Depura tu código. En login, comprueba que no hay ya un usuario. Si lo hay reenvía a home.
 
 
-### Ejercicio
+### Enlaces que aportan información
+
+- Ya hemos visto que los enlaces pueden incluir parámetros "GET".
+- Cuando manejamos listas podemos definir enlaces con mucha información. Veamos un ejemplo para luego usarlo en un ejercicio:
+
+  ```
+  <?php foreach ($lista as $id => $element) { ?>
+    <li>
+      <?= $element ?>     
+      <a href="?method=ver&id=<?= $id ?>">Ver</a> -
+      <a href="?method=borrar&id=<?= $id ?>">Borrar</a>
+    </li>  
+  <?php } ?>    
+  ```
+
+
+### Ejercicio 19
 
 Se trata de crear una lista de deseos Usaremos la clase App con los siguietens métodos:
 
@@ -1027,7 +1064,7 @@ Se trata de crear una lista de deseos Usaremos la clase App con los siguietens m
 - **close** Cierra sesión: borra la cookie.
 
 
-### Ejercicio
+### Ejercicio 20
 
 Colorear una página con ayuda de una cookie. Usaremos la clase App con los siguietens métodos:
 
@@ -1040,3 +1077,51 @@ NOTA: dos vistas (home y colores) y un reenvío (cambio).
 
 
 ## Sesiones
+
+  - También llamadas cookies del lado del servidor.
+  - Guardan la información en el servidor (RAM, fichero, BBDD, ...).
+  - Se apoyan en una cookie que se envía al navegador y que sirve de clave para recuperar la información almacenada.
+
+
+  - Antes de agregar o acceder a las  variables de sesión, debemos "avisar" con  la función session_start().
+  - Al iniciar la sesión se crea un id aleatorio para la sesión. Este id se puede transmitir en la url o guardar en una cookie de forma transparente al programador. La opción de la url es poco recomendaable por segurirdad.
+  - La información se guarda en la variable superglobal $_SESSION. Es un array al que podemos añadir elementos según necesitamos y que podemos leer como es habitual.
+
+
+- Añadir elementos a sesión:
+
+```php
+$_SESSION['name'] = $name;
+//añadir elementos a un array dentro de la sesión
+$_SESSION['deseos'][] = $new;
+//lo mismo pero más "pensado"
+$deseos = $_SESSION['deseos'];
+$deseos[] = $new;
+$_SESSION['deseos'] = $deseos;
+```
+
+
+- Se pueden elimnar elementos selectivamente o borar toda la sesión:
+
+```
+ unset($_SESSION['elemento']); #borra un elemento
+ session_destroy(); #elimina toda la información de sesión.
+```
+
+Sobre las opciones de sesión. Sus parámetros se establecen en el php.ini:
+enlace.
+
+    Cookie o url.
+    Autostart, para requerir el uso de session_start() o no.
+    Tiempo de vida
+    Nombre (por defecto PHPSESSID)
+    otros...
+
+
+#### Ejercicio 21
+
+- Haz el ejercicio 19 pero usando sesiones en vez de cookies
+
+#### Ejercicio 22
+
+- Haz el ejercicio 20 pero usando sesiones en vez de cookies
