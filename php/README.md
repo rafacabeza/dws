@@ -1125,3 +1125,309 @@ enlace.
 #### Ejercicio 22
 
 - Haz el ejercicio 20 pero usando sesiones en vez de cookies
+
+
+
+## Excepciones
+
+- Una excepción es un **objeto**. Describe un error o comportamiento indeseado.
+- Existe en php como en otros muchos lenguajes, p.ej. Java.
+- Sirven para parar el funcionamiento normal ante situaciones indeseadas.
+- Muchas funciones y clases del lenguaje *lanzan* excepciones.
+- En nuestro código también podemos lanzar excepciones.
+
+
+```php
+<?php
+function dividir($dividendo, $divisor) {
+  if($divisor == 0) {
+    throw new Exception("División por cero");
+  }
+  return $dividendo / $divisor;
+}
+
+//esto funciona
+echo dividir(5, 3);
+//esto va a fallar porque no sabemos que hacer con la excepción
+echo dividir(5, 0);
+```
+
+
+### La sentencia try..catch
+
+- Su sintáxis es:
+
+```php
+try {
+  //código que puede lanzar excepciones
+} catch(Exception $e) {
+  //código que coge (catch) la excepción
+  //se ejecuta si se lanza una excepción
+}
+```
+
+
+- Ejemplo:
+
+```php
+<?php
+function dividir($dividendo, $divisor) {
+  if($divisor == 0) {
+    throw new Exception("División por cero");
+  }
+  return $dividendo / $divisor;
+}
+
+try {
+  echo dividir(5, 3) . "<br>";
+  echo dividir(5, 0) . "<br>";
+} catch (Throwable $e) {
+  echo "Fallo: " . $e->getMessage();
+}
+```
+
+
+### Sentencia try...catch...finally
+
+- Permite añadir código que se ejecute siempre, haya o no excepción.
+
+```php
+try {
+  //código que puede lanzar excepciones
+} catch(Exception $e) {
+  //código que coge (catch) la excepción
+  //se ejecuta si se lanza una excepción
+} finally {
+  //código que se ejecuta siempre,
+  //haya o no excepción
+}
+```
+
+
+- Ejemplo
+
+```
+<?php
+function dividir($dividendo, $divisor) {
+  if($divisor == 0) {
+    throw new Exception("División por cero");
+  }
+  return $dividendo / $divisor;
+}
+
+try {
+  echo dividir(5, 3) . "<br>";
+  echo dividir(5, 0) . "<br>";
+} catch (Throwable $e) {
+  echo "Fallo: " . $e->getMessage();
+} finally {
+  echo "<hr>";
+  echo "divisiones acabadas";
+}
+```
+
+
+### El objeto "Exception"
+
+- Al crear un objeto exception podemos pasar 3 atributos:
+
+```php
+ new Exception(message, code, previous)
+
+```
+
+  - **message** es un  texto. Parámetro principal
+  - **code** un código numérico de error
+  - **previous** se usa si lanzamos una excepción dentro de un **catch**
+
+
+- La excepción recibida dispone de los métodos:
+
+  - getMessage(), getter del **message**.
+  - getPrevious(), getter del **previous**
+  - getCode(), getter del **code**
+  - getFile(), devuelve el fichero que lanza la excepción
+  - getLine(), devuelve la línea que lanza la excepción
+  - getTrace(), devuelve array con la traza de la pila de llamadas.
+  - getTraceAsString(), idem convertido a texto.
+
+
+### Excepciones a medida
+
+- Podemos crear nuestro propio tipo de excepciones:
+
+```php
+<?php
+class emailException extends Exception {
+  public function errorMessage() {
+    //error message
+    $errorMsg = 'Error en la línea '.$this->getLine().' del fichero '.$this->getFile()
+    .': <b>'.$this->getMessage().'</b> no es una dirección válida de correo';
+    return $errorMsg;
+  }
+}
+
+$email = "someone@example...com";
+
+try {
+  if(filter_var($email, FILTER_VALIDATE_EMAIL) === FALSE) {
+    throw new emailException($email);
+  }
+}
+catch (emailException $e) {
+  echo $e->errorMessage();
+}
+```
+
+
+- Incluso más de una:
+
+```php
+<?php
+class emailException extends Exception {
+  public function errorMessage() {
+    //error message
+    $errorMsg = 'Error en la línea '.$this->getLine().' del fichero '.$this->getFile()
+    .': <b>'.$this->getMessage().'</b> no es una dirección válida de correo';
+    return $errorMsg;
+  }
+}
+
+class ageException extends Exception {
+  public function errorMessage() {
+    $errorMsg = 'Error en la línea '.$this->getLine().' del fichero '.$this->getFile()
+    .': <b>'.$this->getMessage().'</b> no es una edad válida';
+    return $errorMsg;
+  }
+}
+
+$email = "someone@example...com";
+$age = "-5";
+
+try {
+  if(filter_var($email, FILTER_VALIDATE_EMAIL) === FALSE) {
+    throw new emailException($email);
+  }
+  throw new ageException($age);
+    if($age < 0) {
+  }
+
+}
+catch (emailException $e) {
+  echo $e->errorMessage();
+}
+catch (ageException $e) {
+  echo $e->errorMessage();
+}
+```
+
+
+- Podríamos incluso añadir un **catch** por defecto:
+
+```php
+$email = "someone@example...com";
+$age = "-5";
+$condition = true; 
+try {
+  if ($condition) {
+    throw new Exception("excepción por que sí!");
+  }
+  if(filter_var($email, FILTER_VALIDATE_EMAIL) === FALSE) {
+    throw new emailException($email);
+  }
+  throw new ageException($age);
+    if($age < 0) {
+  }
+}
+catch (emailException $e) {
+  echo $e->errorMessage();
+}
+catch (ageException $e) {
+  echo $e->errorMessage();
+}
+catch ($e) {
+  echo $e;
+}
+```
+
+
+
+## Ficheros
+
+- [Documentación oficial](https://www.php.net/manual/es/book.filesystem.php)
+- [w3schools](https://www.w3schools.com/php/php_ref_filesystem.asp)
+- [tutorial](https://diego.com.es/manejo-de-archivos-en-php)
+
+
+- Abrir un fichero: *fopen(ruta, modo)*
+- La función devuelve 0 si no se puede abrir:
+
+```php
+if (!$fp = fopen("miarchivo.txt", "r")){
+  echo "No se ha podido abrir el archivo";
+}
+```
+
+- El fichero puede ser incluso una url:
+
+```php
+$fp = fopen("http://localhost/miarchivo.txt", "r");
+```
+
+
+- Donde modo:
+
+```
+r   Apertura para lectura. Puntero al principio del archivo
+r+  Apertura para lectura y escritura. Puntero al principio del archivo
+w   Apertura para escritura. Puntero al principio del archivo y lo sobreescribe. Si no existe se intenta crear.
+w+  Apertura para lectura y escritura. Puntero al principio del archivo y lo sobreescribe. Si no existe se intenta crear.
+a   Apertura para escritura. Puntero al final del archivo. Si no existe se intenta crear.
+a+  Apertura para lectura y escritura. Puntero al final del archivo. Si no existe se intenta crear.
+x   Creación y apertura para sólo escritura. Puntero al principio del archivo. Si el archivo ya existe dará error E_WARNING. Si no existe se intenta crear.
+x+  Creación y apertura para lectura y escritura. Mismo comportamiento que x.
+c   Apertura para escritura. Si no existe se crea. Si existe no se sobreescribe ni da ningún error. Puntero al principio del archivo.
+c+  Apertura para lectura y escritura. Mismo comportamiento que C.
+```
+
+
+Ojo:
+
+- Si el archivo no es escribible, abrirlo con r+ fallará, incluso cuando sólo se intenta leer.
+- w y w+ eliminarán el contenido de cualquier archivo. Para sólo añadir y no borrar, se usa a y a+.
+- Si quieres crear nuevos archivos y evitar sobreescribir sin querer un archivo existente, utiliza x o x+.
+- Cuando se trabaja con archivos binarios, como imágenes, hay que añadir 'b' después del modo. Como rb o r+b
+
+
+-  Ejemplo de escritura
+
+```php
+<?php
+$file = fopen("archivo.txt", "w");
+fwrite($file, "Esto es una nueva linea de texto" . PHP_EOL);
+fwrite($file, "Otra más" . PHP_EOL);
+fclose($file);
+echo "texto escrito!!";
+```
+
+- Ejemplo de añadir texto:
+
+```php
+<?php
+$file = fopen("archivo.txt", "a");
+fwrite($file, "Linea anexada en: " . time() . PHP_EOL);
+fclose($file);
+echo "texto escrito!!";
+echo "<hr>";
+```
+
+- Ejemplo de lectura completa:
+
+```php
+<?php
+$file = "miarchivo.txt";
+$fp = fopen($file, "r");
+$contents = fread($fp, filesize($file));
+fclose($fp);
+var_dump($contents);
+```
