@@ -1410,6 +1410,7 @@ fclose($file);
 echo "texto escrito!!";
 ```
 
+
 - Ejemplo de añadir texto:
 
 ```php
@@ -1421,6 +1422,7 @@ echo "texto escrito!!";
 echo "<hr>";
 ```
 
+
 - Ejemplo de lectura completa:
 
 ```php
@@ -1431,3 +1433,43 @@ $contents = fread($fp, filesize($file));
 fclose($fp);
 var_dump($contents);
 ```
+
+
+### Ejercicio 23.
+
+- Crea una aplicación para almacenar una lista de deseos
+- Lista de métodos:
+  - **home**, método por defecto. Muestra la lista de deseos y un formulario para añadir nuevos.
+  - **new**, toma la informacion del nuevo deseo y lo añade al fichero. Después reenvía a home.
+  - **clear**, borra toda la lista de deseos y velve al home.
+
+
+  - **delete**, borra selectivamente elementos de la lista de deseos. Mira el siguiente ejemplo para ver como cargar las líneas del fichero en un array. NOTA: debes, cargar el array, borrar el elemento y volver a escribir el fichero completo.
+
+
+```php
+<?php
+$fp = fopen("archivo.txt", "r");
+if ($fp) {
+    while (($line = fgets($fp)) !== false) {
+        $lista[] =  $line;
+    }
+    if (!feof($fp)) {
+        echo "Error: fallo inesperado de fgets()\n";
+    }
+    fclose($fp);
+    foreach ($lista as $key => $item) {
+        echo "$key: $item <br>";
+    }
+} else {
+    echo "datos no disponibles";
+}
+```
+
+
+
+
+
+
+
+
