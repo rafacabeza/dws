@@ -1431,3 +1431,12 @@ $contents = fread($fp, filesize($file));
 fclose($fp);
 var_dump($contents);
 ```
+
+
+#### Ejercicio 23
+
+Realiza el ejercicio de la lista de deseos usando un fichero **deseos.txt**.
+Usa seriel
+
+- Método **index**, lee el contendio de la lista de deseos.
+- Método **new**, crea un 
