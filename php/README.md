@@ -1435,6 +1435,7 @@ var_dump($contents);
 ```
 
 
+<<<<<<< HEAD
 ### Ejercicio 23.
 
 - Crea una aplicación para almacenar una lista de deseos
@@ -1473,3 +1474,12 @@ if ($fp) {
 
 
 
+=======
+#### Ejercicio 23
+
+Realiza el ejercicio de la lista de deseos usando un fichero **deseos.txt**.
+Usa seriel
+
+- Método **index**, lee el contendio de la lista de deseos.
+- Método **new**, crea un 
+>>>>>>> ea147b71ce3839cc9819e8b4cb1db6c0151c0319
