@@ -50,6 +50,24 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-av
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 ```
 
+### Instrucción:
+
+- Actualizar entornods y pasar a la rama mvc:
+
+```
+cd entornods
+git fetch
+git checkout --track origin/mvc
+```
+
+- Añadir mvc.local a fichero /etc/hosts:
+
+```
+127.0.0.1   mvc.local
+```
+
+
+
 
 ** ¿Funciona? **
 
@@ -96,11 +114,15 @@ if(isset($_GET['method'])) {
     $method = 'index';
 }
 
-if(method_exists($app, $method)) {
-    $app->$method();
-} else {
+try {
+    if(method_exists($app, $method)) {
+        $app->$method();
+    } else {
+        throw new Exception("No encontrado");
+    }
+} catch (\Throwable $th) {
     http_response_code(404);
-    die("No encontrado");
+    echo $th->message;
 }
 ```
 
@@ -147,9 +169,14 @@ class User
     {
         return User::USERS;
     }
-    public function find($id)
+    public static function find($id)
     {
-        return User::USERS[$id];
+        foreach (User::USERS as $key => $user) {
+            if ($user[0] == $id) {
+                return $user;
+            }
+        }
+        return null;
     }
 }
 ```
