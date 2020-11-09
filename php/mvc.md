@@ -15,8 +15,12 @@
 ## Configuración 
 - Vamos a usar un nuevo sitio web: mvc.local
 - Debes incluirlo en /etc/hosts
-- Debes añadir la configuracion en el dockercompose. Ya lo tienes en GitHub.
-- Debes crear la carpeta `data/mvc`.
+- Debes añadir la configuracion en el dockercompose. Directamente puedes usar la rama `mvc`
+
+    ```git
+  git checkout --track origin/mvc
+    ```
+- Debes crear la carpeta `data/mvc`. Allí puedes ir construyenco tu entorno MVC.
 
 
 ### Carpeta public:
@@ -29,19 +33,19 @@
 
 - Por defecto el document root de Apache es `/var/www/html`
 - Nosotros queremos cambiarlo a `/var/www/html/public`
+- Debemos crear nuestra carpeta public: es decir data/mvc/public.
 - El resto de contenido dentro de html será inaccesible desde el exterior
 
 
-- Para lograrlo hay que modificar la configuración de Apache:
-- En el fichero de configuración:
+- Para lograrlo hay que modificar la configuración de Apache.
+- En una instalación común, en el fichero de configuración:
 
-```
-DocumentRoot /var/www/html/public
-```
+  ```
+  DocumentRoot /var/www/html/public
+  ```
 
 
-- Nosotros estamos usando docker.
-- Debemos crear nuestra carpeta public: es decir data/mvc/public.
+- Nosotros estamos usando docker y en la rama mvc ya lo tenemos.
 - La modificación la realizamos desde nuestro Dockerfile. Debemos añadir:
 
 ```
@@ -50,7 +54,8 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-av
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 ```
 
-### Instrucción:
+
+#### Resumen de qué debemos hacer:
 
 - Actualizar entornods y pasar a la rama mvc:
 
@@ -65,8 +70,6 @@ git checkout --track origin/mvc
 ```
 127.0.0.1   mvc.local
 ```
-
-
 
 
 ** ¿Funciona? **
@@ -93,7 +96,14 @@ echo 'Contenido fuera de public. Privado<br>';
 ![mvc](/assets/mvc.png)
 
 
-### Ejemplo simple
+- El controlador es quien responde a cada petición
+  - Recibe ordenes como: quiero la lista de usuarios, añadir uno nuevo, modificarlo, ...
+- El modelo se ocupa de obtener los datos, normalmente de una BBDD. También es la clase que los contiene. Típicamente, un registro, un objeto.
+- El controlador tras obtener los datos del modelo invoca una vista.
+
+
+### Ejemplo simplificado sin BBDD
+
 - Rama mvc00.
 - Un fichero "cargador": start.php
 - Un controlador: Controller.php
@@ -218,35 +228,43 @@ Vista del detalle:
 ## Front Controller y Enrutamiento:
 
 
-### Arquitectura usada:
+### Situación hasta el momento:
 
 - Rama mvc01
-* Inconvenientes de la arquitectura anterior:
-    - Si hay múltiples recursos o tablas tendremos múltiples controladores
-    - Cada uno de ellos supone un punto de entrada a la aplicación.
-* La existencia de una entrada única:
-    - Permite filtrar cualquier petición.
-    - Permite realizar tareas sistemáticas:
-        - Iniciar sesión
-        - Comprobar si el usuario está autorizado
+- Inconvenientes de la arquitectura anterior:
+  - Si hay múltiples recursos o tablas tendremos múltiples controladores
+  - Cada uno de ellos supone un punto de entrada a la aplicación.
 
 
-### Front Controller
+### Front Controller: entrada única.
 
-* Se trata de la clase que recibe todas las peticiones
-* Este controlador puede realizar tareas repetitivas, filtros, ...
-* De acuerdo a la ruta recibida (URI), puede cargar un controlador u otro y ejecutar el método necesario.
-* Esta funcionalidad se conoce como **enrutamiento**.
-* Es interesante que el enutamiento sea *user friendly*, es decir que evite los parámetros:
-    ```
-    # parámetros GET
-    localhost/index.php?controller=user&method=index
-    # user friendly
-    localhost/users
-    ```
+- La existencia de una entrada única:
+  - Permite filtrar cualquier petición.
+  - Permite realizar tareas sistemáticas:
+    - Iniciar sesión
+    - Comprobar si el usuario está autorizado
+
+
+### ¿Qué es Front Controller?
+
+- Se trata de la clase que recibe (casi) todas las peticiones.
+- Vamos a hacer que cualquier petición que no responda a un fichero real (css, js, imagen, php,...) llegue a este controlador frontal.
+
+
+- De acuerdo a la ruta recibida (URI), puede cargar un controlador u otro y ejecutar el método necesario.
+- Esta funcionalidad se conoce como **enrutamiento**.
+- Es interesante que el enutamiento sea *user friendly*, es decir que evite los parámetros GET:
+
+  ```php
+  # parámetros GET
+  localhost/index.php?controller=user&method=index
+  # misma información usando rutas amigables
+  localhost/users
+  ```
 
 
 ### Rutas amigables:
+
 - Vamos a hacer que todas las peticiones lleguen a una única clase App de entrada.
 - Nosotros escribiremos:
 
@@ -260,10 +278,11 @@ Vista del detalle:
 ### Módulo rewrite
 
 - Para lograr esto necesitamos que Apache tenga activo el módulo *rewrite*. 
-- Mira tu Dockerfile de mvc.
-- Necesitamos además un fichero **.htaccess** en el *public*
+- Mira tu Dockerfile de mvc, ya está activo.
+- Además necesitas un fichero **.htaccess** en el *public*
 
 ```
+#Contenido del fichero .htaccess. Copia y pega.
 #Options +FollowSymLinks
 #activar motor de reescritura
 RewriteEngine On  
@@ -281,19 +300,30 @@ RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
 
 - Nuestro controlador frontal va a ser una clase llamada App.
 - Nuestro start.ph debe crear un objeto App.
-```php
-<?php
-require "../core/App.php";
-$app = new App();
-```
+
+  ```php
+  <?php
+  require "../core/App.php";
+  $app = new App();
+  ```
+
 - El constructor de App llevará toda la ejecución de la aplicación, de acuerdo a la ruta recibida:
 
 
-* En nuestro proyecto de clase el front controller carga un controlador de manera fija de acuerdo a la ruta y después ejecuta uno de sus métodos:
-* Esquema que usaremos: `/controlador/metodo/argumento1/argumento2`
-* Por ejemplo la ruta `/user/index` carga el controlador UserController y ejecuta su método `index()`
-* Si no existe controlador tomamos uno por defecto, por ejemplo `index` o `home` .
-* Si no existe método tomamos uno por defecto, por ejemplo `index`
+- En nuestro proyecto de clase el front controller carga un controlador de manera fija de acuerdo a la ruta y después ejecuta uno de sus métodos:
+- Esquema que usaremos: 
+  ```
+  /controlador/metodo/argumento1/argumento2
+  ```
+- Por ejemplo la ruta `/user/index`:
+  - Carga el controlador UserController 
+  - Y ejecuta su método `index()`
+
+
+- Además tomaremos un controlador y método por defecto:
+  - Si no existe controlador tomamos uno por defecto, por ejemplo `index` o `home` .
+  - Si no existe método tomamos uno por defecto, por ejemplo `index`
+- Veamos:
 
 
 ```php
