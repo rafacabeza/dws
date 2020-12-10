@@ -1,9 +1,9 @@
-# Laravel 6.*
+# Laravel 6.* -- 8.**
 
 - Laravel se ha convertido en el framework php más utilizado para desarrollo web.
 - En septiembre/2019 se publicón la versión 6.0
 - Desde entonces usa versionado semántico.
-    - Febrero y agosto: versiones mayores: 6 (LTS), 7, ... 
+    - Febrero y agosto: versiones mayores: 6 (LTS), 7, ... (septiembre 2020: v8)
     - Semanalmente pueden aparecer versiones menores (segundo dígito) y de parcheo (tercero). 
     - Las versiones mayores pueden incluír cambios de ruptura, el resto no.
 
@@ -27,28 +27,56 @@
 
 ## Instalación
 
-- https://laravel.com/docs/6.x/installation
-- Requisitos: 
+- https://laravel.com/docs/8.x/installation
+- Requisitos: https://laravel.com/docs/8.x/deployment 
     - php7.3 y algunos complementos
     - Composer como gestor de dependencias
 - Podemos desarrollar sin servidor o con él (Apache o Nginx)
-- Podemos dockerizar el entorno de desarrollo
+- Podemos dockerizar el entorno de desarrollo. Usando docker podríamos obviar estas dependencias en el anfitrión pero las vamos a instalar. Facilitará nuestra tarea.
 
 
-- Instalación via composer (directorio blog):
+## Instalación via composer (directorio blog):
 
 ```
 composer create-project --prefer-dist laravel/laravel blog
 ```
+- Esto implica:
+  - Descargar fremwork original
+  - Ejecutra composer install
+  - Crear fichero de entorno (.env)
+  - Generar clave de cifrado
 
-- O partiendo del código de GitHub:
 
-```
-git clone https://github.com/laravel/laravel.git
-composer install
-```
+## Instalación via git
 
-- Se puede probar ejecutando:
+- Partimos del código de GitHub o de otro proyecto Laravel. Aquí todas las fases son manuales:
+  - Descarga
+  ```
+  git clone https://github.com/laravel/laravel.git nombreProyecto
+  cd nombreProyecto
+  ```
+
+  - Instalación de dependencias
+  ```
+  composer install
+  ```
+
+
+  - Crear fichero de entorno a partir del de ejemplo:
+  ```
+  cp .env .env.example
+  ```
+
+  - Crearción de la clave de cifrado (ver .env).
+  ```
+  php artisan key:generate
+  ```
+
+
+**NOTA**
+
+- **artisan** se usa de forma generalizada. Por ejemplo, todas las clases **deben** crearse con ese comando.
+- Podemos desarrollar sin servidor ejecutando:
 
 ```
 php artisan serve  # para iniciar el servicio
@@ -56,46 +84,22 @@ chrl+C             # para cerrar
 ```
 
 
-- Usando docker y nuestro entornods:
-    - Descargamos nuestro entornods y nos ponemos en la rama laravel
-    - Añadimos al fichero hosts:
+### Laravel en nuestro entornods:
+
+- Descargamos nuestro entornods y nos ponemos en la rama laravel
+  ```
+  git checkout --track origin/laravel
+  ```
+- Añadimos al fichero hosts:
+  ```
+  127.0.0.1   laravel.local
+  ```
+- Colocamos el directorio del proyecto dentro de *data*
+- Levantamos nuestro servicio:
     ```
-    127.0.0.1   laravel.local
+    cd entornods 
+    docker-compose up -d
     ```
-    - Levantamos nuestro servicio:
-
-        ```
-        cd entornods 
-        docker-compose up -d
-        ```
-    - Colocamos nuestro Laravel limpio en _data/laravel_
-    - ¿Cómo?
-
-
-- __OPCION 1__ (composer)
-    - Levantamos nuestro _entornods_. 
-        - nota: hay que cambiar los permisos de data/laravel a 777.
-    - Entramos en el contenedor _laravel_: 
-    ```
-    docker exec -it --user devuser laravel bash
-    composer create-project --prefer-dist laravel/laravel blog
-    ```
-
-    - Ya podemos acceder a http://laravel.local
-
-
-__ OPCION 2 __ (git + composer)
-- Clonamos el código desde https://github.com/laravel/laravel.git o desde nuestro repositorio. 
-- Lo hacemos en el directorio `entornods/data/laravel`
-
-```
-cd entornods/data
-git clone <identificador ssh/https del repositorio de partida>
-cd laravel
-composer install
-```
-
-- El directorio de partida puede ser `git@github.com:laravel/laravel.git` o el de nuestro proyecto particular
 
 
 OJO!!! 
@@ -104,20 +108,8 @@ OJO!!!
 - Si usamos otro nombre deberemos ajustar alguno de estos comados y el contenido del fichero _docker-compose.yml_
 
 
-- Entramos en el contendor laravel y ejecuamos un par de comandos: 
-
-    ```docker
-    docker exec -it --user devuser laravel bash
-    composer install
-    cp .env.example .env   # El fichero .env define las variables de entorno
-    php artisan key:generate  # genera una clave de cifrado guardada en .env
-    ```
-
-- Vamos al navegador con la url http://laravel.local
-
-
 - El uso de la consola va a ser importante en el desarrollo con Laravel
-- Es muy recomedable definir aliases de comandos pero mucho más si usamos docker
+- Puede ser interesante definir aliases de comandos
 - Editamos el fichero ~/.bashrc 
 
     ```
