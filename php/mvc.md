@@ -885,7 +885,7 @@ public function __construct()
 }
 ```
 
-- Después en la vista: $user->format('Y-m-d')
+- Después en la vista: $user->birthdate->format('Y-m-d')
 
 
 ## CRUD (II): CREATE
@@ -1360,7 +1360,43 @@ echo $product->type->name
 ```
 
 
-- ¿Cómo hacer esta magia?
+- Vamos a añadir un método `type()` que cargue un atributo con ese nombre y que contenga toda la información del `product_type`
+
+```php
+public function type()
+{
+    //un producto pertenece a un tipo:
+    $db = Product::db();
+    $statement = $db->prepare('SELECT * FROM product_types WHERE id = :id');
+    $statement->bindValue(':id', $this->type_id);
+    $statement->execute();
+
+    $statement->setFetchMode(PDO::FETCH_CLASS, ProductType::class);
+    $product_type = $statement->fetch(PDO::FETCH_CLASS);
+
+    return $product_type;
+}
+```
+
+
+- Ahora ya podemos mostrar el nombre del tipo de producto:
+
+```php
+$product->type()->name
+```
+
+- Pero sería más eleganta tratar type como un atributo.
+
+
+### ¿Cómo hacer esta magia? La función `__get($atributo)`
+
+- Hemos visto algunos métodos *mágicos*:
+  - __construct(), el constructor
+  - __toString(), la conversión de un objeto a texto
+- Vamos ahora a usar el metodo __get($nombreAtributo)
+- La función __get se ejecuta siempre que intentamos acceder a un atributo inexistente.
+
+
 - Vamos a decirle al sistema lo siguiente:
     - Si piden un atributo desconocido pero hay un método con ese nombre:
     - Primero ejecuta el método para que cree ese atributo.
@@ -1382,29 +1418,10 @@ public function __get($atributoDesconocido)
 - Ejemplo:
 
 ```php
-    public function patata()
+    public function entero()
     {
-        return  "Patatas fritas";
+        return  rand(1, 100);
     }
-```
-
-
-- Vamos a añadir un método `type()` que cargue un atributo con ese nombre y que contenga toda la información del `product_type`
-
-```php
-public function type()
-{
-    //un producto pertenece a un tipo:
-    $db = Product::db();
-    $statement = $db->prepare('SELECT * FROM product_types WHERE id = :id');
-    $statement->bindValue(':id', $this->type_id);
-    $statement->execute();
-
-    $statement->setFetchMode(PDO::FETCH_CLASS, ProductType::class);
-    $product_type = $statement->fetch(PDO::FETCH_CLASS);
-
-    return $product_type;
-}
 ```
 
 
