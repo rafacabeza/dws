@@ -1336,6 +1336,11 @@ foreach ($users as $user) {
 
 
 
+## Fechas
+
+- [Enlace interesante](https://informaticapc.com/tutorial-php/fechas.php)
+
+
 ## Relaciones 1:n entre modelos
 
 

@@ -29,9 +29,9 @@
 
 - https://laravel.com/docs/6.x/installation
 - Requisitos: 
-    - php7.2 y algunos complementos
+    - php7.3 y algunos complementos
     - Composer como gestor de dependencias
-- Podemos desarrollar sin servidor o con él (Apache on Nginx)
+- Podemos desarrollar sin servidor o con él (Apache o Nginx)
 - Podemos dockerizar el entorno de desarrollo
 
 
