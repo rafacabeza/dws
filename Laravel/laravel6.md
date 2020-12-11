@@ -11,7 +11,7 @@
 - Usa arquitectura MVC (Modelo Vista Controlador) y mucho más:
 - Sistema de enrutamiento potente
 - Usa Blade como gestor de plantillas
-- Su propio ORM: Eloquent
+- Su propio ORM: Eloquent (¿Adios SQL?)
 - Y muchos otros componentes que lo hacen muy interesante: Query Builder, Database Migrations, Seeders, Passport, Dusk, Socialite, ... y muchos otros componentes brindados por terceras partes.
 
 
@@ -135,7 +135,7 @@ OJO!!!
 
 Repositorio de clase
 
-- Vamos a usar el  repositorio: [laravel19](https://bitbucket.org/rafacabeza/laravel19)
+- Vamos a usar el  repositorio: [laravel20](https://bitbucket.org/rafacabeza/laravel20)
 - Recomendación: hacer un fork del mismo:
     - Ve a bitbucket y realiza un fork
     - Clona dentro de `entornods/data` tu repositorio
@@ -154,7 +154,7 @@ Repositorio de clase
 
 ```
 cd data/laravel
-git remote add rafa git@bitbucket.org:rafacabeza/laravel19.git
+git remote add rafa git@bitbucket.org:rafacabeza/laravel20.git
 ```
 
 
