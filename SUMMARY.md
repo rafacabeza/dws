@@ -7,6 +7,7 @@
 3. [MVC](php/mvc.md)
 
 ## Laravel
+* [Laravel 8.*](Laravel/laravel8.md)
 * [Laravel 6.*](Laravel/laravel6.md)
 * [Laravel 5.3](Laravel/README.md)
     * [Instalar](Laravel/instalar.md)

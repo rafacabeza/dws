@@ -1,9 +1,9 @@
-# Laravel 6.*
+# 8.**
 
 - Laravel se ha convertido en el framework php más utilizado para desarrollo web.
 - En septiembre/2019 se publicón la versión 6.0
 - Desde entonces usa versionado semántico.
-    - Febrero y agosto: versiones mayores: 6 (LTS), 7, ... 
+    - Febrero y agosto: versiones mayores: 6 (LTS), 7, ... (septiembre 2020: v8)
     - Semanalmente pueden aparecer versiones menores (segundo dígito) y de parcheo (tercero). 
     - Las versiones mayores pueden incluír cambios de ruptura, el resto no.
 
@@ -11,7 +11,7 @@
 - Usa arquitectura MVC (Modelo Vista Controlador) y mucho más:
 - Sistema de enrutamiento potente
 - Usa Blade como gestor de plantillas
-- Su propio ORM: Eloquent
+- Su propio ORM: Eloquent (¿Adios SQL?)
 - Y muchos otros componentes que lo hacen muy interesante: Query Builder, Database Migrations, Seeders, Passport, Dusk, Socialite, ... y muchos otros componentes brindados por terceras partes.
 
 
@@ -27,28 +27,56 @@
 
 ## Instalación
 
-- https://laravel.com/docs/6.x/installation
-- Requisitos: 
-    - php7.2 y algunos complementos
+- https://laravel.com/docs/8.x/installation
+- Requisitos: https://laravel.com/docs/8.x/deployment 
+    - php7.3 y algunos complementos
     - Composer como gestor de dependencias
-- Podemos desarrollar sin servidor o con él (Apache on Nginx)
-- Podemos dockerizar el entorno de desarrollo
+- Podemos desarrollar sin servidor o con él (Apache o Nginx)
+- Podemos dockerizar el entorno de desarrollo. Usando docker podríamos obviar estas dependencias en el anfitrión pero las vamos a instalar. Facilitará nuestra tarea.
 
 
-- Instalación via composer (directorio blog):
+## Instalación via composer (directorio blog):
 
 ```
 composer create-project --prefer-dist laravel/laravel blog
 ```
+- Esto implica:
+  - Descargar fremwork original
+  - Ejecutra composer install
+  - Crear fichero de entorno (.env)
+  - Generar clave de cifrado
 
-- O partiendo del código de GitHub:
 
-```
-git clone https://github.com/laravel/laravel.git
-composer install
-```
+## Instalación via git
 
-- Se puede probar ejecutando:
+- Partimos del código de GitHub o de otro proyecto Laravel. Aquí todas las fases son manuales:
+  - Descarga
+  ```
+  git clone https://github.com/laravel/laravel.git nombreProyecto
+  cd nombreProyecto
+  ```
+
+  - Instalación de dependencias
+  ```
+  composer install
+  ```
+
+
+  - Crear fichero de entorno a partir del de ejemplo:
+  ```
+  cp .env .env.example
+  ```
+
+  - Crearción de la clave de cifrado (ver .env).
+  ```
+  php artisan key:generate
+  ```
+
+
+**NOTA**
+
+- **artisan** se usa de forma generalizada. Por ejemplo, todas las clases **deben** crearse con ese comando.
+- Podemos desarrollar sin servidor ejecutando:
 
 ```
 php artisan serve  # para iniciar el servicio
@@ -56,46 +84,22 @@ chrl+C             # para cerrar
 ```
 
 
-- Usando docker y nuestro entornods:
-    - Descargamos nuestro entornods y nos ponemos en la rama laravel
-    - Añadimos al fichero hosts:
+### Laravel en nuestro entornods:
+
+- Descargamos nuestro entornods y nos ponemos en la rama laravel
+  ```
+  git checkout --track origin/laravel
+  ```
+- Añadimos al fichero hosts:
+  ```
+  127.0.0.1   laravel.local
+  ```
+- Colocamos el directorio del proyecto dentro de *data*
+- Levantamos nuestro servicio:
     ```
-    127.0.0.1   laravel.local
+    cd entornods 
+    docker-compose up -d
     ```
-    - Levantamos nuestro servicio:
-
-        ```
-        cd entornods 
-        docker-compose up -d
-        ```
-    - Colocamos nuestro Laravel limpio en _data/laravel_
-    - ¿Cómo?
-
-
-- __OPCION 1__ (composer)
-    - Levantamos nuestro _entornods_. 
-        - nota: hay que cambiar los permisos de data/laravel a 777.
-    - Entramos en el contenedor _laravel_: 
-    ```
-    docker exec -it --user devuser laravel bash
-    composer create-project --prefer-dist laravel/laravel blog
-    ```
-
-    - Ya podemos acceder a http://laravel.local
-
-
-__ OPCION 2 __ (git + composer)
-- Clonamos el código desde https://github.com/laravel/laravel.git o desde nuestro repositorio. 
-- Lo hacemos en el directorio `entornods/data/laravel`
-
-```
-cd entornods/data
-git clone <identificador ssh/https del repositorio de partida>
-cd laravel
-composer install
-```
-
-- El directorio de partida puede ser `git@github.com:laravel/laravel.git` o el de nuestro proyecto particular
 
 
 OJO!!! 
@@ -104,20 +108,8 @@ OJO!!!
 - Si usamos otro nombre deberemos ajustar alguno de estos comados y el contenido del fichero _docker-compose.yml_
 
 
-- Entramos en el contendor laravel y ejecuamos un par de comandos: 
-
-    ```docker
-    docker exec -it --user devuser laravel bash
-    composer install
-    cp .env.example .env   # El fichero .env define las variables de entorno
-    php artisan key:generate  # genera una clave de cifrado guardada en .env
-    ```
-
-- Vamos al navegador con la url http://laravel.local
-
-
 - El uso de la consola va a ser importante en el desarrollo con Laravel
-- Es muy recomedable definir aliases de comandos pero mucho más si usamos docker
+- Puede ser interesante definir aliases de comandos
 - Editamos el fichero ~/.bashrc 
 
     ```
@@ -143,7 +135,7 @@ OJO!!!
 
 Repositorio de clase
 
-- Vamos a usar el  repositorio: [laravel19](https://bitbucket.org/rafacabeza/laravel19)
+- Vamos a usar el  repositorio: [laravel20](https://bitbucket.org/rafacabeza/laravel20)
 - Recomendación: hacer un fork del mismo:
     - Ve a bitbucket y realiza un fork
     - Clona dentro de `entornods/data` tu repositorio
@@ -162,7 +154,7 @@ Repositorio de clase
 
 ```
 cd data/laravel
-git remote add rafa git@bitbucket.org:rafacabeza/laravel19.git
+git remote add rafa git@bitbucket.org:rafacabeza/laravel20.git
 ```
 
 
@@ -204,7 +196,7 @@ git remote add rafa git@bitbucket.org:rafacabeza/laravel19.git
 ## Rutas
 
 
-- https://laravel.com/docs/6.x/routing
+- https://laravel.com/docs/8.x/routing
 
 * En nuestro framework mvc "casero", un controlador era responsable de una tarea concreta, o conjunto de tareas relacionadas entre sí \(CRUD sobre una tabla, por ejemplo\).
 
@@ -215,7 +207,7 @@ git remote add rafa git@bitbucket.org:rafacabeza/laravel19.git
 
 * Las rutas se definien en el directorio `routes`:
     - `web.php` define todas las rutas de la aplicación web
-    - `api.php` define las rutas asociadas a un servicio web RESTful
+    - `api.php` define las rutas asociadas a un servicio web
     - `console.php` define rutas usadas desde la consola con `php artisan`
     - `channels.php` se usa en aplicaciones en tiempo real y websockets. No toca...
 
@@ -269,13 +261,49 @@ Route::get('user/{id}', function ($id) {
 ```
 
 
+### Rutas y controladores
+
+- Las rutas anónimas son útiles para pequeñas tareas y pruebas.
+- Pero un trabajo serio necesita el uso de controladores (MVC)
+
+```php
+use App\Http\Controllers\UserController;
+
+//ruta prueba gestionada por el método "index" de PruebaController
+Route::get('/photos', [PhotosController::class, 'index']);
+```
+
+
+Ojo! Esto ha cambiado en la versión 8. Anteriormente la sintáxis era: 
+
+```php
+Route::get('foo', 'Photos\AdminController@method');
+```
+
+
 ### Rutas resource: REST
 
 - Un CRUD necesita definir 7 rutas para 7 acciones.
+    - Lectura: ruta de listado y de detalle
+    - Creación: mostrar formulario de alta y procesarlo
+    - Update: mostrar formulario de edición y procesarlo
+    - Borrado
+
+```php
+Route::get('photos/create', 'Photos\AdminController@create');
+Route::post('photos', 'Photos\AdminController@store');
+Route::get('photos', 'Photos\AdminController@index');
+Route::get('photos/{id}', 'Photos\AdminController@show');
+Route::get('photos/{id}/edit', 'Photos\AdminController@edit');
+Route::put('photos/{id}', 'Photos\AdminController@update');
+Route::delete('photos/{id}', 'Photos\AdminController@destroy');
+```
+
+
 - Si definimos rutas de tipo resource se mapearán estas 7 rutas.
 - En la medida de lo posible estas rutas siguen el paradigma REST.
 - Son las acciones necesarias para un CRUD completo y usando los distintos verbos HTTP: get, post, put y delete.
-- Para ver como gestionar estas rutas y este tipo de controladores: https://laravel.com/docs/6.x/controllers#resource-controllers
+- Para ver como gestionar estas rutas y este tipo de controladores: https://laravel.com/docs/8.x/controllers#resource-controllers
 
 
 - Definición de una ruta
@@ -345,34 +373,18 @@ php artisan make:controller PhotoController --resource
 </small>
 
 
-- No siempre nos vale el uso de rutas resource.
-- Si queremos definir una ruta y un método la sintaxis es:
 
-```php
-Route::get('foo', 'Photos\AdminController@method');
-```
-
-- Para otras cuestiones leer la documentación: 
-    - Uso de middlewares
-    - Definir rutas resource con except/only methods
-    - Asignar nombres a rutas
-    - ...
-
-
-
-## MVC
+## MVC: Controladores
 - Laravel es mucho más que una arquitectura MVC
 - No obstante esta es una parte fundamental del framework
 
 
-### Controladores
-
-- Su ubican en _app/Http/Controllers_ (Podríamos usar subdirectorios)
+- Su ubican en _app/Http/Controllers_ 
 - Para crear un controlador usaremos:
 ```
 php artisan make:controller ControllerName
 ```
-    - Deberemos definir los métodos que necesitemos y asociarlos a una ruta del fichero de rutas (web.php).
+    - Deberemos definir los métodos que necesitemos y asociarlos a una ruta del fichero de rutas (de momento, web.php).
 
 
 - Si queremos usar rutas de tipo resource:
@@ -381,7 +393,7 @@ php artisan make:controller ControllerName --resource
 ```
     - Ya nos vendrá con los 7 métodos asociados a una ruta resource
 
-* OJO! Los formularios HTML no pueden usar PUT, PATCH ni DELETE. Podemos usar campos ocultos para falsear los vervos. El metodo helper `method_field` lo puede hacer por nosotros:
+* OJO! Los formularios HTML no pueden usar PUT, PATCH ni DELETE. Podemos usar campos ocultos para falsear los verbos. El metodo helper `method_field` lo puede hacer por nosotros:
 
 ```php
 {{ method_field('PUT') }}
@@ -395,6 +407,18 @@ php artisan make:controller ControllerName --resource
     public function foo(Request $request)
     {
         //
+    }
+```
+
+
+- Podemos acceder a los parámetros GET y POST así:
+
+```php
+    public function foo(Request $request)
+    {
+        $code = $request->code;
+        $all = $request->all();
+        dd($code);
     }
 ```
 
@@ -459,6 +483,344 @@ plantilla + compilación transparente = html + php
             'posts' => $posts
     ]);
     ```
+
+
+
+## Bases de datos.
+* Antes de hablar de modelos vamos a qué nos brinda Laravel sobre BBDD:
+    - Migraciones
+    - Seeders
+    - Model Factrories
+
+
+### Migraciones
+
+* Laravel provee un sistema llamado "migraciones" que permite elaborar la estructura de la base de datos de un modo paulatino.
+* Las migraciones se asemejan a un control de versiones para la base de datos. Cada migración puede desplegarse o deshacerse según se precise.
+* Facilitan enormemente el trabajo en equipo y mediante SCV \(git u otro\).
+* Facilitan la migración de SGBD.
+* Facilitan la implantación en nuevos equipos de desarrollo o en producción.
+
+
+* Debemos crear una migración por cada tabla.
+* Debemos crearla con artisan y editarla después.
+* Nota, en la versión 6 podemos crearla a la vez que el modelo:
+
+```
+php artisan make:migration create_studies_table  //crear migración
+php artisan make:model -m Study //crear modelo y migración en un comando
+```
+
+
+* Ejemplo de migración de la tabla studies:
+
+```php
+<?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class CreateStudiesTable extends Migration
+{
+    /**
+     * up crea la tabla
+     * down la elimina
+     */
+    public function up()
+    {
+        Schema::create('studies', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('code')->unique();
+            $table->string('name');
+            $table->string('shortName');
+            $table->string('abreviation');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('studies');
+    }
+}
+```
+
+
+- Para modificar una tabla tenemos dos opciones:
+    - Modificar la migración de creación. NO SIEMPRE POSIBLE
+    - Crear una migración de modificación. Ejemplo: 
+
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class ModifyUsersTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->bigInteger('role_id')->unsigned()->default(1)->after('id');
+            $table->foreign('role_id')->references('id')->on('roles');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign('users_role_id_foreign');
+            $table->dropColumn('role_id');
+        });        
+    }
+}
+
+```
+
+
+## Ejecutar migraciones
+
+*
+* Las migraciones se gestionan desde la consola mediante comandos de _artisan_.
+
+  * El comando base es `php artisan migrate`. En los siguientes apartados vamos a ver las variantes.
+
+  ```
+  migrate:install //Crea una tabla en la base de
+    datos que sirve para llevar el control de las migraciones realizadas y su orden.
+  migrate:reset //Realiza una marcha atrás de todas las migraciones en el sistema, volviendo el schema de la
+    base de datos al estado inicial.
+  migrate:refresh //Vuelve atrás el sistema de migraciones y las vuelve a ejecutar todas.
+  migrate:rollback //Vuelve hacia atrás el último lote de  migraciones ejecutadas.
+  * \ //hp artisan migrate:rollback --step=2 Vuelve atrás las últimas migraciones, en este ccaso los últimos dos lotes.
+  migrate:status //Te informa de las migraciones presentes en el sistema y si están ejecutadas o no.
+  ```
+
+
+  ## Creación de migraciones
+
+  * Se usa `artisan make:migration`:
+    ```
+    // ej. comando base.
+    php artisan make:migration create_users_table
+    // ej. comando para creación de tabla. Añade código de creación.
+    php artisan make:migration create_users_table --create=users
+    ```
+
+* El resultado es una clase hija guardada **database/migrations** 
+* El fichero se nombra usando el *timestamp* de creación para que sea ejecutado en el orden correcto.
+
+
+### Métodos de una migración
+* up\(\) sirve para modificar la base de datos. Típicamente crear una tabla.
+* down\(\) sirve para devolver la base de datos a su estado previo. Típicamente borrar una tabla.
+
+```php
+<?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class CreateStudiesTable extends Migration
+{
+    /**
+     * Run the migrations.
+     * Ejecutar migración
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('studies', function (Blueprint $table) {
+            $table->increments('id');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     * Deshacer
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('studies');
+    }
+}
+```
+
+
+### Código de las migraciones
+
+* Dentro de las funciones _up_ y _down_ usamos las funciones de la clase esquema para:
+
+  * Crear tablas: `Schema::create('nommbreTabla', 'funcion_closure');`
+  * Renombrar tablas: `Schema::rename\($original, $nuevo\);`
+  * Borrar tablas: `Schema::drop('users');` o `Schema::dropIfExists('users');`
+  * Modificación de tablas: `Schema::table('nommbreTabla', 'funcion_closure');`
+
+
+* En las funciones anónimas \(closure\) de creación y modificación podemos hacer prácticamente cualquier cosa que soporte SQL. Debemos usar los métodos de la clase Blueprint aplicados a la variable $table:
+
+  ```php
+  $table->string('email');  //añadir columna de texto VARCHAR(100). Hay métodos para muchos tipos de datos. Ver documentación.
+  $table->string('name', 20);
+  $table->tinyInteger('numbers');
+  $table->float('amount');
+  $table->double('column', 15, 8);
+  $table->integer('votes');
+
+  //podemos añadir modificadores e índices:
+  $table->increments('id');  //Clave principal autoincremental usado por defecto.
+  $table->char('codigo', 25)->primary(); //Otras claves principales
+  $table->primary(['area', 'bloque']); // o así...
+  $table->string('email')->nullable(); //añadir columna y permitir nulos.
+  $table->timestamps(); //añade columnas create_at, update_at
+  $table->string('email')->unique();  // columna con indice único
+  $table->index(['account_id', 'created_at']); //índice multicolumna
+
+  //claves ajenas: columna del tipo adecuado más f.k.
+  $table->integer('user_id')->unsigned();
+  $table->foreign('user_id')->references('id')->on('users');
+  //podríamos añadir ->onDelete(cascade) ...
+  ```
+
+
+  * Los posibles modificadores son:
+    ```
+    ->first() | Place the column “first” in the table (MySQL Only)
+    ->after('column') | Place the column “after” another column (MySQL Only)
+    ->nullable() | Allow NULL values to be inserted into the column
+    ->default($value) | Specify a “default” value for the column
+    ->unsigned() | Set integer columns to UNSIGNED
+    ->comment('my comment') | Add a comment to a column
+    ```
+
+* Para otras operaciones consultar la documentación oficial.
+
+
+### Seeders \(o sembradores\)
+
+  * Los _seeders_ son clases usadas para:
+  * Rellenar las tablas con datos de prueba
+  * Cargar las tablas con datos iniciales.
+  * Creación con artisan:
+
+  `php artisan make:seeder StudySeeder`
+
+  * Los seeders tienen un método _run\(\)_ donde se registra el contenido de los registros a insertar. Puede usarse sintáxis de _Query Builder_ o de _Eloquent_
+
+
+* Ejemplo:
+
+```php
+use Illuminate\Database\Seeder;
+use App\Review;
+class StudiesSeeder extends Seeder
+{
+    public function run()
+    {
+        //con eloquent
+        Study::create([
+        'code' => 'IFC303',
+        'name' => 'Desarrollo de Aplicaciones Web',
+        'abreviation' => 'DAW'
+        ]);
+
+        //lo mismo con query builder
+        DB::table('studies')->insert([
+        'code' => 'IFC303',
+        'name' => 'Desarrollo de Aplicaciones Web',
+        'abreviation' => 'DAW
+        ]);
+    }
+}
+```
+
+
+* El orden en que se ejecutan los seeders se establece manualmente. Debe rellenarse el método _run\(\)_ de la clase _DatabaseSeeder_ ubicada en _database/seeds_
+
+```php
+public function run()
+{
+    $this->call(StudySeeder::class);
+    $this->call(ModuleSeeder::class);
+}
+```
+
+
+* Su ejecución es desde artisan:
+  * Modo general
+    `php artisan db:seed`
+  * Junto a las migraciones:
+    `php artisan migrate:refresh --seed`
+  * De forma individual
+    `php artisan db:seed --class=ModuleSeeder`
+
+
+### Model Factories
+
+* Crear un _factory_:
+
+```
+php artisan make:factory PostFactory
+```
+
+* Codificar un factory:
+
+```php
+use Faker\Generator as Faker;
+
+$factory->define(App\User::class, function (Faker $faker) {
+    return [
+        'name' => $faker->name,
+        'email' => $faker->unique()->safeEmail,
+        'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret
+        'remember_token' => str_random(10),
+    ];
+});
+```
+
+
+* Usar el factory:
+
+  * Crear un objeto con `make()` o con `create()`, el primero crea una variable, el segundo además la guarda en base de datos:
+
+  ```php
+      $user = factory(App\User::class)->make();
+      $user = factory(App\User::class)->create();
+  ```
+  * Podemos crear más de un registro en la misma orden:
+  ```php
+  $users = factory(App\User::class, 3)->create();
+  ```
+
+
+  * Además podemos fijar o sobreescribir el valor de los campos:
+
+```php
+$user = factory(App\User::class)->create([
+    'name' => 'Abigail',
+]);
+```
+
 
 
 ### Modelo
@@ -678,7 +1040,6 @@ return Redirect::back()->withErrors(['msg', 'The Message']);
     'UserController@profile', ['id' => 1]
   );
   ```
-
 
 
 
