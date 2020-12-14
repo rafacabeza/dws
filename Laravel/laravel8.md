@@ -64,7 +64,7 @@ composer create-project --prefer-dist laravel/laravel blog
 
   - Crear fichero de entorno a partir del de ejemplo:
   ```
-  cp .env .env.example
+  cp .env.example .env
   ```
 
   - Crearción de la clave de cifrado (ver .env).
