@@ -374,10 +374,13 @@ php artisan make:controller PhotoController --resource
 
 
 
-## MVC: Controladores
+## MVC: Controladores & vistas
 - Laravel es mucho más que una arquitectura MVC
 - No obstante esta es una parte fundamental del framework
+- Veamos de momento como tratar controladores y vistas
 
+
+### Controladores
 
 - Su ubican en _app/Http/Controllers_ 
 - Para crear un controlador usaremos:
@@ -486,8 +489,10 @@ plantilla + compilación transparente = html + php
 
 
 
-## Bases de datos.
-* Antes de hablar de modelos vamos a qué nos brinda Laravel sobre BBDD:
+## Bases de datos y Modelos.
+
+* Para hablar de modelos debemos entender como gestionar las BBDD.
+* Para hacerlo Laravel nos brinda:
     - Migraciones
     - Seeders
     - Model Factrories
@@ -498,10 +503,10 @@ plantilla + compilación transparente = html + php
 * Laravel provee un sistema llamado "migraciones" que permite elaborar la estructura de la base de datos de un modo paulatino.
 * Las migraciones se asemejan a un control de versiones para la base de datos. Cada migración puede desplegarse o deshacerse según se precise.
 * Facilitan enormemente el trabajo en equipo y mediante SCV \(git u otro\).
-* Facilitan la migración de SGBD.
+
+
+* Facilitan la migración de SGBD (Mysql, PostGres, ...).
 * Facilitan la implantación en nuevos equipos de desarrollo o en producción.
-
-
 * Debemos crear una migración por cada tabla.
 * Debemos crearla con artisan y editarla después.
 * Nota, en la versión 6 podemos crearla a la vez que el modelo:
@@ -509,46 +514,6 @@ plantilla + compilación transparente = html + php
 ```
 php artisan make:migration create_studies_table  //crear migración
 php artisan make:model -m Study //crear modelo y migración en un comando
-```
-
-
-* Ejemplo de migración de la tabla studies:
-
-```php
-<?php
-
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Migrations\Migration;
-
-class CreateStudiesTable extends Migration
-{
-    /**
-     * up crea la tabla
-     * down la elimina
-     */
-    public function up()
-    {
-        Schema::create('studies', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('code')->unique();
-            $table->string('name');
-            $table->string('shortName');
-            $table->string('abreviation');
-            $table->timestamps();
-        });
-    }
-
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
-    {
-        Schema::dropIfExists('studies');
-    }
-}
 ```
 
 
@@ -595,25 +560,6 @@ class ModifyUsersTable extends Migration
 ```
 
 
-## Ejecutar migraciones
-
-*
-* Las migraciones se gestionan desde la consola mediante comandos de _artisan_.
-
-  * El comando base es `php artisan migrate`. En los siguientes apartados vamos a ver las variantes.
-
-  ```
-  migrate:install //Crea una tabla en la base de
-    datos que sirve para llevar el control de las migraciones realizadas y su orden.
-  migrate:reset //Realiza una marcha atrás de todas las migraciones en el sistema, volviendo el schema de la
-    base de datos al estado inicial.
-  migrate:refresh //Vuelve atrás el sistema de migraciones y las vuelve a ejecutar todas.
-  migrate:rollback //Vuelve hacia atrás el último lote de  migraciones ejecutadas.
-  * \ //hp artisan migrate:rollback --step=2 Vuelve atrás las últimas migraciones, en este ccaso los últimos dos lotes.
-  migrate:status //Te informa de las migraciones presentes en el sistema y si están ejecutadas o no.
-  ```
-
-
   ## Creación de migraciones
 
   * Se usa `artisan make:migration`:
@@ -648,10 +594,7 @@ class CreateStudiesTable extends Migration
      */
     public function up()
     {
-        Schema::create('studies', function (Blueprint $table) {
-            $table->increments('id');
-            $table->timestamps();
-        });
+        //code
     }
 
     /**
@@ -661,7 +604,7 @@ class CreateStudiesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('studies');
+        //code
     }
 }
 ```
@@ -671,11 +614,36 @@ class CreateStudiesTable extends Migration
 
 * Dentro de las funciones _up_ y _down_ usamos las funciones de la clase esquema para:
 
-  * Crear tablas: `Schema::create('nommbreTabla', 'funcion_closure');`
-  * Renombrar tablas: `Schema::rename\($original, $nuevo\);`
-  * Borrar tablas: `Schema::drop('users');` o `Schema::dropIfExists('users');`
-  * Modificación de tablas: `Schema::table('nommbreTabla', 'funcion_closure');`
+* Crear tablas: 
 
+```php
+Schema::create('studies', function (Blueprint $table) {
+    $table->id();
+    ...
+    $table->timestamps();
+});
+```
+
+
+* Modificar tablas.: 
+
+```php
+Schema::table('studies', function (Blueprint $table) {
+    $table->string('name', 50)->change();
+    $table->bigInteger('role_id')->unsigned()->default(1)->after('id');
+    $table->string('description', 100)->after('name');
+}
+```
+
+
+* Borrar tablas: 
+    
+```php
+public function down()
+{
+    Schema::dropIfExists('studies');
+}
+```
 
 * En las funciones anónimas \(closure\) de creación y modificación podemos hacer prácticamente cualquier cosa que soporte SQL. Debemos usar los métodos de la clase Blueprint aplicados a la variable $table:
 
@@ -688,7 +656,7 @@ class CreateStudiesTable extends Migration
   $table->integer('votes');
 
   //podemos añadir modificadores e índices:
-  $table->increments('id');  //Clave principal autoincremental usado por defecto.
+  $table->id();  //Clave principal, autoincremental, big integer.
   $table->char('codigo', 25)->primary(); //Otras claves principales
   $table->primary(['area', 'bloque']); // o así...
   $table->string('email')->nullable(); //añadir columna y permitir nulos.
@@ -1083,7 +1051,7 @@ class CreateStudiesTable extends Migration
     public function up()
     {
         Schema::create('studies', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->string('code')->unique();
             $table->string('name');
             $table->string('shortName');
@@ -1202,7 +1170,7 @@ class CreateStudiesTable extends Migration
     public function up()
     {
         Schema::create('studies', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->timestamps();
         });
     }
@@ -1241,7 +1209,7 @@ class CreateStudiesTable extends Migration
   $table->integer('votes');
 
   //podemos añadir modificadores e índices:
-  $table->increments('id');  //Clave principal autoincremental usado por defecto.
+  $table->id();  //Clave principal autoincremental usado por defecto.
   $table->char('codigo', 25)->primary(); //Otras claves principales
   $table->primary(['area', 'bloque']); // o así...
   $table->string('email')->nullable(); //añadir columna y permitir nulos.
