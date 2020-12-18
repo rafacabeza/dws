@@ -3,9 +3,9 @@
 - Laravel se ha convertido en el framework php más utilizado para desarrollo web.
 - En septiembre/2019 se publicón la versión 6.0
 - Desde entonces usa versionado semántico.
-    - Febrero y agosto: versiones mayores: 6 (LTS), 7, ... (septiembre 2020: v8)
-    - Semanalmente pueden aparecer versiones menores (segundo dígito) y de parcheo (tercero). 
-    - Las versiones mayores pueden incluír cambios de ruptura, el resto no.
+  - Febrero y agosto: versiones mayores: 6 (LTS), 7, ... (septiembre 2020: v8)
+  - Semanalmente pueden aparecer versiones menores (segundo dígito) y de parcheo (tercero). 
+  - Las versiones mayores pueden incluír cambios de ruptura, el resto no.
 
 
 - Usa arquitectura MVC (Modelo Vista Controlador) y mucho más:
@@ -16,12 +16,12 @@
 
 
 - Enlaces:
-    - [Wikipedia](https://en.wikipedia.org/wiki/Laravel) mejor en inglés.
-    - [Sitio oficial](https://laravel.com/)
-    - [Documentacion](https://laravel.com/docs)
-    - [Laracast](https://laracasts.com/skills/laravel): videotutoriales oficiales
-    - [Styde.net](https://styde.net/): numerosos videotutoriales, cursos y publicaciones
-    - [Código fuente](https://github.com/laravel/laravel). Se puede clonar para iniciar proyecto.
+  - [Wikipedia](https://en.wikipedia.org/wiki/Laravel) mejor en inglés.
+  - [Sitio oficial](https://laravel.com/)
+  - [Documentacion](https://laravel.com/docs)
+  - [Laracast](https://laracasts.com/skills/laravel): videotutoriales oficiales
+  - [Styde.net](https://styde.net/): numerosos videotutoriales, cursos y publicaciones
+  - [Código fuente](https://github.com/laravel/laravel). Se puede clonar para iniciar proyecto.
 
 
 
@@ -29,8 +29,8 @@
 
 - https://laravel.com/docs/8.x/installation
 - Requisitos: https://laravel.com/docs/8.x/deployment 
-    - php7.3 y algunos complementos
-    - Composer como gestor de dependencias
+  - php7.3 y algunos complementos
+  - Composer como gestor de dependencias
 - Podemos desarrollar sin servidor o con él (Apache o Nginx)
 - Podemos dockerizar el entorno de desarrollo. Usando docker podríamos obviar estas dependencias en el anfitrión pero las vamos a instalar. Facilitará nuestra tarea.
 
@@ -40,6 +40,7 @@
 ```
 composer create-project --prefer-dist laravel/laravel blog
 ```
+
 - Esto implica:
   - Descargar fremwork original
   - Ejecutra composer install
@@ -51,23 +52,27 @@ composer create-project --prefer-dist laravel/laravel blog
 
 - Partimos del código de GitHub o de otro proyecto Laravel. Aquí todas las fases son manuales:
   - Descarga
+
   ```
   git clone https://github.com/laravel/laravel.git nombreProyecto
   cd nombreProyecto
   ```
 
   - Instalación de dependencias
+
   ```
   composer install
   ```
 
 
   - Crear fichero de entorno a partir del de ejemplo:
+
   ```
   cp .env.example .env
   ```
 
   - Crearción de la clave de cifrado (ver .env).
+
   ```
   php artisan key:generate
   ```
@@ -137,25 +142,37 @@ Repositorio de clase
 
 - Vamos a usar el  repositorio: [laravel20](https://bitbucket.org/rafacabeza/laravel20)
 - Recomendación: hacer un fork del mismo:
-    - Ve a bitbucket y realiza un fork
-    - Clona dentro de `entornods/data` tu repositorio
-    - Instalar dependencias.
-    - Obten una copia del fichero `.env`
-    - Ejecuta (recuerda que laraa es un alias): 
-        ```
-        larai //para entrar al contenedor
-        cp .env.example .env
-        composer install
-        php artisan key:generate
-        ```
+- Una vez hecho esto:
+- 
+  - Ve a bitbucket y realiza un fork
+  - Clona dentro de `entornods/data` tu repositorio
+  - Instala dependencias
+  - Obten una copia del fichero `.env`
+  - Genera la clave de cifrado
 
 
-- Es interesante poder descargar el código de clase:
+    ```
+    git clone ....
+    cd laravel
+    cp .env.example .env
+    composer install
+    php artisan key:generate
+    ```
+
+- Es interesante poder descargar el código de clase. Para hacerlo añade el repositorio del profesor:
 
 ```
 cd data/laravel
 git remote add rafa git@bitbucket.org:rafacabeza/laravel20.git
 ```
+
+- Cuando quieras descargar la última clase:
+
+```
+git fetch rafa
+git checkout --track rafa/claseXX #la rama que corresponda
+```
+
 
 
 
@@ -489,13 +506,22 @@ plantilla + compilación transparente = html + php
 
 
 
-## Bases de datos y Modelos.
+## Modelos y Bases de datos.
 
-* Para hablar de modelos debemos entender como gestionar las BBDD.
+* Un modelo se crea así:
+
+  ```php
+  php artisan make:model Study
+  ```
+
+* Pero para hablar de modelos debemos entender como gestionar las BBDD.
+
+
 * Para hacerlo Laravel nos brinda:
-    - Migraciones
-    - Seeders
-    - Model Factrories
+
+  - Migraciones
+  - Seeders
+  - Model Factrories
 
 
 ### Migraciones
@@ -560,15 +586,15 @@ class ModifyUsersTable extends Migration
 ```
 
 
-  ## Creación de migraciones
+## Creación de migraciones
 
-  * Se usa `artisan make:migration`:
-    ```
-    // ej. comando base.
-    php artisan make:migration create_users_table
-    // ej. comando para creación de tabla. Añade código de creación.
-    php artisan make:migration create_users_table --create=users
-    ```
+* Se usa `artisan make:migration`:
+  ```
+  // ej. comando base.
+  php artisan make:migration create_users_table
+  // ej. comando para creación de tabla. Añade código de creación.
+  php artisan make:migration create_users_table --create=users
+  ```
 
 * El resultado es una clase hija guardada **database/migrations** 
 * El fichero se nombra usando el *timestamp* de creación para que sea ejecutado en el orden correcto.
@@ -745,6 +771,8 @@ public function run()
 
 ### Model Factories
 
+* Un factory es una clase usada principalmente para desarrollo
+* Permite llenar nuestra base de datos con registros de prueba
 * Crear un _factory_:
 
 ```
