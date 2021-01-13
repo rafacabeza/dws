@@ -1378,9 +1378,10 @@ $user = factory(App\User::class)->create([
 - El ORM Eloquent no pone fácil para tratar las relaciones entre tablas.
 - Basta añadir algunos métodos a los modelos implicados.
 - Vamos a ver únicamente las relaciones 1:N
-- Vamos a verlo con el ejemplo entre usuarios y roles
+- Para relaciones 1:1 y N:M ver la documentación
 
 
+- Vamos a verlo con el ejemplo entre usuarios y roles: un `Role` puede tener varios `Users` y un `User` pertenece a un `Role`.
 - Crear modelo Role (y migración, seeder y controlador)
   - `-m` añade la migración
   - `-s` añade el seeder
