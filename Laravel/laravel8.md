@@ -1372,6 +1372,195 @@ $user = factory(App\User::class)->create([
 
 
 
+## Relaciones entre tablas/modelos
+
+
+- El ORM Eloquent no pone fácil para tratar las relaciones entre tablas.
+- Basta añadir algunos métodos a los modelos implicados.
+- Vamos a ver únicamente las relaciones 1:N
+- Vamos a verlo con el ejemplo entre usuarios y roles
+
+
+- Crear modelo Role (y migración, seeder y controlador)
+  - `-m` añade la migración
+  - `-s` añade el seeder
+  - `-cr` añade el controlador (c) tipo resource (r)
+
+```php
+php artisan make:model Role -mscr
+```
+
+
+- Métodos de la migración
+```php
+    public function up()
+    {
+        Schema::create('roles', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->timestamps();
+        });
+    }
+    public function down()
+    {
+        Schema::dropIfExists('roles');
+    }
+```
+
+
+- Modificación de la tabla users.
+  - Es habitual tener que modificar tablas que ya existen. Para eso usamos migraciones un poco diferentes:
+
+```php
+    public function up()
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->unsignedBigInteger('role_id')->default(1);        
+            $table->foreign('role_id')->references('id')->on('roles');
+        });
+    }
+    public function down()
+    {
+        //las fk se mombran así: tabla_columna_foreign
+        //esto se usa para eliminar la clave en el down
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign('users_role_id_foreign');
+            $table->dropColumn('role_id');
+        });
+    }
+```
+
+
+- Creamos o modificamos el RoleSeeder y el UserSeeder:
+
+```php
+    public function run()
+    {
+        //con DB
+        \DB::table('roles')->insert([
+            'id' => '1',
+            'name' => 'registrado'
+        ]);
+        
+        \DB::table('roles')->insert([
+            'id' => '2',
+            'name' => 'usuario'
+        ]);
+        
+        \DB::table('roles')->insert([
+            'id' => '3',
+            'name' => 'administrador'
+        ]);
+        
+    }
+```
+
+
+```php
+    public function run()
+    {
+        //con DB
+        \DB::table('users')->insert([
+            'id' => '1',
+            'name' => 'registrado',
+            'email' => 'registrado@dws.es',
+            'password' => bcrypt('secret')
+        ]);
+    
+        \DB::table('users')->insert([
+            'id' => '2',
+            'name' => 'usuario',
+            'email' => 'usuario@dws.es',
+            'password' => bcrypt('secret'),
+            'role_id' => 2
+        ]);
+    
+        \DB::table('users')->insert([
+            'id' => '3',
+            'name' => 'admin',
+            'email' => 'admin@dws.es',
+            'password' => bcrypt('secret'),
+            'role_id' => 3
+        ]);
+    }
+```
+
+
+- No debemos olvidar actualizar el DatabaseSeeder:
+
+```php
+    public function run()
+    {
+        $this->call(RoleSeeder::class);
+        $this->call(UserSeeder::class);
+        $this->call(StudiesSeeder::class);
+        // \App\Models\User::factory(10)->create();
+    }
+```
+
+
+- Por fín los modelos: Vamos a tratar una relación 1:N
+- Un `Role` tiene muchos `Users` asociados.
+- La clase Role debe incluír el siguiente método: 
+
+```php
+class Role extends Model
+{
+    // resto del código
+    //el método users nos devolverá una colección de usuarios
+    //el nombre es significativo
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+}
+```
+
+
+- Un `User` pertenece a un `Role`.
+- La clase Role debe incluír el siguiente método:
+
+```php
+    class User extends Authenticatable
+    {
+        // resto del código
+        //el método role nos devolverá un objeto role
+        // el nombre también es significativo
+        public function role()
+        {
+            return $this->belongsTo(Role::class);
+        }       
+    }
+```
+
+
+- Ahora podemos usarla en nuestras vistas.
+- Por ejemplo en "user/index.blade.php"
+
+```php
+    @foreach($users as $user)
+    <tr>
+        <td>{{ $user->name }}</td>
+        <td>{{ $user->role->name }}</td>
+    </tr>
+    @endforeach
+```
+
+
+- O en "role/show.blade.php"
+
+```php
+{{ $role->name }}
+
+<h2>Lista de usuarios</h2>
+
+@foreach ($role->users as $user)
+  <li>{{$user->name}}</li>
+@endforeach
+```
+
+
+
 ## Middleware
 
 - Los middleware son filtros que se ejecutan antes de que el control pase a una ruta o a un controlador.
@@ -1721,3 +1910,15 @@ https://youtu.be/-go8BMcpCf4?list=PLdKRooEQxDnW6OsnV4HQuVo-SX8fCgD1s
 - Pdf
 - Trabajo
 
+
+
+## Relaciones entre modelos
+
+Migraciones -> tablas
+Modelos -> clases que accede a las tablas
+Seeders -> datos iniciales
+Factories -> datos aleatorios de prueba
+
+https://laravel.com/docs/8.x/eloquent-relationships
+
+Usuarios y Roles
