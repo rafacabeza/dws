@@ -1671,12 +1671,12 @@ Route::get('families/ajax', 'FamilyController@ajax')->middleware('admin');
 - Ya vimos como añadir el sistema de autenticación propio de Laravel
 - Disponde de un juego de migraciones, rutas, controladores y vistas que hacen posible la gesión de usuarios
 
-* Documentación oficial: [https://laravel.com/docs/6.x/authentication](https://laravel.com/docs/6.x/authentication)
+* Documentación oficial: [https://laravel.com/docs/7.x/frontend#introduction](https://laravel.com/docs/7.x/frontend#introduction)
 * Autenticarse es identificarse, que la apliación nos reconozca como un usuario concreto.
 
 
 * Para hacerlo debemos hacer uso de variables de sesión.
-* Laravel viene con un sistema base muy completo. Para instalarlo (v5 es distiono!!):
+* Laravel viene con un sistema base muy completo. Vamos a usar la versión usada en Laravel 7:
   ```
     composer require laravel/ui
     php artisan ui bootstrap --auth
@@ -1714,11 +1714,13 @@ Route::get('families/ajax', 'FamilyController@ajax')->middleware('admin');
 Route::get('usuario', function () {
     $user = Auth::user();  //namespace global: \Auth
     dd($user);
+    //si sólo nos interesa el id podríamos hacer:
+    //$id = Auth::id();
 });
 ```
 
 
-## Sesiones
+### Sesiones
 
 * Los parámetros de configuración de sesiones se definen en `config/session.php`. 
 * Importante es el almacenamiento y el tiempo de vida de la sesión.
@@ -1779,6 +1781,62 @@ Route::get('usuario', function () {
   //guardadr datos flasheados.
   $request->session()->keep(['mensaje', 'email']); 
   ```
+
+
+
+## Query Builder. Paginación
+
+- Laravel nos permite realizar gran cantidad de [consultas](https://laravel.com/docs/8.x/queries) sin escribir sql.
+- Hasta el momento, sobre los modelos hemos usado algunos métodos: find(), all(), save(), first().
+
+
+- Las consultas pueden construirse a través de los modelos (User, Role, ...) o de la clase DB:
+
+```php
+//todos los usuarios:
+$user = User::first(); //mejor así para obtener objetos User
+$user = DB::first(); //así obtenmos objetos "básicos"
+```
+
+
+- Vamos a poder filtrar usando `where` en alguna de sus variantes.
+- El método `all()` no admite filtrado con where. 
+- Debemos usar `get()`
+```php
+    $users = User::where('id', 100)->get();
+    $users = User::where('id', '>', 100)->get();
+
+    $users = User::where('id', '<=', 100)
+        ->where('email', 'admin@dws.es')
+        ->get();
+```
+
+
+- Existen otras variantes que podemos consultar en la documentación:
+  - orWhere()
+  - whereBetween()
+  - whereIn()....
+- No vamos a ver su uso. Queda como investigación del alumno.
+
+
+- Para paginar basta con cambiar `get()` por `paginate` 
+```php
+    $users = $query->paginate(); //tamaño 15
+    $users = $query->paginate($pageSize); //tamaño $pageSize
+```
+
+- En la vista la generación del índice de páginas es automático.
+```php
+    {{$users->links()}} //estándar: Tailwind CSS
+    {{$users->links('pagination::bootstrap-4')}} //Bootstrap
+```
+
+- En la rama del proyecto de clase "clase07" ha sido necesario depurar el código
+- Puedes ver las explicaciones en los vídeos de dicha rama.
+
+
+
+## Validación
 
 
 
