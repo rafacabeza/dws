@@ -1904,43 +1904,52 @@ public function store(Request $request)
     //validado ->  a guardar
 } 
 ``` 
+
+
 ### ¿¿Qué pasa tras la validación ??
 - Si la validación falla se produce una excepción y se reenvía la petición a la URL previa.
 - Se crea un objeto $errors que permite mostrar los errores de validación.
 - Los datos del formulario se _flashean_ a la sesión y estarán disponibles sólo en la próxima peticicón para ser volver a rellenar el formulario como estaba.
  
-- OJO. Si usamos Ajax se envía una respuesta al cliente con un código 422 y un JSON con los mensajes de erro.
+- OJO. Si usamos Ajax se envía una respuesta al cliente con un código 422 y un JSON con los mensajes de error.
+
+
 ### Rellenando con los datos _viejos_
 - La funcion helper _old()_ nos permite acceder a los datos que no se han validado y están en la sesión.
 ```php
 <label>Nombre:</label>
-<input type="text" name="name" value="{\{ old('name')}}">
+<input type="text" name="name" value="{{ old('name')}}">
 ```
+
+
 ### Mostrando los errores con blade
 - Todos los errores de la página
 ```php
 @foreach ($errors->all() as $error)
-<li>{\{ $error }}</li>
+<li>{{ $error }}</li>
 @endforeach
 ```
 - Mostrar los errores de un campo:
 ```php
 //sólo el primero
-{\{ $errors->first('name') }}
+{{ $errors->first('name') }}
 //o todos los del campo
 @foreach($errors->get('name') as $error)
-{\{ $error }}
+{{ $error }}
 @endforeach 
 ```
 
- ### Reglas
+
+### Reglas
 - Se pueden añadir múltiples reglas para cada campo. Entre comillas y separadas por la barra vertical. 
 - La regla _bail_ hace que no se sigan evaluando más reglas si esa falla.
 - Revisar la documentación oficial: Available Validation Rules.
 
+
 ### Validation Request.
 - Permite separar código de validación del controlador
 - Permite reutilizar el código de validación.
+
 
 Veamos como haccerlo 
 - Creamos una clase Request:
