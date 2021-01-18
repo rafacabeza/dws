@@ -1848,56 +1848,15 @@ $user = DB::first(); //así obtenmos objetos "básicos"
  - Validar en el cliente es opcional pero en el servidor es obligatorio.
 
 
-### Nota sobre herencia en PHP
-- La herencia en lenguajes como Java se limita a clases hijas (Class A extends B) e interfaces (Class A implements B).
-- Php incluye el concepto de rasgos o _traits_ en inglés. 
- - Un trait es un fragmento de código que puede ser incluido y reutilizado en múltiples clases.
-
-
-- Definición de un trait: 
-```php
-trait ejemploTrait
-{
-    function funTrait1()
-    {
-        /* Codigo fun1Trait1 */
-    }
-    
-    function funTrait2()
-    {
-        /* Codigo fun1Trait2 */
-    }
-}
-```
-
-- Uso del Trait:
- ```php
-class ClaseUsuariaTrait
-{
-   use ejemploTrait1;
-   /*Podemos usar las funciones del trait como propias*/
-}
- ```
-
-
-- Precedencia. ¿Qué ocurre con métodos de igual nombre si una claseHija hereda de una clasePadre y de miTrait? 
- - El trait sobreescribe el de la clase padre.
- - El método de la clase hija sobreescribe a ambos.
-
-
 ### Cómo validar en Laravel
-- Existen tres métodos fundamentales
- - Usar el trait ValidatesRequests disponible en todos los controladores (por extender la clase Controller). Ver abajo.
- - Crear manualmente un _Validator_ usando la calse *fachada* Validator y su método make. Lo dejamos sin explicar.
- - Para las situaciones más complejas podemos usar validación por Request. Permite reutilizar una validación en distintos lugares y separar el código de validación de los controladores. Lo vemos al final de este artículo.
+- Existen varias maneras de hacerlo.
+- Nosotros usaremos el método *validate* del objeto $request.
 
-
-### Validando en el controlador (con el _trait_ de validación).
-- El trait citado nos brinda la función _validate(Request $request, array rules)_. Ejemplo:
+Ejemplo:
 ```php
 public function store(Request $request)
 {
-    $this->validate($request, [
+    $request->validate([
     'title' => 'required|unique:posts|max:255',
     'body' => 'required',
     ]);
@@ -1940,49 +1899,39 @@ public function store(Request $request)
 ```
 
 
+- También podemos usar la directiva *@error* de blade:
+
+```php
+<label for="title">Post Title</label>
+
+<input id="title" type="text" class="@error('title') is-invalid @enderror">
+
+@error('title')
+    <div class="alert alert-danger">{{ $message }}</div>
+@enderror
+```
+
+
+### Traduciendo mensajes
+
+- Podemos traducir todos los literales de Laravel. No sólo los de validación.
+- Debemos acceder a la [siguiente ruta](https://github.com/Laravel-Lang/lang)
+- Descargar la carpeta del idioma que nos interese.
+- Configurar el lenguaje en config.php 
+
+
 ### Reglas
 - Se pueden añadir múltiples reglas para cada campo. Entre comillas y separadas por la barra vertical. 
 - La regla _bail_ hace que no se sigan evaluando más reglas si esa falla.
 - Revisar la documentación oficial: Available Validation Rules.
 
 
-### Validation Request.
-- Permite separar código de validación del controlador
-- Permite reutilizar el código de validación.
+### Otros modos de validar
 
-
-Veamos como haccerlo 
-- Creamos una clase Request:
-```
-php artisan make:request StoreBlogPostRequest
-```
-- La clase Request cuenta con dos métodos:
- - Método _authorize()_ que permite filtrar si el usuario tiene o no permiso para realizar esa petición.
- - Método _rules()_ donde se define el array de reglas de validación: 
-```php
-class ProductoRequest extends Request
-{
-    public function authorize()
-    {
-        return false;
-    }
-    public function rules()
-    {
-        return [
-            'title' => 'required|unique:posts|max:255',
-            'body' => 'required',
-    ];
-}
-```
-- Incluimos el request en el controlador:
-```php
-use App\Http\Requests\ProductoRequest;
-...
-public function store(ProductoRequest $request)
-{
-// al realizar la inyección de dependencias en la función la validación se hace automáticamente.
-}
-```
+- Hemos planteado la forma habitual pero existen otras:
+    -   Creando clases *Request* a la medida de una validación.
+    - Creando clases *Validator*
+- Ambas soluciones son algo más sofisticadas y no las vamos a usar aunque podrían dar solución a situaciones más complejas.
 
 
 
