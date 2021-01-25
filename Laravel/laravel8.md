@@ -2117,13 +2117,3 @@ https://youtu.be/-go8BMcpCf4?list=PLdKRooEQxDnW6OsnV4HQuVo-SX8fCgD1s
 
 
 
-## Relaciones entre modelos
-
-Migraciones -> tablas
-Modelos -> clases que accede a las tablas
-Seeders -> datos iniciales
-Factories -> datos aleatorios de prueba
-
-https://laravel.com/docs/8.x/eloquent-relationships
-
-Usuarios y Roles
