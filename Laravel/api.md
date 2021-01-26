@@ -126,14 +126,32 @@ Route::fallback(function () {
 ```
 
 
-## CRUD de Estudios en API
-
-- Antes de empezar, prueba otras rutas y fuerza la una página de error "No encontrado".
-- No obtenemos un error 404 limpio en JSON. Mejor una ruta de *fallback*
+- Vamos a ver cómo realizar todas las operaciones del CRUD
+- Tenemos dos métodos de devolver una reapuesta:
 
 ```php
-Route::fallback(function () {
-  return response()->json(['error' => 'No encontrado'], 404);
+//Devolver un literal o una  variable y la coversión a JSON es automática
+//En este caso siempre se devuelve status 200
+Route::get('/', function() {
+  $message = "Bienvenido a la API"
+  return $message;
+});```
+
+```php
+//usar la función response() y el método json para cambiar el status
+//el $data que enviamos podría ser cualqueir cosa: objeto, array,...
+Route::get('/', function() {
+  $data = ['message' => 'Bienvenido a la API'];
+  return response()->json($data, 404);
 });
 ```
 
+
+
+### Read: index
+
+- No devolvemos lista sino JSON. 
+- La conversión es automática y el estado es 200.s
+
+<!-- VALIDACIÓN -->
+<!-- SESIÓN -->
