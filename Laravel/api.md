@@ -1,10 +1,14 @@
 # Sercicios Web. API REST
-<!-- ## Tiempo estimado: 150 minutos -->
-
-<!-- https://manuais.iessanclemente.net/index.php/LARAVEL_Framework_-_Tutorial_01_-_Creaci%C3%B3n_de_API_RESTful_(actualizado)#Creaci.C3.B3n_de_las_Rutas_de_la_API_RESTful -->
-
 <!-- Validación en API REST -->
 <!-- https://stackoverflow.com/questions/23162617/rest-api-in-laravel-when-validating-the-request -->
+
+
+Algunos enlaces interesantes:
+
+- [Tutorial Creación de un API RESTful][tutorial]
+- [Códigos de error](https://cloud.google.com/storage/docs/json_api/v1/status-codes)
+- [Buenas prácticas para el diseño de una API](https://elbauldelprogramador.com/buenas-practicas-para-el-diseno-de-una-api-restful-pragmatica/)
+[tutorial]: https://manuais.iessanclemente.net/index.php/LARAVEL_Framework_-_Tutorial_01_-_Creaci%C3%B3n_de_API_RESTful_(actualizado)
 
 
 ## ¿Qué es un Servicio Web?
@@ -52,7 +56,42 @@
 | /studies           | POST      | Creamos un estudio  | 
 | /studies/{id}      | GET  | Obtenemos un estudio  | 
 | /studies/{id}      | PUT  | Modificamos un estudio  | 
+| /studies/{id}      | PATCH  | Modificación parcial | 
 | /studies/{id}      | DELETE  | Borramos un estudio  | 
+
+
+
+Se pueden añadir otras rutas para complementar el acceso:
+
+- Podemos definir búsquedas por un campo: 
+```
+GET /studies?code=IFC303
+```
+
+- Podemos definir búsquedas más complejas: 
+```
+GET /studies/search?family=IFC&level=GS
+```
+
+- Podemos definir ordenaciones, en este caso descendente: 
+```
+GET /studies?sort=-updated_at
+```
+
+
+Y podemos reflejar las relaciones:
+```
+//Lista de módulos de un estudio
+GET /studies/1/modules 
+//Busqueda de un módulo dentro de un estudio
+GET /studies/1/modules/3
+//Creación de un módulo dentro de un estudio
+POST /studies/1/modules
+//Modificación de un módulo dentro de un estudio
+PUT /studies/1/modules/3
+//Borrado de un módulo dentro de un estudio
+DELETE /studies/1/modules/3
+```
 
 
 
@@ -63,7 +102,7 @@
 - Es una herramienta muy extendida
 
 
-## Comprobación API inicial
+### Comprobación API inicial
 
 - Vamos a crear una ruta inicial:
 
@@ -77,7 +116,7 @@ Route::get('/', function() {
 
 
 
-### Códigos de estado:
+## Códigos de estado:
 
   - 200's usados para respuestas con éxito.
   - 300's usados para redirecciones.
@@ -126,14 +165,57 @@ Route::fallback(function () {
 ```
 
 
-## CRUD de Estudios en API
+### Rutas
 
-- Antes de empezar, prueba otras rutas y fuerza la una página de error "No encontrado".
-- No obtenemos un error 404 limpio en JSON. Mejor una ruta de *fallback*
+- Basta con incluir una ruta resource y añadir el modificador except:
 
 ```php
-Route::fallback(function () {
-  return response()->json(['error' => 'No encontrado'], 404);
-});
+Route::resource('studies', StudyController::class)->except([
+    'create', 'edit'
+]);
 ```
 
+
+### Index
+
+```php
+public function index()
+{
+  return Study::all();  
+  //No es lo más correcto porque se devolverían todos los registros. Se recomienda usar Filtros o paginación.
+}
+```
+
+```php
+// Se debería devolver un objeto con una propiedad como mínimo data y el array de resultados en esa propiedad.
+// A su vez también es necesario devolver el código HTTP de la respuesta.
+public function index()
+{
+    // return Study::all();
+    $studies = Study::all();
+
+    return response()->json(['status' => 'ok', 'data' => $studies], 201);
+}
+```
+
+
+### Show
+
+```php
+public function show($id)
+{
+  // Corresponde con la ruta /studies/{study}
+  // Buscamos un study por el ID.
+  $study=Study::find($id);
+
+  // Chequeamos si encontró o no el study
+  if (! $study)
+  {
+    // Se devuelve un array errors con los errores detectados y código 404
+    return response()->json(['errors'=>(['code'=>404,'message'=>'No se encuentra un studio con ese código.'])],404);
+  }
+
+  // Devolvemos la información encontrada.
+  return response()->json(['status'=>'ok','data'=>$study],200);
+}
+```
