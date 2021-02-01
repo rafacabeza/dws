@@ -1926,6 +1926,21 @@ public function store(Request $request)
 - Revisar la documentación oficial: Available Validation Rules.
 
 
+### Unique y update
+
+- Ojo cuando apliquemos la regla *unique* en actualizaciones (update).
+- Si aplicamos la regla sin más va a fallar porque ya existe un registro con ese dato:
+
+```php
+    'code' => 'required|unique:studies|max:6',
+```
+- Debemos indicar que no tenga en cuenta el propio registro para comprobar esta regla:
+
+```php
+    'code' => 'required|max:6|unique:studies,code,' . $study->id,
+```
+
+
 ### Otros modos de validar
 
 - Hemos planteado la forma habitual pero existen otras:

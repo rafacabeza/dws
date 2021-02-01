@@ -1,10 +1,14 @@
 # Sercicios Web. API REST
-<!-- ## Tiempo estimado: 150 minutos -->
-
-<!-- https://manuais.iessanclemente.net/index.php/LARAVEL_Framework_-_Tutorial_01_-_Creaci%C3%B3n_de_API_RESTful_(actualizado)#Creaci.C3.B3n_de_las_Rutas_de_la_API_RESTful -->
-
 <!-- Validación en API REST -->
 <!-- https://stackoverflow.com/questions/23162617/rest-api-in-laravel-when-validating-the-request -->
+
+
+Algunos enlaces interesantes:
+
+- [Tutorial Creación de un API RESTful][tutorial]
+- [Códigos de error](https://cloud.google.com/storage/docs/json_api/v1/status-codes)
+- [Buenas prácticas para el diseño de una API](https://elbauldelprogramador.com/buenas-practicas-para-el-diseno-de-una-api-restful-pragmatica/)
+[tutorial]: https://manuais.iessanclemente.net/index.php/LARAVEL_Framework_-_Tutorial_01_-_Creaci%C3%B3n_de_API_RESTful_(actualizado)
 
 
 ## ¿Qué es un Servicio Web?
@@ -52,7 +56,42 @@
 | /studies           | POST      | Creamos un estudio  | 
 | /studies/{id}      | GET  | Obtenemos un estudio  | 
 | /studies/{id}      | PUT  | Modificamos un estudio  | 
+| /studies/{id}      | PATCH  | Modificación parcial | 
 | /studies/{id}      | DELETE  | Borramos un estudio  | 
+
+
+
+Se pueden añadir otras rutas para complementar el acceso:
+
+- Podemos definir búsquedas por un campo: 
+```
+GET /studies?code=IFC303
+```
+
+- Podemos definir búsquedas más complejas: 
+```
+GET /studies/search?family=IFC&level=GS
+```
+
+- Podemos definir ordenaciones, en este caso descendente: 
+```
+GET /studies?sort=-updated_at
+```
+
+
+Y podemos reflejar las relaciones:
+```
+//Lista de módulos de un estudio
+GET /studies/1/modules 
+//Busqueda de un módulo dentro de un estudio
+GET /studies/1/modules/3
+//Creación de un módulo dentro de un estudio
+POST /studies/1/modules
+//Modificación de un módulo dentro de un estudio
+PUT /studies/1/modules/3
+//Borrado de un módulo dentro de un estudio
+DELETE /studies/1/modules/3
+```
 
 
 
@@ -63,7 +102,7 @@
 - Es una herramienta muy extendida
 
 
-## Comprobación API inicial
+### Comprobación API inicial
 
 - Vamos a crear una ruta inicial:
 
@@ -76,8 +115,24 @@ Route::get('/', function() {
 - Abre Postman y prueba su funcionamiento.
 
 
+- El anterior ejemplo funciona pero es más correcto de la siguiente manera:
+  - Definimos el código de estado Http
+  - Los arrays ordenados se covierten en arrays JSON
+  - Los arrays asociativos se convierten en objetos
+  - Los objetos se convierten en objetos:
 
-### Códigos de estado:
+```php
+//usar la función response() y el método json para cambiar el status
+//el $data que enviamos podría ser cualqueir cosa: objeto, array,...
+Route::get('/', function() {
+  $data = ['message' => 'Bienvenido a la API'];
+  return response()->json($data, 200);
+});
+```
+
+
+
+## Códigos de estado:
 
   - 200's usados para respuestas con éxito.
   - 300's usados para redirecciones.
@@ -95,7 +150,7 @@ Route::get('/', function() {
 
 
   - 400 Bad Request – [Petición Errónea] La petición está malformada, como por ejemplo, si el contenido no fue bien parseado. El error se debe mostrar también en el JSON de respuesta.
-  - 401 Unauthorized – [Desautorizada] Cuando los detalles de autenticación son inválidos o no son otorgados. También útil para disparar un popup de autorización si la API es usada desde un navegador.
+  - 401 Unauthorized – [Desautorizada] No se ha podido autenticar al usuario. Sin credenciales o credenciales no válidas.
   - 403 Forbidden – [Prohibida] Cuando la autenticación es exitosa pero el usuario no tiene permiso al recurso en cuestión.
 
 
@@ -126,32 +181,58 @@ Route::fallback(function () {
 ```
 
 
-- Vamos a ver cómo realizar todas las operaciones del CRUD
-- Tenemos dos métodos de devolver una reapuesta:
+
+### Rutas
+
+- Basta con incluir una ruta resource y añadir el modificador except:
 
 ```php
-//Devolver un literal o una  variable y la coversión a JSON es automática
-//En este caso siempre se devuelve status 200
-Route::get('/', function() {
-  $message = "Bienvenido a la API"
-  return $message;
-});```
-
-```php
-//usar la función response() y el método json para cambiar el status
-//el $data que enviamos podría ser cualqueir cosa: objeto, array,...
-Route::get('/', function() {
-  $data = ['message' => 'Bienvenido a la API'];
-  return response()->json($data, 404);
-});
+Route::resource('studies', StudyController::class)->except([
+    'create', 'edit'
+]);
 ```
 
 
+### Index
 
-### Read: index
+```php
+public function index()
+{
+  return Study::all();  
+  //No es lo más correcto porque se devolverían todos los registros. Se recomienda usar Filtros o paginación.
+}
+```
 
-- No devolvemos lista sino JSON. 
-- La conversión es automática y el estado es 200.s
+```php
+// Se debería devolver un objeto con una propiedad como mínimo data y el array de resultados en esa propiedad.
+// A su vez también es necesario devolver el código HTTP de la respuesta.
+public function index()
+{
+    // return Study::all();
+    $studies = Study::all();
 
-<!-- VALIDACIÓN -->
-<!-- SESIÓN -->
+    return response()->json(['status' => 'ok', 'data' => $studies], 201);
+}
+```
+
+
+### Show
+
+```php
+public function show($id)
+{
+  // Corresponde con la ruta /studies/{study}
+  // Buscamos un study por el ID.
+  $study=Study::find($id);
+
+  // Chequeamos si encontró o no el study
+  if (! $study)
+  {
+    // Se devuelve un array errors con los errores detectados y código 404
+    return response()->json(['errors'=>(['code'=>404,'message'=>'No se encuentra un studio con ese código.'])],404);
+  }
+
+  // Devolvemos la información encontrada.
+  return response()->json(['status'=>'ok','data'=>$study],200);
+}
+```
