@@ -60,7 +60,6 @@ Algunos enlaces interesantes:
 | /studies/{id}      | DELETE  | Borramos un estudio  | 
 
 
-
 Se pueden añadir otras rutas para complementar el acceso:
 
 - Podemos definir búsquedas por un campo: 
@@ -172,14 +171,15 @@ Route::get('/', function() {
 ## CRUD de Estudios en API
 
 - Antes de empezar, prueba otras rutas y fuerza la una página de error "No encontrado".
-- No obtenemos un error 404 limpio en JSON. Mejor una ruta de *fallback*
+- Obtenemos un error 404 html.
+- Mejor un error 404 limpio en JSON. 
+- Debemos definir una ruta de *fallback*, o ruta por defecto si ninguna otra es la solicitada
 
 ```php
 Route::fallback(function () {
   return response()->json(['error' => 'No encontrado'], 404);
 });
 ```
-
 
 
 ### Rutas
@@ -211,7 +211,7 @@ public function index()
     // return Study::all();
     $studies = Study::all();
 
-    return response()->json(['status' => 'ok', 'data' => $studies], 201);
+    return response()->json(['status' => 'ok', 'data' => $studies], 200);
 }
 ```
 
