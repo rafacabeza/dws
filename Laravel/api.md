@@ -170,7 +170,7 @@ Route::get('/', function() {
 
 ## CRUD de Estudios en API
 
-- Antes de empezar, prueba otras rutas y fuerza la una página de error "No encontrado".
+- Antes de empezar, prueba otras rutas y fuerza la página de error "No encontrado".
 - Obtenemos un error 404 html.
 - Mejor un error 404 limpio en JSON. 
 - Debemos definir una ruta de *fallback*, o ruta por defecto si ninguna otra es la solicitada
@@ -182,11 +182,20 @@ Route::fallback(function () {
 ```
 
 
-### Rutas
+### Controlador y rutas
+
+- Vamos a necesitar un controlador para gestionar nuestro recurso.
+- Ojo, vamos separar los controladores API del resto:
+
+```php
+php artisan make:controller Api/StudyController
+```
+
 
 - Basta con incluir una ruta resource y añadir el modificador except:
 
 ```php
+
 Route::resource('studies', StudyController::class)->except([
     'create', 'edit'
 ]);
@@ -236,3 +245,62 @@ public function show($id)
   return response()->json(['status'=>'ok','data'=>$study],200);
 }
 ```
+
+
+### Create
+
+```php
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'code' => 'required|unique:studies,code|max:6',
+            'name' => 'required',
+            'abreviation' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);            
+        }
+        
+        $new = Study::create($request->all());
+        return response()->json($new, 201);
+    }
+```
+
+
+### Update: PUT
+
+```php
+    public function update(Request $request, $id)
+    {
+        $study = Study::find($id);
+        //si no se encuentra 404
+        if (!$study) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'No se ha encontrado un estudio con ese código'
+            ], 404);
+        }
+        //si no valida 422
+        $validator = Validator::make($request->all(), [
+            'code' => 'required|unique:studies,code|max:6',
+            'name' => 'required',
+            'abreviation' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);            
+        }
+
+        //todo ok 201
+        $study->fill($request->all());
+        $study->save();
+        return response()->json([
+            'status' => 'ok',
+            'data' => $study
+        ], 200);
+    }
+    ```
+
+
+### Delete
