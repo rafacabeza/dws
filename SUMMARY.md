@@ -8,6 +8,7 @@
 
 ## Laravel
 * [Laravel 8.*](Laravel/laravel8.md)
+* [API con Laravel](Laravel/api.md)
 * [Laravel 6.*](Laravel/laravel6.md)
 * [Laravel 5.3](Laravel/README.md)
     * [Instalar](Laravel/instalar.md)
