@@ -430,11 +430,20 @@ class User extends Authenticatable implements JWTSubject
 ```
 
 
-### Rutas
+### Rutas y controlador
+
+- Usaremos un controlador. Lo creamos:
+
+```
+php artisan make:controller Api/AuthController
+```
 
 - Necesitamos unas rutas en *api.php* para los métodos de autenticación:
 
 ```php
+//En la parte superiror:
+use App\Http\Controllers\Api\AuthController;
+
 // rutas con este prefijo: /api/auth/....
 Route::group([
     'middleware' => 'api',
@@ -449,7 +458,7 @@ Route::group([
 ```
 
 
-### Por último el AuthController
+### Métodos del controlador
 
 - Necesitamos añadir algunos "use":
 
@@ -482,7 +491,7 @@ protected function respondWithToken($token, $status=200)
   ```php
   public function __construct()
   {
-      $this->middleware('auth:api', ['except' => ['login']]);
+      $this->middleware('auth:api', ['except' => ['login', 'register']]);
   }
   ```
 
