@@ -271,36 +271,295 @@ public function show($id)
 ### Update: PUT
 
 ```php
-    public function update(Request $request, $id)
-    {
-        $study = Study::find($id);
-        //si no se encuentra 404
-        if (!$study) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'No se ha encontrado un estudio con ese código'
-            ], 404);
-        }
-        //si no valida 422
-        $validator = Validator::make($request->all(), [
-            'code' => 'required|unique:studies,code|max:6',
-            'name' => 'required',
-            'abreviation' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);            
-        }
-
-        //todo ok 201
-        $study->fill($request->all());
-        $study->save();
+public function update(Request $request, $id)
+{
+    $study = Study::find($id);
+    //si no se encuentra 404
+    if (!$study) {
         return response()->json([
-            'status' => 'ok',
-            'data' => $study
-        ], 200);
+            'status' => 404,
+            'message' => 'No se ha encontrado un estudio con ese código'
+        ], 404);
     }
-    ```
+    //si no valida 422
+    $validator = Validator::make($request->all(), [
+        'code' => 'required|unique:studies,code|max:6',
+        'name' => 'required',
+        'abreviation' => 'required',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 422);            
+    }
+
+    //todo ok 201
+    $study->fill($request->all());
+    $study->save();
+    return response()->json([
+        'status' => 'ok',
+        'data' => $study
+    ], 200);
+}
+```
 
 
 ### Delete
+
+- Estamos repitiendo la comprobación de 404 una y otra vez.
+- Sería interesante crear un método para no repetir código de esta manera.
+
+```php
+//DRY. Don't Repeat Yourself
+public function check404($study)
+{
+    if (!$study) {
+        response()->json([
+            'status' => 404,
+            'message' => 'No se ha encontrado un estudio con ese id'
+        ], 404)->send();
+        die();
+    }
+}
+```
+
+
+```php
+public function destroy($id)
+{
+    $study = Study::find($id);
+    $this->check404($study);
+
+    try {
+        //status 204: No content
+        $study->delete();
+        return response()->json([
+            'Sin contenido'
+        ], 204);
+    } catch (\Throwable $th) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Borrado fallido',
+            'error_message' => $th->getMessage()
+        ], 409);
+    }
+}
+```
+
+
+
+## Autenticación: JWT
+
+- REST se define como sin estado. Esto implica la no utilización de cookies y por ende sesiones.
+- **JSON Web Token** es un estándar usado para este fin.
+- Cuando un usuario hace login recibe un token que debe guardar en su aplicación cliente.
+- En el resto de peticiones debe entregar ese token para ser identificado.
+
+
+- Para JWT vamos a usar la librería  [tymondesigns/jwt-auth](https://github.com/tymondesigns/jwt-auth)
+- Veamos como usarla para:
+  - Hacer login
+  - Hacer logout
+  - Registrar un usuario
+  - ...
+
+
+### Instalación
+
+- Instalar dependencias:
+
+```php
+composer require tymon/jwt-auth
+```
+
+- Tomar fichero de configuración y crear clave de cifrado
+
+```
+php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\LaravelServiceProvider"
+php artisan jwt:secret  
+```
+
+- La clave de cifrado se guarda en .env. Deberemos repetirlo en cada instalación.
+
+
+- Debemos modificar el fichero *config/auth.php*. Apartado *guards*
+
+```php
+  'api' => [
+      'driver' => 'jwt',
+      'provider' => 'users'   
+  ],
+```
+
+
+### Modificar el modelo User
+
+-  Añadimos un "use" en la cabecera
+
+```php
+use Tymon\JWTAuth\Contracts\JWTSubject;
+```
+
+- Más abajo en la definición de clase, implements ...
+
+```php
+class User extends Authenticatable implements JWTSubject
+```
+
+
+- Por último, añadimos estos métodos:
+
+```php
+    /**
+    * Get the identifier that will be stored in the subject claim of the JWT.
+    *
+    * @return mixed
+    */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+    /**
+    * Return a key value array, containing any custom claims to be added to the JWT.
+    *
+    * @return array
+    */
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+```
+
+
+### Rutas
+
+- Necesitamos unas rutas en *api.php* para los métodos de autenticación:
+
+```php
+// rutas con este prefijo: /api/auth/....
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'auth'
+    ], function ($router) {
+        Route::post('login', [AuthController::class, 'login']);
+        Route::post('logout', 'AuthController@logout');
+        Route::post('refresh', 'AuthController@refresh');
+        Route::post('me',  [AuthController::class, 'me']);
+});
+```
+
+
+### Por último el AuthController
+
+- Necesitamos añadir algunos "use":
+
+```php
+use JWTAuth;
+use Auth;
+use App\Models\User;
+use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Exceptions\JWTException;
+```
+
+
+- DRY. Para enviar el token al cliente usaremos este método:
+
+```php
+protected function respondWithToken($token, $status=200)
+{        
+    return response()->json([
+        'access_token' => $token,
+        'token_type' => 'bearer',
+        'expires_in' => auth('api')->factory()->getTTL() * 60
+    ], $status);
+}
+```
+
+
+- Veamos ahora los métodos: 
+- El constructor con un middleware.
+
+  ```php
+  public function __construct()
+  {
+      $this->middleware('auth:api', ['except' => ['login']]);
+  }
+  ```
+
+
+- Register
+
+  ```php
+  public function register(Request $request)
+  {
+      $validator = Validator::make($request->all(), [
+          'name' => 'required|string|max:255',
+          'email' => 'required|string|email|max:255|unique:users',
+          'password' => 'required|string|min:6|confirmed',
+      ]);
+
+      if($validator->fails()){
+          return response()->json($validator->errors(), 400);
+      };
+
+      $user = User::create([
+          'name' => $request->name,
+          'email' => $request->email,
+          'password' => bcrypt($request->password),
+      ]);
+
+      $token = JWTAuth::fromUser($user);
+      return response()->json(compact('user','token'), 201);
+  }
+  ```
+
+
+- Login
+
+  ```php
+  public function login(Request $request)
+  {        
+      $credentials = $request->only('email', 'password');
+      try {
+          if ($token = JWTAuth::attempt($credentials)) {
+              return $this->respondWithToken($token); //OK
+          } else {
+              return response()->json(['error' => 'Credenciales inválidas'], 400);                
+          }
+      } catch (JWTException $e) {
+            \Log::error($e->getMessage());
+          return response()->json(['error' => 'No se pudo crear el token'], 500);
+      }
+  }    
+  ```
+
+
+- Logout
+
+  ```php
+  public function logout()
+  {
+      // auth()->logout();
+      Auth::logout();
+
+      return response()->json(['message' => 'Salió con éxito']);
+  }
+  ```
+
+
+- La información del usuario: me().
+
+  ```php
+  public function me()
+  {
+      return response()->json(Auth::user());
+  }
+  ```
+
+- Refresh
+
+  ```php
+  public function refresh()
+  {
+      return $this->respondWithToken(JWTAuth::refresh());
+  }
+  ```
