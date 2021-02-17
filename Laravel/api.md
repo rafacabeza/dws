@@ -573,3 +573,109 @@ protected function respondWithToken($token, $status=200)
       return $this->respondWithToken(JWTAuth::refresh());
   }
   ```
+
+
+
+## Autorización
+
+- Autenticar es identificar al usuario:
+    - En web usamos sesión y los controladores que nos brinda Laravel
+    - En api acabamos de crear el controalador Api/AuthController
+- El middleware *Auth* nos permite limitar el acceso a una ruta a usuarios identificados.
+- Pero no nos permite un control de acceso más elaborado
+
+
+- Laravel ofrece varias soluciones para esto. Vamos a estudiar las políticas.
+- Una política es una clase guardada den *app/Policies*
+- Una política va siempre asociada a un modelo.
+- Su creación:
+
+```
+php artisan make:policy StudyPolicy --model=Study
+```
+
+
+### Registro
+
+- Una vez creada debemos registrarla en el array $policies en AuthServiceProvider
+
+```php
+    protected $policies = [
+        'App\Study' => 'App\Policies\StudyPolicy',
+    ]
+```
+
+- Si no hacemos esto siempre obtendremos un estado  *403 No autorizado*
+
+
+### Definir reglas
+
+- Cada tipo de acceso se asocia a una regla. Una regla será un método dentro de la política.
+- Por defecto las polítcas traen una colección de reglas/métodos.
+- Por ejemplo el método update lo podemos usar para actualizar un estudio. Sus argumentos deben ser el user y un objeto del modelo protegido (Study):
+
+```php
+public function update(User $user, Study $study)
+{
+    return $user->id === $study->user_id;
+}
+
+```
+
+
+- Otros métodos se asocian a la clase en vez de a un objeto (create, viewAny, ...). Observa, crear o ver todos los estudios hace referencia a la clase, no a un estudio concreto.
+
+```php
+public function create(User $user)
+{
+    return $user->isAdmin();
+}
+```
+
+
+### Autorización web.
+
+- Para autorizar basta con usar el método *autorize()* del controlador:
+- Ejemplo sobre una regla de clase:
+
+```php
+public function create()
+{
+    $this->authorize('create', Study::class);
+    return view('study.create');
+}
+```
+
+
+- Ejemplo sobre una regla de objeto
+
+```php
+    public function update(Request $request, Study $study)
+    {
+        $this->authorize('update', $study);
+        //resto del código
+    
+    }
+```
+
+
+### Autorización web en blade.
+
+- Podemos ocultar enlaces usando directivas específicas:
+
+```php
+@can('create', App\Study::class)
+<div class="float-right>
+<a href="/studies">Nuevo estudio</a>
+</div>
+@endcan
+    
+.....
+
+@can('update', $study)
+<div class="float-right>
+<a href="/studies/{{$study->id}}">Editar</a>
+</div>
+@endcan
+
+```
