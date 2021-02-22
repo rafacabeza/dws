@@ -570,7 +570,7 @@ protected function respondWithToken($token, $status=200)
   ```php
   public function refresh()
   {
-      return $this->respondWithToken(JWTAuth::refresh());
+      return $this->respondWithToken(JWTAuth::refresh(JWTAuth::getToken()));
   }
   ```
 
