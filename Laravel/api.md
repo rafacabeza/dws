@@ -679,3 +679,109 @@ public function create()
 @endcan
 
 ```
+
+
+
+## Modelos un poco más a fondo:
+
+
+- *Setters* o *mutators*
+- Nomenclatura:
+
+    ```php
+    set{Attribute}Attribute
+    ```
+
+
+- Ejemplo:
+
+    ```php
+
+    class User extends Model
+    {
+        public function setFirstNameAttribute($value)
+        {
+            $this->attributes['first_name'] = strtolower($value);
+        }
+    }
+    ```
+
+
+- *Getters* o *accessors*
+- Permiten modificar o formatear los datos según están recogidos en la base de datos.
+- Nomenclatura: 
+
+    ```
+    get{Attribute}Attribute
+    ```
+
+
+- Ejemplo:
+
+```php
+class User extends Model
+{
+    public function getFirstNameAttribute($value)
+    {
+        return ucfirst($value);
+    }
+}
+```
+
+
+- Podemos añadir campos calculados:
+
+    ```php
+    public function getFullNameAttribute()
+    {
+        return "{$this->first_name} {$this->last_name}";
+    }
+    ```
+
+
+- Podemos incluso hacer que esos campos se añadan cuando serializamos objetos (conversión a JSON).
+
+    ```php
+    class User extends Model
+    {
+        /**
+        * The accessors to append to the model's array form.
+        *
+        * @var array
+        */
+        protected $appends = ['is_admin', 'fullName'];
+    }
+    ```
+
+
+### Fechas
+
+- Las fechas se leen como texto de la base de datos
+- Laravel tiene una clase específica para tratar fechas y horas llamada [Carbon](https://carbon.nesbot.com/docs/)
+- Podemos forzar que nuestras fechas hagan *casting* a esta clase cada vez que se leen de la BBDD.
+
+
+- Para hacerlo basta con definir la variable $dates:
+
+    ```php
+    class User extends Model
+    {
+        /**
+        * The attributes that should be mutated to dates.
+        *
+        * @var array
+        */
+        protected $dates = [
+            'seen_at',
+        ];
+    }        
+    ```
+
+
+- Una vez hecho esto podemos usar dicho campo como una fecha:
+
+    ```php
+    {{ $user->seen_at->format('d-m-Y') }}
+    {{ $user->seen_at->addDays(30) }}
+    {{ $user_seen_at->diffInDays($dt->copy()->addMonth()) }}
+    ```
