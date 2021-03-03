@@ -570,7 +570,7 @@ protected function respondWithToken($token, $status=200)
   ```php
   public function refresh()
   {
-      return $this->respondWithToken(JWTAuth::refresh());
+      return $this->respondWithToken(JWTAuth::refresh(JWTAuth::getToken()));
   }
   ```
 
@@ -679,3 +679,294 @@ public function create()
 @endcan
 
 ```
+
+
+
+## Modelos un poco más a fondo:
+
+
+- *Setters* o *mutators*
+- Nomenclatura:
+
+    ```php
+    set{Attribute}Attribute
+    ```
+
+
+- Ejemplo:
+
+    ```php
+
+    class User extends Model
+    {
+        public function setFirstNameAttribute($value)
+        {
+            $this->attributes['first_name'] = strtolower($value);
+        }
+    }
+    ```
+
+
+- *Getters* o *accessors*
+- Permiten modificar o formatear los datos según están recogidos en la base de datos.
+- Nomenclatura: 
+
+    ```
+    get{Attribute}Attribute
+    ```
+
+
+- Ejemplo:
+
+```php
+class User extends Model
+{
+    public function getFirstNameAttribute($value)
+    {
+        return ucfirst($value);
+    }
+}
+```
+
+
+- Podemos añadir campos calculados:
+
+    ```php
+    public function getFullNameAttribute()
+    {
+        return "{$this->first_name} {$this->last_name}";
+    }
+    ```
+
+
+- Podemos incluso hacer que esos campos se añadan cuando serializamos objetos (conversión a JSON).
+
+    ```php
+    class User extends Model
+    {
+        /**
+        * The accessors to append to the model's array form.
+        *
+        * @var array
+        */
+        protected $appends = ['is_admin', 'fullName'];
+    }
+    ```
+
+
+### Fechas
+
+- Las fechas se leen como texto de la base de datos
+- Laravel tiene una clase específica para tratar fechas y horas llamada [Carbon](https://carbon.nesbot.com/docs/)
+- Podemos forzar que nuestras fechas hagan *casting* a esta clase cada vez que se leen de la BBDD.
+
+
+- Para hacerlo basta con definir la variable $dates:
+
+    ```php
+    class User extends Model
+    {
+        /**
+        * The attributes that should be mutated to dates.
+        *
+        * @var array
+        */
+        protected $dates = [
+            'seen_at',
+        ];
+    }        
+    ```
+
+
+- Una vez hecho esto podemos usar dicho campo como una fecha:
+
+    ```php
+    {{ $user->seen_at->format('d-m-Y') }}
+    {{ $user->seen_at->addDays(30) }}
+    {{ $user_seen_at->diffInDays($dt->copy()->addMonth()) }}
+    ```
+
+
+
+## Laravel como cliente Http
+
+- Una aplicación web también puede ser un cliente Http
+- Típicamente podemos hacer que una aplicación web consuma los recursos ofrecidos por una API Rest
+
+
+- Vamos a crear una nueva instalación de Laravel (laravel20client)
+- Vamos a crear un controlador StudyController que consuma los recursos de la API que ya hemos creado.
+- Por simplificar, vamos a prescindier de autenticación y autorización
+- Ruta api: 
+
+    ```php
+    // Route::resource('studies', StudyController::class);
+    Route::resource('studies', EstudioController::class);
+    ```
+
+
+- Código del controlador en la API
+
+```php
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Study;
+use Illuminate\Support\Facades\Validator;
+
+class EstudioController extends Controller
+{
+    public function index()
+    {
+        $studies = Study::all();
+        // return $studies;
+        return response()->json([
+            'status' => 200,
+            'data' => $studies
+        ], 200);
+    }
+
+    /**
+    * Store a newly created resource in storage.
+    *
+    * @param  \Illuminate\Http\Request  $request
+    * @return \Illuminate\Http\Response
+    */
+    public function store(Request $request)
+    {        
+        $rules = [
+            'code' => 'required|unique:studies,code|max:6',
+            'name' => 'required|max:255',
+            'abreviation' => 'required|max:255'
+        ];        
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors()
+            ], 422);                
+        }
+        
+        $study = Study::create($request->all());
+        return response()->json([
+            'status' => 'ok',
+            'data' => $study
+        ], 201);
+    }
+
+    /**
+    * Display the specified resource.
+    *
+    * @param  int  $id
+    * @return \Illuminate\Http\Response
+    */
+    public function show($id)
+    {
+        $study = Study::find($id);
+        $this->check404($study);
+
+        return response()->json([
+            'status' => 'ok',
+            'data' => $study
+        ], 200);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $study = Study::find($id);     
+        $this->check404($study);
+
+        //si no pasa validación 422
+        $rules = [
+            'code' => 'required|max:6|unique:studies,code,' . $study->id,
+            'name' => 'required|max:255',
+            'abreviation' => 'required|max:255'
+        ];        
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors()
+            ], 422);                
+        }
+        $study->fill($request->all());
+        $study->save();
+        return response()->json([
+            'status' => 'ok',
+            'data' => $study
+        ], 200);                
+    }
+
+    /**
+    * Remove the specified resource from storage.
+    *
+    * @param  int  $id
+    * @return \Illuminate\Http\Response
+    */
+    public function destroy($id)
+    {
+        $study = Study::find($id);
+        $this->check404($study);
+
+        try {
+            //status 204: No content
+            $study->delete();
+            return response()->json([
+                'Sin contenido'
+            ], 204);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Borrado fallido. Conflicto',
+            ], 409);
+        }
+    }
+    //DRY. Don't Repeat Yourself
+    public function check404($study)
+    {
+        if (!$study) {
+            response()->json([
+                'status' => 404,
+                'message' => 'No se ha encontrado un estudio con ese id'
+            ], 404)->send();
+            die();
+        }
+    }
+```
+
+
+- Crearmos un nuevo proyecto laravel20client
+
+    ```
+    composer create-project laravel/laravel laravel20cliente
+    ```
+
+- Añadimos un controlador StudioController que va a gestionar los estudios de nuestra API (en español por diferenciar):
+
+    ```
+    php artisan make:controller StudioController
+    ```
+
+- Ahora se trata de añadir rutas y métodos a este controlador para completar el CRUD a través de  nuestra API
+
+
+### Index
+
+
+### Show
+
+
+### Store
+
+
+### Update
+
+
+### Delete
+
+
+### Index
+
+
