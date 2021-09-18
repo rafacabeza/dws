@@ -1,7 +1,7 @@
 # Desarrollo Web en Entorno Servidor
 
 * [Repositorio Github](https://github.com/rafacabeza/dws)
-* [GitBook](https://rcabeza.gitbook.io/dws/)
+* [GitBook](https://rafacabeza.gitbook.io/dws/)
 
 
 Este texto pretende ser la documentación base para el estudio y seguimiento del módulo Desarrollo Web en Entorno Servidor del ciclo de Desarrollo de Aplicaciones Web \(IFC303\).
