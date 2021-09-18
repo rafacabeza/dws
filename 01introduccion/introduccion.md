@@ -310,9 +310,7 @@ git --version
 
 
 - Php y composer
-```bash
-sudo apt-get install git
-```
+
   - https://www.digitalocean.com/community/tutorials/how-to-install-and-use-composer-on-ubuntu-20-04
 
 
