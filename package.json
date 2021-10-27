@@ -4,7 +4,7 @@
   "description": "Este texto pretende ser la documentación base para el estudio y seguimiento del módulo Desarrollo Web en Entorno Servidor del ciclo de Desarrollo de Aplicaciones Web \\(IFC303\\).",
   "main": "index.js",
   "scripts": {
-    "start": "reveal-md --css style.css ./README.md --port 2000",
+    "start": "reveal-md --theme white --css style.css ./README.md --port 2000",
     "php": "reveal-md --css style.css ./php/mvc.md --port 2000",
     "laravel": "reveal-md --css style.css ./Laravel/laravel6.md --port 2000",
     "node": "reveal-md --css style.css ./node/intro.md --port 2000",

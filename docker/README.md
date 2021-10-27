@@ -69,13 +69,6 @@
 ![](images/google-trends.png)
 
 
-## Cloud Native Foundation
-
-- Nace en el 2015 con el objetivo de ayudar en el avance de las tecnologías de contenedores.
-- Fundadores: Google, CoreOS, Mesosphere, Red Hat, Twitter, Huawei, Intel, Cisco, IBM, Docker, Univa, and VMware.
-- [Ver mapa](https://landscape.cncf.io/)
-
-
 
 # Docker
 
@@ -83,25 +76,6 @@
 ## Qué es Docker
 
 Herramienta **open-source** que nos permite realizar una **virtualización ligera**, con la que poder **empaquetar entornos y aplicaciones** que posteriormente podremos **desplegar** en cualquier sistema que disponga de esta tecnología
-
-
-## Arquitectura Docker
-
-- Es una arquitectura **cliente-servidor**
-  - El servidor es el daemon (container engine) al que se acccede mediante una **API REST**
-  - Existen SDKs y clientes de la API para distintos lenguajes
-  - El cliente habitual es el comando **docker**
-- ![](images/docker-architecture.svg)
-
-
--  Por defecto usa **UNIX sockets**:
-   - Comunicacción entre procesos de la misma  máquina
-   - Se maneja  por el kernel
-
-- Podemos configurarlo para que use **TCP**
-  - Cliente y dockerd en máquinas distintas
-  - Se cambia la variable de entorno ```DOCKER_HOST=tcp://X.X.X.X:2375```
-  - Es recomendable  habilitar -tls (por defecto puerto 2376 para TLS) y poner un WebProxy delante para controlar el acceso.
 
 
 ## Objetos de Docker
@@ -149,12 +123,6 @@ EXPOSE 80
   - Actualizaciones
 
 
-## Desarrollos actuales
-  - [La carga en la comunicación de un equipo de tamaño n es  n(n-1)/2](https://en.wikipedia.org/wiki/The_Mythical_Man-Month)
-  - Un  equipo de desarrollo se debe dividir en equipos  pequeños autónomos (2 pizzas)
-![](images/successtriangle.png)
-
-
 ##  Docker en Linux (I)
 
 - En Linux Docker no es virtualizado, no hay un hipervisor. 
@@ -164,31 +132,21 @@ EXPOSE 80
 ##  Docker en Linux (II)
 
 - Linux aisla los procesos, ya sean los propios de la máquina anfitrión o procesos de otros contenedores. 
-- Controla los recursos que se le asignan a contenedores pero sin la penalización de rendimiento de los sistemas virtualizados.    
+- Controla los recursos que se le asignan a contenedores pero sin la penalización de rendimiento de los sistemas virtualizados.
 
 
-##  Docker en Windows (I)
+##  Docker en Windows
 
-- El ecosistema de contenedores fundamentalmente utiliza Linux
-- Como los  contenedores comparten el kernel con el host, no se  pueden ejecutar directamente en Windows, [hace falta virtualización](https://stackoverflow.com/questions/48251703/if-docker-runs-natively-on-windows-then-why-does-it-need-hyper-v )
-- HyperV en Windows 10 pero versiones PRO o ENTERPRISE
-- HyperV y  VirtualBox no se llevan bien
-- Debemos deshabilitarlo mediante el siguiente comando de PowerShell:
-    ```
-    Disable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All
-    ```
-  - Y  además puede ser necesario  reiniciar :-(
-
-
-##  Docker en Windows (II)
-
-- Docker Client se ejecuta en Windows pero llama al Docker Daemon de una máquina virtual Linux
-
-![](images/mobyvm.png)
+- Actualmente docker puede usarse en Windows
+- De las múltiples maneras posibles, la mejor es Docker Desktop
+- Windows puede crear contenedores Windows o contenedores Linux, pero no simultaneamente. Debemos decirle si vamos a usar contenedores de un  tipo u otro.
+- El uso de contendeores linux requiere instalar LSW, Linux Subsystem for Windows. Es decir, poner un kernel linux a disposición de docker.
 
 
 
 # Instalación
+
+- Dejo estas notas aunque no explicamos nada. Nosotros ya tenemos instalado docker.
 
 
 ## Versiones de Docker
@@ -258,11 +216,6 @@ EXPOSE 80
   - *docker logs*
   - *docker container logs*
 
-## Uso del servidor apache
-
-https://hub.docker.com/_/httpd
-
-
 ## Imágenes
 - Ver listado de imágenes
   - *docker images*
@@ -323,66 +276,7 @@ docker start <container-id>
 ```
 
 
-## Ejercicio
-
-- Prueba a hacer un deploy de un contenedor Apache utilizando la extensión Docker de Visual Code
-
-
-## Ejecución imagen con versión
-
-- Por defecto descargamos imágen con versión *latest*
-- **docker pull redis** es equivalente a **docker pull redis:latest**
-- Vamos a descargar la versión  4.0 de redis:
-
-  ```
-  docker run redis:<version>  
-  # hace directamente docker pull & docker start
-  ```
-
-
-## redis-comander
-
-- [Paquete de npm](https://www.npmjs.com/package/redis-commander) para acceder a Redis desde el navegador
-- Instalación:
-  - Debemos instalar  nodejs, la versión de la distribución de Ubuntu es antigua (v10)
-  -  Instalamos usando el PPA oficial
-
-```
-sudo curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh
-sudo bash nodesource_setup.sh
-sudo apt-get install -y nodejs
-node --version
-sudo npm i -g redis-commander
-redis-commander
-```
-
-
-## Comprobamos acceso a nuestro redis
-
-- No nos conecta, ¿qué pasa?
-  - Los contenedores funcionan por defecto en una red interna, ajenos al host
-  - Veamos como funciona la configuración de red de docker
-
-
-## Varios redis a la vez
-
-- Redis funciona por una red interna
-- Podríamos lanzar varios redis, y aunque escuchan  por el mismo puerto funcionaría:
-  ```
-    docker run  -d redis
-    docker run -d redis:4.0   
-  ```
-- ¿A dónde conectaría ahora redis-commander?
-
-
 ## Configuración  de redes
-
-- Internamente usa las regla de enrutado del  servidor
-  - [En Linux mediante IPtables](https://docs.docker.com/network/iptables/)
-- Es un sistema abierto, mediante el uso de drivers. 
-
-
-##  Drivers - bridge
 
 - Por defecto, no es necesario especificarlo.  Los contenedores se comunican entre sí.
 -  Son las más utilizadas
@@ -396,45 +290,6 @@ redis-commander
 
 
  ![](images/docker-bridge-network.jpg)
-
-
-## ¿Cómo  se accede  al exterior?
-  ```
-  $ sudo iptables -t nat -L –n
-  ...
-  Chain POSTROUTING (policy ACCEPT) target prot opt
-  source destination MASQUERADE all -- 172.17.0.0/16
-  !172.17.0.0/16
-  ...
-  ```
-
-
-##  Drivers - host
-
-  - Usa  la red del  host directamente, elimina  el aislamiento del contenedor con el host. 
-  - Comparte namespace de red con el host
-  - Tiene acceso a todas las interfaces del Host
-  - Evita el uso de NAT 
-  - Puede provocar conflictos de puertos
-
-
-##  Drivers - overlay
-
-- Para conectar múltiples demonios docker y permitir la comunición entre servicios swarm.
-
-
-##  Drivers - macvlan
-
-- Permite asignar direcciones MAC a los contenedores, haciendo que aparezcan como dispositivos físicos en la red.
-
-
-##  Drivers - otros
-
-- **none**:
-
-- **Network plugins**:  
-
-  - Se pueden instalar y  usar  plugins  de  red  de terceros. 
 
 
 ## Debug de un contenedor
@@ -469,25 +324,6 @@ docker exec -it <name  or container-id> /bin/bash
   ```
 
 
-## ¿Cómo dar acceso a  redis-commander?
-
-- En modo bridge, podemos mapear puertos del contenedor al host:
-
-  ```
-  docker run -p5000:6379 -d redis
-  # error siguiente línea,  cambiar   puerto!! 
-  docker run -p5000:6379 -d redis:4.0  
-  ```
-
-- Otra opción es arrancar el contenedor en modo  host:
-  ```
-  docker run  --network host -d redis
-  # ¿Qué sucede si lo  arrancas dos veces?
-  docker run  --network host -d redis
-  ```
-
-
-  
 ## Logs de un contenedor
 
 ```
