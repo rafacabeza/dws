@@ -8,9 +8,10 @@
 4. [MVC](php/mvc.md)
 
 ## Laravel
-* [Laravel 8.*](Laravel/laravel8.md)
-* [API con Laravel](Laravel/api.md)
 * [Laravel 6.*](Laravel/laravel6.md)
+* [Laravel 8.*](Laravel/laravel8.md)
+* [Laravel 9.*](Laravel/laravel9.md)
+* [API con Laravel](Laravel/api.md)
 
 ## Node.js
 * [Instalacion](node/instalacion.md)
