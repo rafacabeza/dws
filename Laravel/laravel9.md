@@ -1,4 +1,4 @@
-# 8.**
+# 9.**
 
 - Laravel se ha convertido en el framework php más utilizado para desarrollo web.
 - En septiembre/2019 se publicón la versión 6.0
@@ -259,7 +259,7 @@ git checkout --track rafa/claseXX #la rama que corresponda
 ## Rutas
 
 
-- https://laravel.com/docs/8.x/routing
+- https://laravel.com/docs/9.x/routing
 
 * En nuestro framework mvc "casero", un controlador era responsable de una tarea concreta, o conjunto de tareas relacionadas entre sí \(CRUD sobre una tabla, por ejemplo\).
 
@@ -337,7 +337,7 @@ Route::get('/photos', [PhotosController::class, 'index']);
 ```
 
 
-Ojo! Esto ha cambiado en la versión 8. Anteriormente la sintáxis era: 
+Ojo! Esto cambió en la versión 8. Anteriormente la sintáxis era: 
 
 ```php
 Route::get('foo', 'Photos\AdminController@method');
@@ -366,7 +366,7 @@ Route::delete('photos/{id}', 'Photos\AdminController@destroy');
 - Si definimos rutas de tipo resource se mapearán estas 7 rutas.
 - En la medida de lo posible estas rutas siguen el paradigma REST.
 - Son las acciones necesarias para un CRUD completo y usando los distintos verbos HTTP: get, post, put y delete.
-- Para ver como gestionar estas rutas y este tipo de controladores: https://laravel.com/docs/8.x/controllers#resource-controllers
+- Para ver como gestionar estas rutas y este tipo de controladores: https://laravel.com/docs/9.x/controllers#resource-controllers
 
 
 - Definición de una ruta
@@ -1834,7 +1834,7 @@ Route::get('usuario', function () {
 
 ## Query Builder. Paginación
 
-- Laravel nos permite realizar gran cantidad de [consultas](https://laravel.com/docs/8.x/queries) sin escribir sql.
+- Laravel nos permite realizar gran cantidad de [consultas](https://laravel.com/docs/9.x/queries) sin escribir sql.
 - Hasta el momento, sobre los modelos hemos usado algunos métodos: find(), all(), save(), first().
 
 
