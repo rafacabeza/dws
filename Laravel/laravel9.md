@@ -69,40 +69,6 @@ composer create-project --prefer-dist laravel/laravel:^8.0 laravelpruebas
   cd nombreProyecto
   ```
 
-  - Si lo que queremos es iniciar un proyecto (Laravel 9), pero no tenemos la versión adecuada de php y composer:
-
-    ```
-    # Nos colcamos en la carpeta data de entornods:
-    mkdir laravel9
-    mkdir laravel9/public
-    echo "hola mundo"
-    ```
-    - Tras levantar docker y agregar la línea correspondiente en le /etc/hosts, para falsear la resolución DNS.
-
-    ```
-    127.0.0.1   laravel9.local
-    ```
-
-    - Deveríamos ver el mensaje "hola mundo en nuestro navegador" al acceder a "http://laravel.local"
-
-    - Vamos a colocar ahora un proyecto laravel 9 realmente:
-
-    ```
-    # Necesitamos entrar al contenedor con nuestro terminal, ahí hay php 8 y composer 2.
-    docker exec -it -u devuser laravel9 bash
-    # Ya estamos dentro. Comprobamos versiones 
-    php -v
-    composer
-    # vacíamos el contenido del directorio laravel9 (dentro del contenedor es /var/www/html)
-    rm -r public
-    # Instalamos laravel
-    composer create-project --prefer-dist laravel/laravel .
-    # Ya debemos ver en nuestro navegador la pantalla de bienvenida de Laravel 9.
-
-    ```
-
-
-
   - Instalación de dependencias. Ojo, si no tenemos la versión correcta de php y composer entramos dentro del contenedor.
 
   ```
@@ -154,7 +120,7 @@ chrl+C             # para cerrar
 
 
 OJO!!! 
-- El _entornods_ viene configurado para una aplicación ubicada en data/laravel
+- El _entornods_ viene configurado para una aplicación ubicada en data/laravel (o data/laravel9)
 - El resto de instrucciones también
 - Si usamos otro nombre deberemos ajustar alguno de estos comados y el contenido del fichero _docker-compose.yml_
 
@@ -169,6 +135,7 @@ OJO!!!
     alias larac='docker exec --user devuser laravel  composer '
     alias larai='docker exec -it --user devuser laravel bash'
     ```
+
 - ejecutar lo siguiente si no queremos reiniciar:
 
     ```
@@ -186,7 +153,7 @@ OJO!!!
 
 Repositorio de clase
 
-- Vamos a usar el  repositorio: [laravel22](https://bitbucket.org/rafacabeza/laravel22)
+- Vamos a usar el  repositorio: [laravel20](https://bitbucket.org/rafacabeza/laravel20)
 - Recomendación: hacer un fork del mismo:
 - Una vez hecho esto:
 - 

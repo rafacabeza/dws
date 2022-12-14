@@ -11,6 +11,7 @@
 * [Laravel 6.*](Laravel/laravel6.md)
 * [Laravel 8.*](Laravel/laravel8.md)
 * [Laravel 9.*](Laravel/laravel9.md)
+* [Trabajo](Laravel/ejercicios.md)
 * [API con Laravel](Laravel/api.md)
 
 ## Node.js
