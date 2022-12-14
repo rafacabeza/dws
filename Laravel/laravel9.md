@@ -235,7 +235,7 @@ git checkout --track rafa/claseXX #la rama que corresponda
     class Kernel extends HttpKernel
     ```
     - Carga clases _bootstrapers_ que preparan la aplicación (heredado)
-    - Define una serie de _middlewares_ (filtros) que se ejecutan antes de tratar el _request_
+    - Define una serie de _middlewares_ (filtros) que se ejecutan antes de tratar el _request_, es decir, antes de ejecutar un método del controlador correspondiente.
     - Por fin, el kernel trata el _request_ y devuelve un _response_ (heredado)
 - Todas las clases dentro de _Iluminate_ están dentro de vendor, son parte del framework y no debemos modificarlas en absoluto. Todo lo "heredado" está ahí.
 
@@ -450,6 +450,7 @@ php artisan make:controller PhotoController --resource
 ```
 php artisan make:controller ControllerName
 ```
+
     - Deberemos definir los métodos que necesitemos y asociarlos a una ruta del fichero de rutas (de momento, web.php).
 
 
@@ -457,9 +458,10 @@ php artisan make:controller ControllerName
 ```
 php artisan make:controller ControllerName --resource
 ```
+
     - Ya nos vendrá con los 7 métodos asociados a una ruta resource
 
-* OJO! Los formularios HTML no pueden usar PUT, PATCH ni DELETE. Podemos usar campos ocultos para falsear los verbos. El metodo helper `method_field` lo puede hacer por nosotros:
+    - OJO! Los formularios HTML no pueden usar PUT, PATCH ni DELETE. Podemos usar campos ocultos para falsear los verbos. El metodo helper `method_field` lo puede hacer por nosotros:
 
 ```php
 {{ method_field('PUT') }}
