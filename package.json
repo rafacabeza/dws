@@ -22,6 +22,6 @@
   },
   "homepage": "https://github.com/rafacabeza/dws#readme",
   "dependencies": {
-    "reveal-md": "^2.4.1"
+    "reveal-md": "^5.4.0"
   }
 }
